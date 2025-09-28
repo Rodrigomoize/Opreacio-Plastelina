@@ -289,6 +289,33 @@ MonoBehaviour:
     isCombined: 0
     cardImage: {fileID: 0}
     fbxCharacter: {fileID: 0}
+  - cardName: 
+    cardValue: 0
+    cardLife: 0
+    cardVelocity: 0
+    intelectCost: 0
+    isSelected: 0
+    isCombined: 0
+    cardImage: {fileID: 0}
+    fbxCharacter: {fileID: 0}
+  - cardName: 
+    cardValue: 0
+    cardLife: 0
+    cardVelocity: 0
+    intelectCost: 0
+    isSelected: 0
+    isCombined: 0
+    cardImage: {fileID: 0}
+    fbxCharacter: {fileID: 0}
+  - cardName: 
+    cardValue: 0
+    cardLife: 0
+    cardVelocity: 0
+    intelectCost: 0
+    isSelected: 0
+    isCombined: 0
+    cardImage: {fileID: 0}
+    fbxCharacter: {fileID: 0}
 --- !u!4 &468729725
 Transform:
   m_ObjectHideFlags: 0
