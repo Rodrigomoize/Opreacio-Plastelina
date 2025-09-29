@@ -57,6 +57,20 @@ public class PlayerCardManager : MonoBehaviour
 
         CardDisplay display = newCard.GetComponent<CardDisplay>();
 
+        CardDrag drag = newCard.GetComponent<CardDrag>();
+        if (drag != null)
+        {
+            drag.playerManager = this;
+            drag.cardDisplay = display;
+        }
+        else
+        {
+            Debug.LogWarning("Prefab no contiene CardDrag");
+        }
+
+        spawnedCards.Add(newCard);
+        cardData.ShowHimSelf();
+
         spawnedCards.Add(newCard);
         cardData.ShowHimSelf();
     }
@@ -73,6 +87,44 @@ public class PlayerCardManager : MonoBehaviour
     public void CombineCards()
     {
         
+    }
+
+    public bool RequestGenerateCharacter(CardManager.Card cardData, Vector3 spawnPosition, GameObject cardUI)
+    {
+        // Llamamos al CardManager para intentar generar (CardManager gestiona intelecto si es necesario)
+        bool ok = cardManager.GenerateCharacter(cardData, spawnPosition);
+        if (ok)
+        {
+            // Eliminamos la carta del mazo del jugador:
+            // 1) eliminar la instancia UI
+            if (spawnedCards.Contains(cardUI))
+            {
+                spawnedCards.Remove(cardUI);
+                Destroy(cardUI);
+            }
+            // 2) eliminar el dato de la lista playerCards
+            if (playerCards.Contains(cardData))
+            {
+                playerCards.Remove(cardData);
+            }
+            // 3) generar nueva carta para rellenar el hueco 
+            AddNextCard(); 
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private void AddNextCard()
+    {
+        CardManager.Card next = cardManager.GetRandomCloneFromAvailable();
+        if (next != null)
+        {
+            playerCards.Add(next);
+            CreateCard(next);
+        }
     }
 
     public void DiscardCard(GameObject card)
