@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     [SerializeField] UIManager uiManager;
     [SerializeField] AudioManager audioManager;
-    [SerializeField] CombatManager combatManager;
+    [SerializeField] CardManager combatManager;
     [SerializeField] AICardManager aiCardManager;
     [SerializeField] PlayerCardManager playerCardManager;
 
