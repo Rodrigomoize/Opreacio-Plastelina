@@ -7,7 +7,10 @@ public class PlayerCardManager : MonoBehaviour
     public CardManager cardManager;
     
     public GameObject cardPrefab;
-    public Transform CardUI;
+    public Transform CardUI1;
+    public Transform CardUI2;
+    public Transform CardUI3;
+    public Transform CardUI4;
 
     public Button SumaButton;
     public Button RestaButton;
@@ -19,7 +22,7 @@ public class PlayerCardManager : MonoBehaviour
     void Awake()
     {
         if (cardPrefab == null) Debug.LogError("Card Prefab is not assigned in the inspector.");
-        if (CardUI == null) Debug.LogError("Card UI Transform is not assigned in the inspector.");
+        if (CardUI1 == null) Debug.LogError("Card UI Transform is not assigned in the inspector.");
         if (cardManager == null) Debug.LogError("CardManager is not assigned in the inspector.");
     }
 
@@ -27,12 +30,12 @@ public class PlayerCardManager : MonoBehaviour
     {
         List<CardManager.Card> randomCards = GetRandomCards(4);
 
-        foreach (CardManager.Card card in randomCards)
-        {
-            playerCards.Add(card);
-            CreateCard(card);      
-        }
+        CreateCard(randomCards[0], CardUI1);
+        CreateCard(randomCards[1], CardUI2);
+        CreateCard(randomCards[2], CardUI3);
+        CreateCard(randomCards[3], CardUI4);
     }
+
 
     private List<CardManager.Card> GetRandomCards(int n)
     {
@@ -50,9 +53,9 @@ public class PlayerCardManager : MonoBehaviour
         return result;
     }
 
-    public void CreateCard(CardManager.Card cardData)
+    public void CreateCard(CardManager.Card cardData, Transform slotParent)
     {
-        GameObject newCard = Instantiate(cardPrefab, CardUI);
+        GameObject newCard = Instantiate(cardPrefab, slotParent);
         newCard.name = cardData.cardName;
 
         CardDisplay display = newCard.GetComponent<CardDisplay>();
@@ -70,10 +73,8 @@ public class PlayerCardManager : MonoBehaviour
 
         spawnedCards.Add(newCard);
         cardData.ShowHimSelf();
-
-        spawnedCards.Add(newCard);
-        cardData.ShowHimSelf();
     }
+
     public void SelectCard(GameObject card)
     {
         
@@ -123,7 +124,7 @@ public class PlayerCardManager : MonoBehaviour
         if (next != null)
         {
             playerCards.Add(next);
-            CreateCard(next);
+            CreateCard(playerCards[0], CardUI1);
         }
     }
 

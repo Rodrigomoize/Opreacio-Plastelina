@@ -17,7 +17,6 @@ public class CardDrag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         rectTransform = GetComponent<RectTransform>();
         canvasGroup = GetComponent<CanvasGroup>();
         if (cardDisplay == null) cardDisplay = GetComponent<CardDisplay>();
-        // Busca el canvas padre (necesario para convertir posiciones)
         rootCanvas = GetComponentInParent<Canvas>();
     }
 
@@ -25,17 +24,24 @@ public class CardDrag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     {
         originalParent = transform.parent;
         originalAnchoredPos = rectTransform.anchoredPosition;
-        transform.SetParent(rootCanvas.transform, true); // llevar al top del canvas
-        canvasGroup.blocksRaycasts = false; // para que los raycasts no se queden en la UI mientras arrastramos
+        transform.SetParent(rootCanvas.transform, true); 
+        canvasGroup.blocksRaycasts = false; 
     }
 
     public void OnDrag(PointerEventData eventData)
     {
         Vector2 movePos;
-        // Mueve el rectTransform con la posición del pointer
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(rootCanvas.transform as RectTransform, eventData.position, eventData.pressEventCamera, out movePos);
-        rectTransform.anchoredPosition = movePos;
+
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            rootCanvas.transform as RectTransform,
+            eventData.position,
+            eventData.pressEventCamera,
+            out movePos))
+        {
+            rectTransform.anchoredPosition = movePos;
+        }
     }
+
 
     public void OnEndDrag(PointerEventData eventData)
     {
@@ -56,14 +62,11 @@ public class CardDrag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
                 }
                 else
                 {
-                    // no se pudo (p.ej. intelecto insuficiente) -> volver a la posición original
                     ReturnToOriginal();
                     return;
                 }
             }
         }
-
-        // Si no golpea PlayableArea -> devolver al slot original
         ReturnToOriginal();
     }
 
