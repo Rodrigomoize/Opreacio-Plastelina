@@ -7,10 +7,8 @@ public class PlayerCardManager : MonoBehaviour
     public CardManager cardManager;
     
     public GameObject cardPrefab;
-    public Transform CardUI1;
-    public Transform CardUI2;
-    public Transform CardUI3;
-    public Transform CardUI4;
+
+    public List<Transform> cardSlots = new List<Transform>();
 
     public Button SumaButton;
     public Button RestaButton;
@@ -22,18 +20,17 @@ public class PlayerCardManager : MonoBehaviour
     void Awake()
     {
         if (cardPrefab == null) Debug.LogError("Card Prefab is not assigned in the inspector.");
-        if (CardUI1 == null) Debug.LogError("Card UI Transform is not assigned in the inspector.");
+        if (cardSlots == null) Debug.LogError("Card UI Transform is not assigned in the inspector.");
         if (cardManager == null) Debug.LogError("CardManager is not assigned in the inspector.");
     }
 
     void Start()
     {
         List<CardManager.Card> randomCards = GetRandomCards(4);
-
-        CreateCard(randomCards[0], CardUI1);
-        CreateCard(randomCards[1], CardUI2);
-        CreateCard(randomCards[2], CardUI3);
-        CreateCard(randomCards[3], CardUI4);
+        foreach (var card in randomCards)
+        {
+            CreateCard(card);
+        }
     }
 
 
@@ -53,22 +50,40 @@ public class PlayerCardManager : MonoBehaviour
         return result;
     }
 
-    public void CreateCard(CardManager.Card cardData, Transform slotParent)
+    public void CreateCard(CardManager.Card cardData)
     {
-        GameObject newCard = Instantiate(cardPrefab, slotParent);
+        Transform freeSlot = GetFirstFreeSlot();
+        if (freeSlot == null)
+        {
+            Debug.LogWarning("No hay slots libres para crear más cartas");
+            return;
+        }
+
+        // Instancia carta en el slot
+        GameObject newCard = Instantiate(cardPrefab, freeSlot);
         newCard.name = cardData.cardName;
 
+        RectTransform rt = newCard.GetComponent<RectTransform>();
+        RectTransform slotRT = freeSlot.GetComponent<RectTransform>();
+
+        rt.localScale = Vector3.one;
+        rt.localRotation = Quaternion.identity;
+
+        Vector2 slotSize = slotRT.rect.size;
+        rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, slotSize.x);
+        rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, slotSize.y);
+
+        rt.anchoredPosition = Vector2.zero; // centra dentro del slot
+        rt.pivot = slotRT.pivot;
+
         CardDisplay display = newCard.GetComponent<CardDisplay>();
+        if (display != null) display.SetCardData(cardData);
 
         CardDrag drag = newCard.GetComponent<CardDrag>();
         if (drag != null)
         {
             drag.playerManager = this;
             drag.cardDisplay = display;
-        }
-        else
-        {
-            Debug.LogWarning("Prefab no contiene CardDrag");
         }
 
         spawnedCards.Add(newCard);
@@ -96,8 +111,6 @@ public class PlayerCardManager : MonoBehaviour
         bool ok = cardManager.GenerateCharacter(cardData, spawnPosition);
         if (ok)
         {
-            // Eliminamos la carta del mazo del jugador:
-            // 1) eliminar la instancia UI
             if (spawnedCards.Contains(cardUI))
             {
                 spawnedCards.Remove(cardUI);
@@ -118,13 +131,21 @@ public class PlayerCardManager : MonoBehaviour
         }
     }
 
+    private Transform GetFirstFreeSlot()
+    {
+        foreach (Transform slot in cardSlots)
+        {
+            if (slot.childCount == 0) return slot;
+        }
+        return null;
+    }
+
     private void AddNextCard()
     {
-        CardManager.Card next = cardManager.GetRandomCloneFromAvailable();
-        if (next != null)
+        List<CardManager.Card> randomCards = GetRandomCards(1);
+        foreach (var card in randomCards)
         {
-            playerCards.Add(next);
-            CreateCard(playerCards[0], CardUI1);
+            CreateCard(card);
         }
     }
 
