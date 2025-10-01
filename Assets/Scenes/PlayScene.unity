@@ -973,7 +973,7 @@ RectTransform:
   m_GameObject: {fileID: 821623317}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.3829045, y: 1.3829045, z: 1.3829045}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1302032084}
@@ -983,7 +983,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0.000011444, y: 571}
+  m_AnchoredPosition: {x: 0.000011444, y: 583.5}
   m_SizeDelta: {x: 631.1851, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &821623319
@@ -2010,8 +2010,9 @@ MonoBehaviour:
   maxIntelect: 10
   minIntelect: 0
   currentIntelect: 0
-  regenInterval: 1
-  regenAmount: 8
+  regenDelay: 5
+  regenInterval: 8
+  regenAmount: 1
   intelectSlider: {fileID: 821623320}
 --- !u!4 &1639695186
 Transform:
