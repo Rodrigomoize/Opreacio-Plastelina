@@ -51,11 +51,16 @@ public class IntelectManager : MonoBehaviour
         currentIntelect = Mathf.Min(maxIntelect, currentIntelect + amount);
     }
 
-    private void Update()
+    void Update()
     {
-        if (Input.GetKey(KeyCode.Space)) {
-            Consume(1);
-            Debug.Log("Has restado intelecto");
+        // DEBUG: pulsando espacio consumimos 1 punto (solo en editor/testing)
+        if (Application.isEditor && Input.GetKeyDown(KeyCode.Space))
+        {
+            Debug.Log("DEBUG: Space pressed -> intentar consumir 1");
+            bool ok = Consume(1);
+            Debug.Log($"DEBUG: Consume(1) devolvió {ok}. CurrentIntelect = {currentIntelect}");
         }
     }
+
+
 }

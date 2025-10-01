@@ -54,14 +54,34 @@ public class CardDrag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             if (hit.collider != null && hit.collider.CompareTag("PlayableArea"))
             {
                 Vector3 spawnPos = hit.point;
-                // Llama al manager para generar character
-                bool spawned = playerManager.RequestGenerateCharacter(cardDisplay.GetCardData(), spawnPos, this.gameObject);
+                Debug.Log("CardDrag: soltada en PlayableArea.");
+
+                // Recuperar los datos desde el CardDisplay
+                if (cardDisplay == null)
+                {
+                    Debug.LogError("CardDrag: cardDisplay es null. ¿Se asignó en CreateCard?");
+                    ReturnToOriginal();
+                    return;
+                }
+
+                CardManager.Card data = cardDisplay.GetCardData();
+                if (data == null)
+                {
+                    Debug.LogError("CardDrag: GetCardData devolvió null. ¿SetCardData fue llamado al instanciar la carta?");
+                    ReturnToOriginal();
+                    return;
+                }
+
+                // Llamamos al PlayerCardManager para intentar generar el personaje
+                bool spawned = playerManager.RequestGenerateCharacter(data, spawnPos, this.gameObject);
                 if (spawned)
                 {
+                    // La UI será destruida por PlayerCardManager (no hacemos ReturnToOriginal)
                     return;
                 }
                 else
                 {
+                    // Ej: intelecto insuficiente -> volver al slot original
                     ReturnToOriginal();
                     return;
                 }

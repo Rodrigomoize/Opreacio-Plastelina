@@ -23,6 +23,7 @@ public class IntelectBar : MonoBehaviour
         currentIntelect = intelectManager.currentIntelect;
         intelectSlider.value = currentIntelect;
     }
+
     // Update is called once per frame
     void Update()
     {

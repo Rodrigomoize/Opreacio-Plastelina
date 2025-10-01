@@ -108,6 +108,7 @@ public class PlayerCardManager : MonoBehaviour
     public bool RequestGenerateCharacter(CardManager.Card cardData, Vector3 spawnPosition, GameObject cardUI)
     {
         // Llamamos al CardManager para intentar generar (CardManager gestiona intelecto si es necesario)
+        Debug.Log($"RequestGenerateCharacter: intentando jugar {cardData.cardName} coste {cardData.intelectCost}");
         bool ok = cardManager.GenerateCharacter(cardData, spawnPosition);
         if (ok)
         {
