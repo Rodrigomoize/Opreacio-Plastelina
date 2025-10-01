@@ -97,12 +97,7 @@ public class CardManager : MonoBehaviour
             return false;
         }
 
-        bool consumed = intelectManager.Consume(cardData.intelectCost);
-        if (!consumed)
-        {
-            Debug.LogWarning("Consume devolvió false aunque CanConsume era true. Revisa Consume().");
-            return false;
-        }
+        intelectManager.Consume(cardData.intelectCost);
 
         // Instanciar el fbxCharacter en el mundo (si existe)
         if (cardData.fbxCharacter != null)
