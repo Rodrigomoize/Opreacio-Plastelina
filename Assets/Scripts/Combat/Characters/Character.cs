@@ -115,6 +115,7 @@ public class Character : MonoBehaviour
             else
             {
                 // attacker continues - or implement alternate logic
+                //pensar en meter un camerashake o resta de puntos 
             }
         }
         else if (thisIsDefender && !otherIsDefender)
