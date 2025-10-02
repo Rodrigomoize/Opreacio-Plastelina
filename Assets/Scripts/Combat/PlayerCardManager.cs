@@ -100,9 +100,19 @@ public class PlayerCardManager : MonoBehaviour
 
     }
 
-    public void CombineCards()
+    public void PlayCombinedCards(CardManager.Card a, CardManager.Card b, char op, Vector3 spawnPos)
     {
-        
+        int result = 0;
+        if (op == '+') result = a.cardValue + b.cardValue;
+        else if (op == '-') result = a.cardValue - b.cardValue;
+
+        // Normaliza si quieres que esté en 1..5, o permite 0-... según reglas.
+        // Ahora llama a CardManager para gestionar coste y spawn:
+        bool played = cardManager.GenerateCombinedCharacter(a, b, spawnPos, Character.Team.Player, result, op);
+        if (played)
+        {
+            // destruir UI, reponer cartas, etc.
+        }
     }
 
     public bool RequestGenerateCharacter(CardManager.Card cardData, Vector3 spawnPosition, GameObject cardUI)

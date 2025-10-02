@@ -2,10 +2,12 @@ using UnityEngine;
 
 public class CardDisplay : MonoBehaviour
 {
+    public enum CardType { Single, Operation }
     [Header("Datos visibles en Inspector (debug)")]
     public string cardName;
     public int cardValue;
     public int cardLife;
+    public CardType cardType = CardType.Single;
     public int cardVelocity;
     public int intelectCost;
 

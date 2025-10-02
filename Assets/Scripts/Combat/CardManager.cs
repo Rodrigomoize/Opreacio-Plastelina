@@ -92,8 +92,30 @@ public class CardManager : MonoBehaviour
             Debug.LogWarning("CharacterManager no existe en escena, instanciando directamente.");
             GameObject go = Instantiate(cardData.fbxCharacter, spawnPosition, Quaternion.identity);
             Character cs = go.GetComponent<Character>();
-            if (cs != null) cs.SetupFromCard(cardData, teamToSpawn);
+            //if (cs != null) cs.SetupFromCard(cardData, teamToSpawn);
             return cs != null;
         }
     }
+
+    public bool GenerateCombinedCharacter(Card partA, Card partB, Vector3 spawnPosition, Character.Team team, int operationResult, char opSymbol)
+    {
+        if (partA == null || partB == null) return false;
+        int totalCost = partA.intelectCost + partB.intelectCost; // o tu regla
+
+        if (intelectManager == null) { Debug.LogError("IntelectManager no asignado!"); return false; }
+        if (!intelectManager.CanConsume(totalCost)) return false;
+        if (!intelectManager.Consume(totalCost)) return false;
+
+        if (CharacterManager.Instance != null)
+        {
+            CharacterManager.Instance.CreateCombinedCharacterFromCards(partA, partB, spawnPosition, team, operationResult, opSymbol);
+            return true;
+        }
+        else
+        {
+            Debug.LogError("CharacterManager no presente.");
+            return false;
+        }
+    }
+
 }
