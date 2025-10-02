@@ -13,6 +13,7 @@ public class CardManager : MonoBehaviour
         public int cardVelocity;
         public int intelectCost;
         public bool isSelected;
+        public bool isSingle;
         public bool isCombined;
         public bool isUsed;
         public GameObject cardImage;
@@ -79,37 +80,20 @@ public class CardManager : MonoBehaviour
     // Generar el character en world, comprobando intelecto. Devuelve true si ha sido posible.
     public bool GenerateCharacter(Card cardData, Vector3 spawnPosition)
     {
-        if (cardData == null)
+        Character.Team teamToSpawn = Character.Team.Player; // o decide según contexto/owner
+        if (CharacterManager.Instance != null)
         {
-            Debug.LogError("GenerateCharacter recibió cardData null.");
-            return false;
-        }
-
-        if (intelectManager == null)
-        {
-            Debug.LogError("IntelectManager no asignado en CardManager!");
-            return false;
-        }
-
-        if (!intelectManager.CanConsume(cardData.intelectCost))
-        {
-            Debug.Log($"No hay intelecto suficiente para {cardData.cardName} (coste {cardData.intelectCost})");
-            return false;
-        }
-
-        intelectManager.Consume(cardData.intelectCost);
-
-        // Instanciar el fbxCharacter en el mundo (si existe)
-        if (cardData.fbxCharacter != null)
-        {
-            GameObject go = Instantiate(cardData.fbxCharacter, spawnPosition, Quaternion.identity);
-            Debug.Log($"Spawned {cardData.cardName} at {spawnPosition}");
-            return true;
+            Character created = CharacterManager.Instance.CreateCharacterFromCard(cardData, spawnPosition, teamToSpawn);
+            if (created != null) return true;
+            else return false;
         }
         else
         {
-            Debug.LogWarning($"Carta {cardData.cardName} no tiene fbxCharacter asignado.");
-            return false;
+            Debug.LogWarning("CharacterManager no existe en escena, instanciando directamente.");
+            GameObject go = Instantiate(cardData.fbxCharacter, spawnPosition, Quaternion.identity);
+            Character cs = go.GetComponent<Character>();
+            if (cs != null) cs.SetupFromCard(cardData, teamToSpawn);
+            return cs != null;
         }
     }
 }
