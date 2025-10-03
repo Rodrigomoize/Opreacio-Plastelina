@@ -92,7 +92,7 @@ public class CardManager : MonoBehaviour
             Debug.LogWarning("CharacterManager no existe en escena, instanciando directamente.");
             GameObject go = Instantiate(cardData.fbxCharacter, spawnPosition, Quaternion.identity);
             Character cs = go.GetComponent<Character>();
-            if (cs != null) cs.SetupFromCard(cardData, teamToSpawn);
+            if (cs != null) cs.SetupFromCard(cardData, teamToSpawn, intelectManager );
             return cs != null;
         }
     }

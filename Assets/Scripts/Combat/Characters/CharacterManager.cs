@@ -5,7 +5,9 @@ public class CharacterManager : MonoBehaviour
 {
     public static CharacterManager Instance;
 
-    
+    public IntelectManager intelectManager;
+
+
     public Transform playerCharactersParent;
     public Transform enemyCharactersParent;
 
@@ -41,7 +43,7 @@ public class CharacterManager : MonoBehaviour
             return null;
         }
 
-        charScript.SetupFromCard(card, team);
+        charScript.SetupFromCard(card, team, intelectManager);
         return charScript;
     }
 

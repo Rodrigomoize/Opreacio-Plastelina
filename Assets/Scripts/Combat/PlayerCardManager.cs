@@ -95,11 +95,6 @@ public class PlayerCardManager : MonoBehaviour
         
     }
 
-    public void PlayCard()
-    {
-
-    }
-
     public void PlayCombinedCards(CardManager.Card a, CardManager.Card b, char op, Vector3 spawnPos)
     {
         int result = 0;

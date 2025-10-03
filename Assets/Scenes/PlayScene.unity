@@ -259,8 +259,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 59149fe8d6f45af43a060fae0202a8a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterManager
+  intelectManager: {fileID: 1639695185}
   playerCharactersParent: {fileID: 0}
   enemyCharactersParent: {fileID: 0}
+  combinedPrefab: {fileID: 6541662843382258608, guid: d647e2f016046bd449819fb86119fab2, type: 3}
 --- !u!4 &47276649
 Transform:
   m_ObjectHideFlags: 0
@@ -554,7 +556,7 @@ MonoBehaviour:
     isCombined: 0
     isUsed: 0
     cardImage: {fileID: 0}
-    fbxCharacter: {fileID: 0}
+    fbxCharacter: {fileID: 306698880946776116, guid: c7a6732deb04c20478f71c0a362b7dc8, type: 3}
   - cardName: 2
     cardValue: 2
     cardLife: 2
@@ -565,7 +567,7 @@ MonoBehaviour:
     isCombined: 0
     isUsed: 0
     cardImage: {fileID: 0}
-    fbxCharacter: {fileID: 0}
+    fbxCharacter: {fileID: 2923807866410120005, guid: 32258bcf884665d44ba015c9fbe98941, type: 3}
   - cardName: 3
     cardValue: 3
     cardLife: 3
@@ -576,7 +578,7 @@ MonoBehaviour:
     isCombined: 0
     isUsed: 0
     cardImage: {fileID: 0}
-    fbxCharacter: {fileID: 0}
+    fbxCharacter: {fileID: 1219588499643922361, guid: c0af99b09dac99f488c9d3bc606159e7, type: 3}
   - cardName: 4
     cardValue: 4
     cardLife: 4
@@ -586,7 +588,7 @@ MonoBehaviour:
     isSingle: 0
     isCombined: 0
     isUsed: 0
-    cardImage: {fileID: 0}
+    cardImage: {fileID: 7335100743432361997, guid: b13d7d2cc8add4b42a45073a54de690a, type: 3}
     fbxCharacter: {fileID: 0}
   - cardName: 5
     cardValue: 5
@@ -598,7 +600,7 @@ MonoBehaviour:
     isCombined: 0
     isUsed: 0
     cardImage: {fileID: 0}
-    fbxCharacter: {fileID: 0}
+    fbxCharacter: {fileID: 998042312859281677, guid: b0b8752fc72f00d4182da24890d405c4, type: 3}
   intelectManager: {fileID: 1639695185}
 --- !u!4 &88149203
 Transform:

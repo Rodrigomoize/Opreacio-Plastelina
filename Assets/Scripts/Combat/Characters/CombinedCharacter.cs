@@ -36,6 +36,5 @@ public class CombinedCharacter : MonoBehaviour
         frontUnit.SetupFromCard(frontCard, team, manager.intelectManager, this.operationResult, opSymbol);
         backUnit.SetupFromCard(backCard, team, manager.intelectManager, this.operationResult, opSymbol);
 
-        // agent speed etc...
     }
 }

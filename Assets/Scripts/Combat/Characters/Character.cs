@@ -22,7 +22,7 @@ public class Character : MonoBehaviour
     private NavMeshAgent agent;
     private bool isInitialized = false;
 
-    private int operationResult = int.MinValue; // si == int.MinValue -> no aplica
+    private int operationResult = int.MinValue;
     private char opSymbol;
 
 
@@ -69,7 +69,7 @@ public class Character : MonoBehaviour
         }
     }
 
-    private void Die()
+    public void Die()
     {
        
         Destroy(gameObject);
