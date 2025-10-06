@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 5275591522006104044}
   - component: {fileID: 93375558401347558}
   - component: {fileID: 2847348346621588309}
-  - component: {fileID: 1208833560049869736}
   - component: {fileID: 8563554855671735290}
   - component: {fileID: 4401224604391712949}
+  - component: {fileID: 1208833560049869736}
   - component: {fileID: 1453077750377922306}
   - component: {fileID: 4114250135371751518}
   m_Layer: 0
@@ -71,24 +71,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &1208833560049869736
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1339059252819176335}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae33fcb8b31a12c4bbb25520e55bf443, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cardName: 
-  cardValue: 0
-  cardLife: 0
-  cardVelocity: 0
-  intelectCost: 0
-  fbxCharacter: {fileID: 0}
 --- !u!114 &8563554855671735290
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -131,6 +113,32 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &1208833560049869736
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1339059252819176335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae33fcb8b31a12c4bbb25520e55bf443, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cardData:
+    cardName: 
+    cardValue: 0
+    cardLife: 0
+    cardVelocity: 0
+    intelectCost: 0
+    isSelected: 0
+    isSingle: 0
+    isCombined: 0
+    isUsed: 0
+    cardImage: {fileID: 0}
+    fbxCharacter: {fileID: 0}
+  highlightImage: {fileID: 0}
+  ownerManager: {fileID: 0}
 --- !u!114 &1453077750377922306
 MonoBehaviour:
   m_ObjectHideFlags: 0

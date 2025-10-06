@@ -40,6 +40,9 @@ public class CardManager : MonoBehaviour
         clone.cardVelocity = original.cardVelocity;
         clone.intelectCost = original.intelectCost;
         clone.fbxCharacter = original.fbxCharacter;
+        clone.cardImage = original.cardImage;
+        clone.isSingle = original.isSingle;
+        clone.isCombined = original.isCombined;
         return clone;
     }
 
@@ -77,45 +80,66 @@ public class CardManager : MonoBehaviour
         return result;
     }
 
-    // Generar el character en world, comprobando intelecto. Devuelve true si ha sido posible.
     public bool GenerateCharacter(Card cardData, Vector3 spawnPosition)
     {
-        Character.Team teamToSpawn = Character.Team.Player; // o decide según contexto/owner
-        if (CharacterManager.Instance != null)
+        if (cardData == null)
         {
-            Character created = CharacterManager.Instance.CreateCharacterFromCard(cardData, spawnPosition, teamToSpawn);
-            if (created != null) return true;
-            else return false;
+            Debug.LogWarning("[CardManager] GenerateCharacter recibió cardData null.");
+            return false;
         }
-        else
+
+        // If an intelect manager exists, check/consume
+        if (intelectManager != null)
         {
-            Debug.LogWarning("CharacterManager no existe en escena, instanciando directamente.");
-            GameObject go = Instantiate(cardData.fbxCharacter, spawnPosition, Quaternion.identity);
-            Character cs = go.GetComponent<Character>();
-            if (cs != null) cs.SetupFromCard(cardData, teamToSpawn, intelectManager );
-            return cs != null;
+            if (!intelectManager.CanConsume(cardData.intelectCost))
+            {
+                Debug.Log($"[CardManager] No hay intelecto suficiente para {cardData.cardName} (coste {cardData.intelectCost})");
+                return false;
+            }
+            bool consumed = intelectManager.Consume(cardData.intelectCost);
+            if (!consumed)
+            {
+                Debug.LogWarning("[CardManager] Consume falló aunque CanConsume devolvió true (verifica IntelectManager).");
+                return false;
+            }
         }
-    }
 
-    public bool GenerateCombinedCharacter(Card partA, Card partB, Vector3 spawnPosition, Character.Team team, int operationResult, char opSymbol)
-{
-    if (partA == null || partB == null) return false;
-    int totalCost = partA.intelectCost + partB.intelectCost; // o tu regla
-
-    if (intelectManager == null) { Debug.LogError("IntelectManager no asignado!"); return false; }
-    if (!intelectManager.CanConsume(totalCost)) return false;
-    if (!intelectManager.Consume(totalCost)) return false;
-
-    if (CharacterManager.Instance != null)
-    {
-        CharacterManager.Instance.CreateCombinedCharacterFromCards(partA, partB, spawnPosition, team, operationResult, opSymbol);
+        // Figurative spawn: no instanciamos modelos reales todavía
+        Debug.Log($"[CardManager] (FIGURATIVE) Spawn pedido: {cardData.cardName} at {spawnPosition} (cost {cardData.intelectCost})");
         return true;
     }
-    else
+
+    // ---------- FIGURATIVE: GENERATE COMBINED CHARACTER ----------
+    // New signature: no Character.Team ni dependencia externa
+    public bool GenerateCombinedCharacter(Card partA, Card partB, Vector3 spawnPosition, int operationResult, char opSymbol)
     {
-        Debug.LogError("CharacterManager no presente.");
-        return false;
+        if (partA == null || partB == null)
+        {
+            Debug.LogWarning("[CardManager] GenerateCombinedCharacter: partes null.");
+            return false;
+        }
+
+        int totalCost = partA.intelectCost + partB.intelectCost;
+
+        if (intelectManager != null)
+        {
+            if (!intelectManager.CanConsume(totalCost))
+            {
+                Debug.Log($"[CardManager] No hay intelecto suficiente para combined (coste {totalCost})");
+                return false;
+            }
+            bool consumed = intelectManager.Consume(totalCost);
+            if (!consumed)
+            {
+                Debug.LogWarning("[CardManager] Consume falló en combined.");
+                return false;
+            }
+        }
+
+        // Figurative spawn / log
+        Debug.Log($"[CardManager] (FIGURATIVE) Spawn combined: {partA.cardName} {opSymbol} {partB.cardName} => result {operationResult} at {spawnPosition} (cost {totalCost})");
+        return true;
     }
 }
 
-}
+
