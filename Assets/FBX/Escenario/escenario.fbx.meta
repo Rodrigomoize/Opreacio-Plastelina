@@ -8,147 +8,147 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: BanderinEnemigo
-    second: {fileID: 2100000, guid: 6395c54a792fb8d49bdf8cb86fde10f8, type: 2}
+    second: {fileID: 2100000, guid: 13004465cb09ec942bc92809bad2761f, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: BanderinPlayer
-    second: {fileID: 2100000, guid: 5d9d6734c584605428bd265cc7c8fa4e, type: 2}
+    second: {fileID: 2100000, guid: 9d222c2fdaa54e14fb21ec12c00a378b, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Cardboard
-    second: {fileID: 2100000, guid: cd42078591dc3de46857c3d3f3de78c8, type: 2}
+    second: {fileID: 2100000, guid: 6331a6fd7be8490449ea3d9d67c5dee7, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Cardboard.001
-    second: {fileID: 2100000, guid: 5b138f6ecd76c344aa8d438f126c9b3b, type: 2}
+    second: {fileID: 2100000, guid: 639d51d09645dc149a44898d913b4ac4, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Clay_StopMo.017
-    second: {fileID: 2100000, guid: 249d871972ffba746a600f0d8837709f, type: 2}
+    second: {fileID: 2100000, guid: 5b855b4c02b563748b53d055fc8c11cf, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Oil Painting
-    second: {fileID: 2100000, guid: 22df68be2e95e8946b93d8ec0b84d0b5, type: 2}
+    second: {fileID: 2100000, guid: 7e4c8ec0b5d96a945b733c66551be180, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Oil Painting.002
-    second: {fileID: 2100000, guid: b0962262d7bda6b42b0aace0d4159234, type: 2}
+    second: {fileID: 2100000, guid: 202cc5329d2e1fd44b8c977a37b67d4e, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Oil Painting.003
-    second: {fileID: 2100000, guid: 4ba3940bdfdc22248a2132bfac2520dc, type: 2}
+    second: {fileID: 2100000, guid: 48a88080e4884c741931da88bfa1e36c, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Painted Plaster Wall
-    second: {fileID: 2100000, guid: a290e936ab13ceb4098d169f4eec86e7, type: 2}
+    second: {fileID: 2100000, guid: ec50a821bb27e774397e41a09490cc10, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Painted Plaster Wall.001
-    second: {fileID: 2100000, guid: f82f35e43364c5a46bc4b3380e5250db, type: 2}
+    second: {fileID: 2100000, guid: e0c55c5471ec96d408a9d0c47c4c4193, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Painted Plaster Wall.002
-    second: {fileID: 2100000, guid: 7110a8e1a9d25e549b7b78a50c0589a4, type: 2}
+    second: {fileID: 2100000, guid: ed04df7a96aa89247ac9d69bd36a0887, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Pega
-    second: {fileID: 2100000, guid: 070dcd9d44e65d24ca6c61a8ffef1754, type: 2}
+    second: {fileID: 2100000, guid: d0fcc51b39f010f499da18e9d6feb1a1, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Plastic
-    second: {fileID: 2100000, guid: 880c287a6eabda942a11eaba571979ab, type: 2}
+    second: {fileID: 2100000, guid: 33232f34e9d65c44b86a203e23716f0c, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Plastic.002
-    second: {fileID: 2100000, guid: a74c6e909644fff4c9df0bbd3bf2b649, type: 2}
+    second: {fileID: 2100000, guid: c8775c73f37b93b40803ffd7ee35f527, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Plastic.003
-    second: {fileID: 2100000, guid: 4bbcbd5cc53db65439d49b1360d87d3f, type: 2}
+    second: {fileID: 2100000, guid: 62e7fec812ccbc84a8dd0ee787ab6d08, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Plastic.004
-    second: {fileID: 2100000, guid: b0cb57e009fff51458b2fdc33f44895f, type: 2}
+    second: {fileID: 2100000, guid: 6dd71c8032c525d41b2bd0fe4871cb13, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Plastic.005
-    second: {fileID: 2100000, guid: 1b1ac85d79f539f4ca43f2de688d055f, type: 2}
+    second: {fileID: 2100000, guid: f6892f34481534e408f3772e9d655ca7, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Plastic.008
-    second: {fileID: 2100000, guid: 077af6a6b17bf5f4aaceb1904a4463fe, type: 2}
+    second: {fileID: 2100000, guid: 92401175e193e2440b69ece08e2ba402, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Plastic.011
-    second: {fileID: 2100000, guid: e43f5aeb74f296c47823e9d641f9adaa, type: 2}
+    second: {fileID: 2100000, guid: 13b3a969244e863489eb601152c7ed8c, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Plastic.027
-    second: {fileID: 2100000, guid: bedb6e4d6b4822a4ea487e30eea3fff5, type: 2}
+    second: {fileID: 2100000, guid: b80a5d1f3e2afd94095aa4de1d2c363a, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Plastic.028
-    second: {fileID: 2100000, guid: 9c2b4c18de5332f489e5cb7c40f94867, type: 2}
+    second: {fileID: 2100000, guid: 05ee75418ebcc574c8bd011c887efbf5, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Plastic.029
-    second: {fileID: 2100000, guid: 022a99ebb822bfa499743a4a98434191, type: 2}
+    second: {fileID: 2100000, guid: c36a6ec315d174f41b61679fbcf696c5, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Plastic.030
-    second: {fileID: 2100000, guid: 4ab5eddd2df54414db8cd562cd906e41, type: 2}
+    second: {fileID: 2100000, guid: 4940a82cf651ddd43a2dacb409e713ed, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Scratched Green Plastic
-    second: {fileID: 2100000, guid: 1e9ee20de98ae0245887cf3b36a4a8f7, type: 2}
+    second: {fileID: 2100000, guid: 164276ece678d6044989ef05af3d7801, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Scratched Green Plastic.001
-    second: {fileID: 2100000, guid: 4f3dd408e7cc9a94f8e6149b88a62964, type: 2}
+    second: {fileID: 2100000, guid: def2c0083d0711140a0b4a51a6fa049e, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Stainless Steel
-    second: {fileID: 2100000, guid: 4b94d723481c24444bee910a3e38dad4, type: 2}
+    second: {fileID: 2100000, guid: 3097601517aa1bc408e2641f89d4213b, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Wrinkled paper
-    second: {fileID: 2100000, guid: 2421eeefcbfef5643bd679843fafa837, type: 2}
+    second: {fileID: 2100000, guid: cd90ef61e7ad6c347979fcb88332533f, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Wrinkled paper.001
-    second: {fileID: 2100000, guid: 2c5be07854161b54ca2cd8e327d4c5b8, type: 2}
+    second: {fileID: 2100000, guid: c27ba5674a7cab64fbdfe3e353e5a7e8, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: lambert3
-    second: {fileID: 2100000, guid: d905a62c9bb5a9d45b654fc5e7184db2, type: 2}
+    second: {fileID: 2100000, guid: cef4caeac4ba0f047b33429bafd6f38a, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
