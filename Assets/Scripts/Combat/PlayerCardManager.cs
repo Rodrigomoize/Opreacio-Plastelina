@@ -101,13 +101,6 @@ public class PlayerCardManager : MonoBehaviour
             Debug.LogWarning("cardPrefab no contiene CardDisplay.");
         }
 
-        CardDrag drag = newCard.GetComponent<CardDrag>();
-        if (drag != null)
-        {
-            drag.playerManager = this;
-            drag.cardDisplay = display;
-        }
-
         spawnedCards.Add(newCard);
         data.ShowHimSelf();
 
@@ -119,96 +112,43 @@ public class PlayerCardManager : MonoBehaviour
     {
         if (display == null) return;
 
-        // Si la carta se acaba de seleccionar (display.isSelected == true) la añadimos
+        // Si la carta acaba de quedar seleccionada (display.isSelected == true) la añadimos
         if (display.isSelected)
         {
-            // Si ya estaba en la lista, no duplicar
             if (!selectedDisplays.Contains(display))
             {
+                // si ya hay 2, sustituimos la más antigua (manteniendo lógica de máximo 2)
                 if (selectedDisplays.Count >= 2)
                 {
-                    // eliminar la más antigua (y forzar su isSelected=false)
                     var old = selectedDisplays[0];
-                    old.isSelected = false;
-                    old.ApplyHighlight(false);
                     selectedDisplays.RemoveAt(0);
+                    // forzamos su estado lógico a false (no visual)
+                    old.isSelected = false;
+                    Debug.Log($"[PlayerCardManager] Deselected (rotated out): {old.GetCardData()?.cardName}");
                 }
                 selectedDisplays.Add(display);
+                Debug.Log($"[PlayerCardManager] Selected: {display.GetCardData()?.cardName}");
             }
         }
         else
         {
-            // se ha deseleccionado -> quitar de la lista si existe
+            // se deseleccionó -> quitar de la lista si estaba
             if (selectedDisplays.Contains(display))
             {
                 selectedDisplays.Remove(display);
+                Debug.Log($"[PlayerCardManager] Deselected by click: {display.GetCardData()?.cardName}");
             }
         }
 
-        UpdateSelectionVisuals();
+        // Log de estado actual de selección (útil para debug)
+        string list = selectedDisplays.Count == 0 ? "(ninguna)" : string.Join(", ", selectedDisplays.ConvertAll(d => d.GetCardData()?.cardName ?? "null"));
+        Debug.Log($"[PlayerCardManager] SelectedCardsCount={selectedDisplays.Count} List={list}");
     }
 
-    // Forzar seleccionar desde código (usado por CardDrag o llamadas externas)
-    public void ForceSelect(CardDisplay d)
-    {
-        if (d == null) return;
-        if (!d.isSelected)
-        {
-            d.isSelected = true;
-            d.ApplyHighlight(true);
-        }
-
-        if (!selectedDisplays.Contains(d))
-        {
-            if (selectedDisplays.Count >= 2)
-            {
-                var old = selectedDisplays[0];
-                old.isSelected = false;
-                old.ApplyHighlight(false);
-                selectedDisplays.RemoveAt(0);
-            }
-            selectedDisplays.Add(d);
-        }
-
-        UpdateSelectionVisuals();
-    }
-
-    // Actualiza la visibilidad/desaturación de todas las cartas
-    private void UpdateSelectionVisuals()
-    {
-        // Si no hay selección -> restaurar todo
-        if (selectedDisplays.Count == 0)
-        {
-            foreach (var go in spawnedCards)
-            {
-                if (go == null) continue;
-                var cd = go.GetComponent<CardDisplay>();
-                if (cd != null) cd.SetDesaturate(false);
-            }
-            return;
-        }
-
-        // Hay selección -> desaturar las no seleccionadas
-        foreach (var go in spawnedCards)
-        {
-            if (go == null) continue;
-            var cd = go.GetComponent<CardDisplay>();
-            if (cd == null) continue;
-
-            bool isSelectedLocal = cd.isSelected;
-            cd.SetDesaturate(!isSelectedLocal);
-        }
-    }
     public void DeselectAll()
     {
-        foreach (var d in selectedDisplays)
-        {
-            if (d != null) d.SetHighlight(false);
-            Debug.Log(d);
-        }
         selectedDisplays.Clear();
         currentOperator = '\0';
-        UpdateSelectionVisuals();
     }
 
 
