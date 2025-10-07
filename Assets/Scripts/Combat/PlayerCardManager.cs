@@ -112,17 +112,14 @@ public class PlayerCardManager : MonoBehaviour
     {
         if (display == null) return;
 
-        // Si la carta acaba de quedar seleccionada (display.isSelected == true) la añadimos
         if (display.isSelected)
         {
             if (!selectedDisplays.Contains(display))
             {
-                // si ya hay 2, sustituimos la más antigua (manteniendo lógica de máximo 2)
                 if (selectedDisplays.Count >= 2)
                 {
                     var old = selectedDisplays[0];
                     selectedDisplays.RemoveAt(0);
-                    // forzamos su estado lógico a false (no visual)
                     old.isSelected = false;
                     Debug.Log($"[PlayerCardManager] Deselected (rotated out): {old.GetCardData()?.cardName}");
                 }
@@ -132,7 +129,6 @@ public class PlayerCardManager : MonoBehaviour
         }
         else
         {
-            // se deseleccionó -> quitar de la lista si estaba
             if (selectedDisplays.Contains(display))
             {
                 selectedDisplays.Remove(display);
@@ -140,7 +136,6 @@ public class PlayerCardManager : MonoBehaviour
             }
         }
 
-        // Log de estado actual de selección (útil para debug)
         string list = selectedDisplays.Count == 0 ? "(ninguna)" : string.Join(", ", selectedDisplays.ConvertAll(d => d.GetCardData()?.cardName ?? "null"));
         Debug.Log($"[PlayerCardManager] SelectedCardsCount={selectedDisplays.Count} List={list}");
     }
