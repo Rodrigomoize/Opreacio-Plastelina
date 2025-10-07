@@ -111,13 +111,10 @@ public class CardManager : MonoBehaviour
         return true;
     }
 
-    // ---------- FIGURATIVE: GENERATE COMBINED CHARACTER ----------
-    // New signature: no Character.Team ni dependencia externa
     public bool GenerateCombinedCharacter(Card partA, Card partB, Vector3 spawnPosition, int operationResult, char opSymbol)
     {
         if (partA == null || partB == null)
         {
-            Debug.LogWarning("[CardManager] GenerateCombinedCharacter: partes null.");
             return false;
         }
 
@@ -127,19 +124,15 @@ public class CardManager : MonoBehaviour
         {
             if (!intelectManager.CanConsume(totalCost))
             {
-                Debug.Log($"[CardManager] No hay intelecto suficiente para combined (coste {totalCost})");
                 return false;
             }
             bool consumed = intelectManager.Consume(totalCost);
             if (!consumed)
             {
-                Debug.LogWarning("[CardManager] Consume falló en combined.");
                 return false;
             }
         }
 
-        // Figurative spawn / log
-        Debug.Log($"[CardManager] (FIGURATIVE) Spawn combined: {partA.cardName} {opSymbol} {partB.cardName} => result {operationResult} at {spawnPosition} (cost {totalCost})");
         return true;
     }
 }

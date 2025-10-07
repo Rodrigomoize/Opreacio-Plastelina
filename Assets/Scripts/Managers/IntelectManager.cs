@@ -70,13 +70,7 @@ public class IntelectManager : MonoBehaviour
 
     void Update()
     {
-        // DEBUG: pulsando espacio consumimos 1 punto (solo en editor/testing)
-        if (Application.isEditor && Input.GetKeyDown(KeyCode.Space))
-        {
-            Debug.Log("DEBUG: Space pressed -> intentar consumir 1");
-            Consume(1);
-            Debug.Log($"DEBUG: Consum. CurrentIntelect = {currentIntelect}");
-        }
+
     }
 
 

@@ -96,15 +96,10 @@ public class PlayerCardManager : MonoBehaviour
             display.ownerManager = this;
             display.SetCardData(data);
         }
-        else
-        {
-            Debug.LogWarning("cardPrefab no contiene CardDisplay.");
-        }
 
         spawnedCards.Add(newCard);
         data.ShowHimSelf();
 
-        Debug.Log($"Se han instanciado Carta '{data.cardName}' en slot '{freeSlot.name}' - spawnedCards count: {spawnedCards.Count}");
     }
 
 
@@ -121,7 +116,7 @@ public class PlayerCardManager : MonoBehaviour
                     var old = selectedDisplays[0];
                     selectedDisplays.RemoveAt(0);
                     old.isSelected = false;
-                    Debug.Log($"[PlayerCardManager] Deselected (rotated out): {old.GetCardData()?.cardName}");
+                    
                 }
                 selectedDisplays.Add(display);
                 Debug.Log($"[PlayerCardManager] Selected: {display.GetCardData()?.cardName}");
@@ -137,7 +132,6 @@ public class PlayerCardManager : MonoBehaviour
         }
 
         string list = selectedDisplays.Count == 0 ? "(ninguna)" : string.Join(", ", selectedDisplays.ConvertAll(d => d.GetCardData()?.cardName ?? "null"));
-        Debug.Log($"[PlayerCardManager] SelectedCardsCount={selectedDisplays.Count} List={list}");
     }
 
     public void DeselectAll()
@@ -157,12 +151,10 @@ public class PlayerCardManager : MonoBehaviour
         if (currentOperator == op)
         {
             currentOperator = '\0';
-            Debug.Log("[PlayerCardManager] Operación deshabilitada");
         }
         else
         {
             currentOperator = op;
-            Debug.Log($"[PlayerCardManager] Operación seleccionada: {op}");
         }
     }
 
@@ -180,10 +172,8 @@ public class PlayerCardManager : MonoBehaviour
         {
             // spawn single
             CardManager.Card c = selectedDisplays[0].GetCardData();
-            if (c == null) { Debug.LogWarning("Carta null en HandlePlayAreaClick"); DeselectAll(); return; }
 
             bool ok = RequestGenerateCharacter(c, spawnPosition, selectedDisplays[0].gameObject);
-            if (!ok) Debug.Log("[PlayerCardManager] No se pudo generar carta (coste u otro fallo).");
 
             DeselectAll();
             currentOperator = '\0';
