@@ -6,55 +6,103 @@ using UnityEngine.EventSystems;
 public class CardDisplay : MonoBehaviour, IPointerClickHandler
 {
     public CardManager.Card cardData;
-    public Image highlightImage; 
+
+    [Header("UI refs (assign in prefab)")]
+    public Image artworkImage;         // child "Artwork"
+    public Image highlightImage;       // child "Highlight" (active when selected)
+    public Image desaturateOverlay;    // child "Desaturate" (active when NOT selected while others are selected)
+
+
+
     [HideInInspector] public PlayerCardManager ownerManager;
+
+    [HideInInspector] public bool isSelected = false; // estado local
+
+    private float lastClickTime = 0f;
+    private float clickDebounce = 0.15f;
+
+    private Color originalArtworkColor;
+    private Sprite originalArtworkSprite;
 
     void Awake()
     {
-        if (highlightImage != null) highlightImage.gameObject.SetActive(false);
+        if (artworkImage != null)
+        {
+            originalArtworkColor = artworkImage.color;
+            originalArtworkSprite = artworkImage.sprite;
+        }
+
     }
 
     public void SetCardData(CardManager.Card data)
     {
         cardData = data;
+        if (cardData == null) return;
 
-        // Si la carta tiene un "Artwork" Image child, intenta asignar un Sprite
-        if (cardData != null && cardData.cardImage != null)
+        // Asignar sprite desde cardData.cardSprite (o fallback)
+        if (artworkImage != null)
         {
-            UnityEngine.UI.Image artwork = transform.Find("Artwork")?.GetComponent<UnityEngine.UI.Image>();
-            if (artwork != null)
+            if (cardData.cardSprite != null)
             {
-                // si cardImage es un prefab con SpriteRenderer o Image, intenta extraer el sprite
-                var sr = cardData.cardImage.GetComponent<SpriteRenderer>();
-                if (sr != null) artwork.sprite = sr.sprite;
-                else
-                {
-                    var img = cardData.cardImage.GetComponent<UnityEngine.UI.Image>();
-                    if (img != null) artwork.sprite = img.sprite;
-                    else
-                    {
-                        // fallback: si cardImage tiene una textura en un material, no manejamos aquí
-                    }
-                }
+                artworkImage.sprite = cardData.cardSprite;
+                artworkImage.color = Color.white;
+                artworkImage.gameObject.SetActive(true);
+            }
+            else
+            {
+                artworkImage.sprite = originalArtworkSprite;
+                artworkImage.color = originalArtworkColor;
+                artworkImage.gameObject.SetActive(true);
+                Debug.Log($"CardDisplay: fallback artwork para '{cardData.cardName}'");
             }
         }
     }
 
+    // Compatibilidad: GetCardData (muchos sitios lo llaman)
+    public CardManager.Card GetCardData()
+    {
+        return cardData;
+    }
 
-    public CardManager.Card GetCardData() => cardData;
+    // Toggle de selección local + notificar manager
+    public void ToggleSelected()
+    {
+        isSelected = !isSelected;
+        ApplyHighlight(isSelected);
+        ownerManager?.OnCardClicked(this); // manager sincroniza lista y visuales globales
+    }
+
+    // Aplicar highlight visual (no desactiva el GameObject)
+    public void ApplyHighlight(bool on)
+    {
+        if (highlightImage != null) highlightImage.gameObject.SetActive(on);
+        else if (artworkImage != null) artworkImage.color = on ? new Color(1f, 0.95f, 0.8f) : originalArtworkColor;
+    }
+
+    // Compatibilidad: SetHighlight (tu PlayerCardManager lo llama así)
+    public void SetHighlight(bool on)
+    {
+        ApplyHighlight(on);
+    }
+
+    // Desaturación local (por manager)
+    public void SetDesaturate(bool on)
+    {
+        if (desaturateOverlay != null) desaturateOverlay.gameObject.SetActive(on);
+        else if (artworkImage != null) artworkImage.color = on ? new Color(0.7f, 0.7f, 0.7f) : originalArtworkColor;
+    }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        ownerManager?.OnCardClicked(this);
-    }
-
-    public void SetHighlight(bool on)
-    {
-        if (highlightImage != null) highlightImage.gameObject.SetActive(on);
-        else
+        float now = Time.unscaledTime;
+        if (now - lastClickTime < clickDebounce)
         {
-            var img = GetComponent<Image>();
-            if (img != null) img.color = on ? new Color(1f, 1f, 0.85f) : Color.white;
+            Debug.Log("Click ignorado por debounce");
+            return;
         }
+        lastClickTime = now;
+
+        ToggleSelected();
+        Debug.Log($"CardDisplay: OnPointerClick -> {cardData?.cardName} (isSelected={isSelected})");
     }
 }

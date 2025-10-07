@@ -14,7 +14,6 @@ GameObject:
   - component: {fileID: 8563554855671735290}
   - component: {fileID: 4401224604391712949}
   - component: {fileID: 1208833560049869736}
-  - component: {fileID: 1453077750377922306}
   - component: {fileID: 4114250135371751518}
   m_Layer: 0
   m_Name: Carta 4
@@ -137,22 +136,10 @@ MonoBehaviour:
     isUsed: 0
     cardImage: {fileID: 0}
     fbxCharacter: {fileID: 0}
-  highlightImage: {fileID: 0}
+  artworkImage: {fileID: 8563554855671735290}
+  highlightImage: {fileID: 8563554855671735290}
+  desaturateOverlay: {fileID: 7066983772469813683, guid: 238ec7e318c3370499a8ba522dd77324, type: 3}
   ownerManager: {fileID: 0}
---- !u!114 &1453077750377922306
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1339059252819176335}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3dd277b495d446b49bff43bfe54fe9cb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CardDrag
-  playerManager: {fileID: 0}
-  cardDisplay: {fileID: 0}
 --- !u!222 &4114250135371751518
 CanvasRenderer:
   m_ObjectHideFlags: 0

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CardManager : MonoBehaviour
 {
@@ -16,7 +17,7 @@ public class CardManager : MonoBehaviour
         public bool isSingle;
         public bool isCombined;
         public bool isUsed;
-        public GameObject cardImage;
+        public Sprite cardSprite;
         public GameObject fbxCharacter;
 
         public void ShowHimSelf()
@@ -40,7 +41,8 @@ public class CardManager : MonoBehaviour
         clone.cardVelocity = original.cardVelocity;
         clone.intelectCost = original.intelectCost;
         clone.fbxCharacter = original.fbxCharacter;
-        clone.cardImage = original.cardImage;
+        clone.isSelected = original.isSelected;
+        clone.cardSprite = original.cardSprite;
         clone.isSingle = original.isSingle;
         clone.isCombined = original.isCombined;
         return clone;

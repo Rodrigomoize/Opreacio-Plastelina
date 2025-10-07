@@ -5,22 +5,25 @@ using UnityEngine.UI;
 public class PlayerCardManager : MonoBehaviour
 {
     public CardManager cardManager;
-    public GameObject cardPrefab;
-    public List<Transform> cardSlots = new List<Transform>();
+    public GameObject cardPrefab;            
+    public List<Transform> cardSlots = new List<Transform>(4);
     public Button SumaButton;
     public Button RestaButton;
 
+    [Header("Spawn figurativo en mundo")]
     public Transform spawnPoint;
 
+    // Estado de selección / operación
     private List<CardDisplay> selectedDisplays = new List<CardDisplay>(2);
     private List<CardManager.Card> playerCards = new List<CardManager.Card>();
     private List<GameObject> spawnedCards = new List<GameObject>();
+    private char currentOperator = '\0'; 
 
     void Awake()
     {
         if (cardPrefab == null) Debug.LogError("Card Prefab is not assigned in the inspector.");
-        if (cardSlots == null) Debug.LogError("Card UI Transform is not assigned in the inspector.");
-        if (cardManager == null) Debug.LogError("CardManager is not assigned in the inspector.");
+        if (cardSlots == null) Debug.LogError("Card slots not assigned.");
+        if (cardManager == null) Debug.LogError("CardManager not assigned.");
     }
 
     void OnEnable()
@@ -37,6 +40,7 @@ public class PlayerCardManager : MonoBehaviour
 
     void Start()
     {
+        // Inicializa mano
         List<CardManager.Card> randomCards = GetRandomCards(4);
         foreach (var card in randomCards) CreateCard(card);
     }
@@ -53,20 +57,27 @@ public class PlayerCardManager : MonoBehaviour
             result.Add(clone);
             tempList.RemoveAt(randomIndex);
         }
-
         return result;
     }
 
-    public void CreateCard(CardManager.Card cardData)
+
+    public void CreateCard(CardManager.Card data)
     {
-        playerCards.Add(cardData);
+        if (data == null)
+        {
+            Debug.LogWarning("CreateCard recibió null");
+            return;
+        }
+
+        playerCards.Add(data);
         Transform freeSlot = GetFirstFreeSlot();
         if (freeSlot == null) { Debug.LogWarning("No hay slots libres"); return; }
 
         GameObject newCard = Instantiate(cardPrefab, freeSlot, false);
-        newCard.name = cardData.cardName;
+        newCard.name = data.cardName;
+        newCard.SetActive(true); // por si el prefab viene desactivado accidentalmente
 
-        // Ajustar rect transform para que ocupe el slot
+        // Ajustar rectTransform para ocupar el slot
         RectTransform rt = newCard.GetComponent<RectTransform>();
         RectTransform slotRT = freeSlot.GetComponent<RectTransform>();
         if (rt != null && slotRT != null)
@@ -83,7 +94,11 @@ public class PlayerCardManager : MonoBehaviour
         if (display != null)
         {
             display.ownerManager = this;
-            display.SetCardData(cardData);
+            display.SetCardData(data);
+        }
+        else
+        {
+            Debug.LogWarning("cardPrefab no contiene CardDisplay.");
         }
 
         CardDrag drag = newCard.GetComponent<CardDrag>();
@@ -94,89 +109,186 @@ public class PlayerCardManager : MonoBehaviour
         }
 
         spawnedCards.Add(newCard);
-        cardData.ShowHimSelf();
+        data.ShowHimSelf();
+
+        Debug.Log($"Se han instanciado Carta '{data.cardName}' en slot '{freeSlot.name}' - spawnedCards count: {spawnedCards.Count}");
     }
 
-    // Toggle select
+
     public void OnCardClicked(CardDisplay display)
     {
         if (display == null) return;
 
-        if (selectedDisplays.Contains(display))
+        // Si la carta se acaba de seleccionar (display.isSelected == true) la añadimos
+        if (display.isSelected)
         {
-            selectedDisplays.Remove(display);
-            display.SetHighlight(false);
-            return;
-        }
-
-        if (selectedDisplays.Count < 2)
-        {
-            selectedDisplays.Add(display);
-            display.SetHighlight(true);
-            return;
-        }
-
-        // replace oldest
-        selectedDisplays[0].SetHighlight(false);
-        selectedDisplays.RemoveAt(0);
-        selectedDisplays.Add(display);
-        display.SetHighlight(true);
-    }
-
-    // Exposed button handlers
-    public void OnSumaButtonClicked() => OnCombineButton('+');
-    public void OnRestaButtonClicked() => OnCombineButton('-');
-
-    private void OnCombineButton(char op)
-    {
-        if (selectedDisplays.Count < 2)
-        {
-            Debug.Log("Selecciona 2 cartas antes de combinar.");
-            return;
-        }
-
-        var a = selectedDisplays[0].GetCardData();
-        var b = selectedDisplays[1].GetCardData();
-        if (a == null || b == null) return;
-
-        // Ordenar para que el número mayor vaya siempre como segundo
-        int firstVal = Mathf.Min(a.cardValue, b.cardValue);
-        int secondVal = Mathf.Max(a.cardValue, b.cardValue);
-
-        string opText = $"{firstVal}{op}{secondVal}";
-        Debug.Log($"[PlayerCardManager] Combinación seleccionada: {opText}");
-
-        Vector3 spawnPos = spawnPoint != null ? spawnPoint.position : Vector3.zero;
-        bool played = cardManager.GenerateCombinedCharacter(a, b, spawnPos, op == '+' ? firstVal + secondVal : firstVal - secondVal, op);
-        if (played)
-        {
-            foreach (var d in new List<CardDisplay>(selectedDisplays)) RemoveCardUI(d);
-            selectedDisplays.Clear();
+            // Si ya estaba en la lista, no duplicar
+            if (!selectedDisplays.Contains(display))
+            {
+                if (selectedDisplays.Count >= 2)
+                {
+                    // eliminar la más antigua (y forzar su isSelected=false)
+                    var old = selectedDisplays[0];
+                    old.isSelected = false;
+                    old.ApplyHighlight(false);
+                    selectedDisplays.RemoveAt(0);
+                }
+                selectedDisplays.Add(display);
+            }
         }
         else
         {
-            Debug.Log("[PlayerCardManager] No se pudo jugar la combinación (coste o fallo).");
+            // se ha deseleccionado -> quitar de la lista si existe
+            if (selectedDisplays.Contains(display))
+            {
+                selectedDisplays.Remove(display);
+            }
         }
+
+        UpdateSelectionVisuals();
     }
 
-    public bool IsSelected(CardDisplay d) => selectedDisplays.Contains(d);
-
+    // Forzar seleccionar desde código (usado por CardDrag o llamadas externas)
     public void ForceSelect(CardDisplay d)
     {
         if (d == null) return;
-        if (selectedDisplays.Contains(d)) return;
-        if (selectedDisplays.Count >= 2)
+        if (!d.isSelected)
         {
-            selectedDisplays[0].SetHighlight(false);
-            selectedDisplays.RemoveAt(0);
+            d.isSelected = true;
+            d.ApplyHighlight(true);
         }
-        selectedDisplays.Add(d);
-        d.SetHighlight(true);
+
+        if (!selectedDisplays.Contains(d))
+        {
+            if (selectedDisplays.Count >= 2)
+            {
+                var old = selectedDisplays[0];
+                old.isSelected = false;
+                old.ApplyHighlight(false);
+                selectedDisplays.RemoveAt(0);
+            }
+            selectedDisplays.Add(d);
+        }
+
+        UpdateSelectionVisuals();
     }
 
-    private Vector3 GetDefaultSpawnPos()
+    // Actualiza la visibilidad/desaturación de todas las cartas
+    private void UpdateSelectionVisuals()
     {
-        return spawnPoint != null ? spawnPoint.position : Vector3.zero;
+        // Si no hay selección -> restaurar todo
+        if (selectedDisplays.Count == 0)
+        {
+            foreach (var go in spawnedCards)
+            {
+                if (go == null) continue;
+                var cd = go.GetComponent<CardDisplay>();
+                if (cd != null) cd.SetDesaturate(false);
+            }
+            return;
+        }
+
+        // Hay selección -> desaturar las no seleccionadas
+        foreach (var go in spawnedCards)
+        {
+            if (go == null) continue;
+            var cd = go.GetComponent<CardDisplay>();
+            if (cd == null) continue;
+
+            bool isSelectedLocal = cd.isSelected;
+            cd.SetDesaturate(!isSelectedLocal);
+        }
+    }
+    public void DeselectAll()
+    {
+        foreach (var d in selectedDisplays)
+        {
+            if (d != null) d.SetHighlight(false);
+            Debug.Log(d);
+        }
+        selectedDisplays.Clear();
+        currentOperator = '\0';
+        UpdateSelectionVisuals();
+    }
+
+
+    public bool IsSelected(CardDisplay d) => selectedDisplays.Contains(d);
+
+    private void OnSumaButtonClicked() => ToggleOperator('+');
+    private void OnRestaButtonClicked() => ToggleOperator('-');
+
+    private void ToggleOperator(char op)
+    {
+        if (currentOperator == op)
+        {
+            currentOperator = '\0';
+            Debug.Log("[PlayerCardManager] Operación deshabilitada");
+        }
+        else
+        {
+            currentOperator = op;
+            Debug.Log($"[PlayerCardManager] Operación seleccionada: {op}");
+        }
+    }
+
+   
+    public void HandlePlayAreaClick(Vector3 spawnPosition)
+    {
+        if (selectedDisplays.Count == 0)
+        {
+            
+            Debug.Log("[PlayerCardManager] PlayArea clic: nada seleccionado.");
+            return;
+        }
+
+        if (selectedDisplays.Count == 1)
+        {
+            // spawn single
+            CardManager.Card c = selectedDisplays[0].GetCardData();
+            if (c == null) { Debug.LogWarning("Carta null en HandlePlayAreaClick"); DeselectAll(); return; }
+
+            bool ok = RequestGenerateCharacter(c, spawnPosition, selectedDisplays[0].gameObject);
+            if (!ok) Debug.Log("[PlayerCardManager] No se pudo generar carta (coste u otro fallo).");
+
+            DeselectAll();
+            currentOperator = '\0';
+            return;
+        }
+
+        if (selectedDisplays.Count == 2)
+        {
+
+            if (currentOperator == '\0')
+            {
+                Debug.Log("[PlayerCardManager] Dos cartas seleccionadas pero sin operación: se deseleccionan.");
+                DeselectAll();
+                return;
+            }
+
+            var a = selectedDisplays[0].GetCardData();
+            var b = selectedDisplays[1].GetCardData();
+            if (a == null || b == null) { Debug.LogWarning("Carta null en combinación"); DeselectAll(); return; }
+
+            // ordenar valores: el mayor debe ir segundo
+            int firstVal = Mathf.Min(a.cardValue, b.cardValue);
+            int secondVal = Mathf.Max(a.cardValue, b.cardValue);
+            int operationResult = currentOperator == '+' ? firstVal + secondVal : firstVal - secondVal;
+
+            bool played = cardManager.GenerateCombinedCharacter(a, b, spawnPosition, operationResult, currentOperator);
+            if (played)
+            {
+                // eliminar UI y reponer
+                foreach (var d in new List<CardDisplay>(selectedDisplays)) RemoveCardUI(d);
+                selectedDisplays.Clear();
+            }
+            else
+            {
+                Debug.Log("[PlayerCardManager] No se pudo jugar la combinación (coste u otro fallo).");
+            }
+
+            currentOperator = '\0';
+            return;
+        }
     }
 
     private void RemoveCardUI(CardDisplay display)
@@ -196,23 +308,17 @@ public class PlayerCardManager : MonoBehaviour
         bool ok = cardManager.GenerateCharacter(cardData, spawnPosition);
         if (ok)
         {
-            Debug.Log($"[PlayerCardManager] Carta spawn creada: {cardData.cardName} en {spawnPosition}");
-            if (spawnedCards.Contains(cardUI))
+            Debug.Log($"[PlayerCardManager] Carta spawn creada (figurative): {cardData.cardName} en {spawnPosition}");
+            if (cardUI != null && spawnedCards.Contains(cardUI))
             {
                 spawnedCards.Remove(cardUI);
                 Destroy(cardUI);
             }
-            if (playerCards.Contains(cardData))
-            {
-                playerCards.Remove(cardData);
-            }
+            if (playerCards.Contains(cardData)) playerCards.Remove(cardData);
             AddNextCard();
             return true;
         }
-        else
-        {
-            return false;
-        }
+        return false;
     }
 
     private Transform GetFirstFreeSlot()
