@@ -108,6 +108,7 @@ public class CardManager : MonoBehaviour
 
         // Figurative spawn: no instanciamos modelos reales todavía
         Debug.Log($"[CardManager] (FIGURATIVE) Spawn pedido: {cardData.cardName} at {spawnPosition} (cost {cardData.intelectCost})");
+        
         return true;
     }
 
