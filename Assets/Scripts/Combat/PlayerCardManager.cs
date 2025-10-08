@@ -61,7 +61,7 @@ public class PlayerCardManager : MonoBehaviour
     }
 
 
-    public void CreateCard(CardManager.Card data)
+    public void CreateCard(CardManager.Card data, Transform forcedSlot = null)
     {
         if (data == null)
         {
@@ -69,17 +69,24 @@ public class PlayerCardManager : MonoBehaviour
             return;
         }
 
+        // Añadir al listado lógico de cartas del jugador
         playerCards.Add(data);
-        Transform freeSlot = GetFirstFreeSlot();
-        if (freeSlot == null) { Debug.LogWarning("No hay slots libres"); return; }
 
-        GameObject newCard = Instantiate(cardPrefab, freeSlot, false);
+        Transform slotToUse = forcedSlot != null ? forcedSlot : GetFirstFreeSlot();
+        if (slotToUse == null)
+        {
+            Debug.LogWarning("No hay slots libres");
+            // si no hay slot, revertir la adición lógica
+            playerCards.Remove(data);
+            return;
+        }
+
+        GameObject newCard = Instantiate(cardPrefab, slotToUse, false);
         newCard.name = data.cardName;
-        newCard.SetActive(true); // por si el prefab viene desactivado accidentalmente
 
-        // Ajustar rectTransform para ocupar el slot
+        // Ajustar rectTransform
         RectTransform rt = newCard.GetComponent<RectTransform>();
-        RectTransform slotRT = freeSlot.GetComponent<RectTransform>();
+        RectTransform slotRT = slotToUse.GetComponent<RectTransform>();
         if (rt != null && slotRT != null)
         {
             rt.localScale = Vector3.one;
@@ -96,10 +103,13 @@ public class PlayerCardManager : MonoBehaviour
             display.ownerManager = this;
             display.SetCardData(data);
         }
+        else
+        {
+            Debug.LogWarning("cardPrefab no contiene CardDisplay.");
+        }
 
         spawnedCards.Add(newCard);
         data.ShowHimSelf();
-
     }
 
 
@@ -234,13 +244,45 @@ public class PlayerCardManager : MonoBehaviour
         if (ok)
         {
             Debug.Log($"[PlayerCardManager] Carta spawn creada (figurative): {cardData.cardName} en {spawnPosition}");
+
+            // Guardar el slot (parent) de la carta antes de destruirla
+            Transform slotOfCard = null;
+            if (cardUI != null)
+            {
+                slotOfCard = cardUI.transform.parent;
+            }
+
+            // quitar la UI de la mano
             if (cardUI != null && spawnedCards.Contains(cardUI))
             {
                 spawnedCards.Remove(cardUI);
                 Destroy(cardUI);
             }
+
+            // quitar la carta lógica del mazo/hand
             if (playerCards.Contains(cardData)) playerCards.Remove(cardData);
-            AddNextCard();
+
+            // Crear inmediatamente la siguiente carta en el mismo slot si sabemos cuál era
+            if (slotOfCard != null)
+            {
+                // pedir 1 carta nueva y crearla en el slotOfCard
+                List<CardManager.Card> newCards = GetRandomCards(1);
+                if (newCards != null && newCards.Count > 0)
+                {
+                    CreateCard(newCards[0], slotOfCard);
+                }
+                else
+                {
+                    // fallback: usar AddNextCard normal
+                    AddNextCard();
+                }
+            }
+            else
+            {
+                // fallback cuando no teníamos referencia al slot
+                AddNextCard();
+            }
+
             return true;
         }
         return false;
