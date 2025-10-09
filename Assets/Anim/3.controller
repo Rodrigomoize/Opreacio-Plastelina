@@ -51,7 +51,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Armature|3_Walk
+  m_Name: Armature|3_Idle
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions: []
@@ -64,7 +64,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: -4336809235463798611, guid: 16914de01a30d9d43b2e31491d231f9a, type: 3}
+  m_Motion: {fileID: -7081413713854733284, guid: 16914de01a30d9d43b2e31491d231f9a, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
