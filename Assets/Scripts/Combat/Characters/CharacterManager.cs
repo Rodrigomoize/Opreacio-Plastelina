@@ -1,61 +1,101 @@
-using System.Collections.Generic;
+using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class CharacterManager : MonoBehaviour
 {
-    public static CharacterManager Instance;
-
-    public IntelectManager intelectManager;
-
-
-    public Transform playerCharactersParent;
-    public Transform enemyCharactersParent;
-
-    [Header("Prefabs")]
-    public GameObject combinedPrefab;
-
-    void Awake()
+    
+    [System.Serializable]
+    public class Characters
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        public float velocity;
+        public int life;
+        public int value;
+        NavMeshAgent agent;
+        public GameObject characterPrefab;
     }
 
-    // Crea el character a partir de la Card (usa card.fbxCharacter como prefab)
-    //public Character CreateCharacterFromCard(CardManager.Card card, Vector3 spawnPosition, Character.Team team = Character.Team.Player)
-    //{
-    //    if (card == null)
-    //    {
-    //        Debug.LogError("CreateCharacterFromCard: card null");
-    //        return null;
-    //    }
-    //    if (card.fbxCharacter == null)
-    //    {
-    //        Debug.LogError($"CreateCharacterFromCard: card {card.cardName} no tiene fbxCharacter");
-    //        return null;
-    //    }
+    public List<Characters> CharacterSetting = new List<Characters>();
+    Characters original = new Characters();
+    CharacterCombined combined;
+    IntelectManager intelectManager;
 
-    //    Transform parent = (team == Character.Team.Player) ? playerCharactersParent : enemyCharactersParent;
-    //    GameObject go = Instantiate(card.fbxCharacter, spawnPosition, Quaternion.identity, parent);
-    //    Character charScript = go.GetComponent<Character>();
-    //    if (charScript == null)
-    //    {
-    //        Debug.LogError("Prefab fbxCharacter no contiene componente Character");
-    //        return null;
-    //    }
+    void Start()
+    {
+        
+    }
 
-    //    charScript.SetupFromCard(card, team, intelectManager);
-    //    return charScript;
-    //}
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
 
-    //public CombinedCharacter CreateCombinedCharacterFromCards(CardManager.Card partA, CardManager.Card partB, Vector3 spawnPos, Character.Team team, int operationResult, char opSymbol)
-    //{
-    //    if (combinedPrefab == null) { Debug.LogError("combinedPrefab no asignado"); return null; }
-    //    Transform parent = (team == Character.Team.Player) ? playerCharactersParent : enemyCharactersParent;
-    //    GameObject go = Instantiate(combinedPrefab, spawnPos, Quaternion.identity, parent);
-    //    CombinedCharacter combined = go.GetComponent<CombinedCharacter>();
-    //    if (combined == null) { Debug.LogError("combinedPrefab sin script CombinedCharacter"); Destroy(go); return null; }
-    //    combined.SetupFromCards(partA, partB, operationResult, opSymbol, team, this); // pasamos referencia a manager si hace falta
-    //    return combined;
-    //}
+    public Characters SetAtributes(Characters character)
+    {
+
+        character.velocity = original.velocity;
+        character.life = original.life;
+        character.value = original.value;
+
+        return character;
+    }
+
+    public void OnColliderEnter(Collider playerCollider)
+    {
+        var deffender = GetComponent<Characters>();
+        var b = GetComponent<CharacterCombined>();
+        if (playerCollider.CompareTag("AITeam"))
+        {
+            if (deffender.value == b.attackCharacter.value)
+            {
+                ResolveOperation();
+            }else
+            {
+                                
+            }
+        }
+        else
+        {}
+    }
+
+    public void GenerateSingleCharacter()
+    {
+
+    }
+
+    public List<Characters> GenerateCombinedCharacter(Characters firstCharacter, Characters secondCharacter)
+    {
+        Characters characterA = new Characters();
+        Characters characterB = new Characters();
+
+        characterA.velocity = firstCharacter.velocity;
+        characterB.velocity = secondCharacter.velocity;
+        characterA.life = firstCharacter.life;
+        characterB.life = secondCharacter.life;
+        characterA.value = firstCharacter.value;
+        characterB.value = secondCharacter.value;
+        characterA.characterPrefab = firstCharacter.characterPrefab;
+        characterB.characterPrefab = secondCharacter.characterPrefab;
+
+        return new List<Characters> { characterA, characterB };
+    }
+
+
+    public void AssignTag(GameObject obj, string tagName)
+    {
+        if (!string.IsNullOrEmpty(tagName) && obj != null)
+        {
+            obj.tag = tagName;
+        }
+    }
+
+    public void ResolveOperation()
+    {
+
+        intelectManager.AddIntelect(1);
+    }
 
 }

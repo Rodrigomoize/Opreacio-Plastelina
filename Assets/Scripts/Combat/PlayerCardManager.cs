@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using static CharacterCombined;
 
 public class PlayerCardManager : MonoBehaviour
 {
@@ -282,6 +283,10 @@ public class PlayerCardManager : MonoBehaviour
                 // fallback cuando no teníamos referencia al slot
                 AddNextCard();
             }
+
+            // PARA CUANDO HAGAS EL GENERATECOMBINEDCHARACTERS
+            //List<CharacterManager.Characters> characters = characterManager.GenerateCombinedCharacter(firstCharacter, secondCharacter);
+            //CombinedCharacter combinedCharacter = SetCombinedCharacterValues(characters);
 
             return true;
         }
