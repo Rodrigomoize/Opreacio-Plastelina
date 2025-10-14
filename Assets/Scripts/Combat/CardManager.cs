@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -32,6 +32,7 @@ public class CardManager : MonoBehaviour
 
     [Header("Intelect Manager")]
     public IntelectManager intelectManager;
+    public CharacterManager characterManager;
     public Card CloneCard(Card original)
     {
         Card clone = new Card();
@@ -82,15 +83,22 @@ public class CardManager : MonoBehaviour
         return result;
     }
 
-    public bool GenerateCharacter(Card cardData, Vector3 spawnPosition)
+    public bool GenerateCharacter(Card cardData, Vector3 spawnPosition, string teamTag)
     {
         if (cardData == null)
         {
-            Debug.LogWarning("[CardManager] GenerateCharacter recibi� cardData null.");
+            Debug.LogWarning("[CardManager] GenerateCharacter recibió cardData null.");
             return false;
         }
 
-        // If an intelect manager exists, check/consume
+        // Verificar que tengamos CharacterManager
+        if (characterManager == null)
+        {
+            Debug.LogError("[CardManager] CharacterManager no está asignado!");
+            return false;
+        }
+
+        // Verificar intelecto
         if (intelectManager != null)
         {
             if (!intelectManager.CanConsume(cardData.intelectCost))
@@ -101,41 +109,86 @@ public class CardManager : MonoBehaviour
             bool consumed = intelectManager.Consume(cardData.intelectCost);
             if (!consumed)
             {
-                Debug.LogWarning("[CardManager] Consume fall� aunque CanConsume devolvi� true (verifica IntelectManager).");
+                Debug.LogWarning("[CardManager] Consume falló aunque CanConsume devolvió true.");
                 return false;
             }
         }
 
-        // Figurative spawn: no instanciamos modelos reales todav�a
-        Debug.Log($"[CardManager] (FIGURATIVE) Spawn pedido: {cardData.cardName} at {spawnPosition} (cost {cardData.intelectCost})");
-        
-        return true;
+        // NUEVA PARTE: Instanciar el personaje real usando CharacterManager
+        GameObject spawnedCharacter = characterManager.InstantiateSingleCharacter(cardData, spawnPosition, teamTag);
+
+        if (spawnedCharacter != null)
+        {
+            Debug.Log($"[CardManager] ✓ Personaje {cardData.cardName} instanciado en {spawnPosition} con tag {teamTag}");
+            return true;
+        }
+        else
+        {
+            Debug.LogError($"[CardManager] Error al instanciar {cardData.cardName}");
+            // Devolver el intelecto si falló la instanciación
+            if (intelectManager != null)
+            {
+                intelectManager.AddIntelect(cardData.intelectCost);
+            }
+            return false;
+        }
     }
 
-    public bool GenerateCombinedCharacter(Card partA, Card partB, Vector3 spawnPosition, int operationResult, char opSymbol)
+    public bool GenerateCombinedCharacter(Card partA, Card partB, Vector3 spawnPosition, int operationResult, char opSymbol, string teamTag)
     {
         if (partA == null || partB == null)
         {
+            Debug.LogWarning("[CardManager] GenerateCombinedCharacter recibió cartas null");
+            return false;
+        }
+
+        // Verificar que tengamos CharacterManager
+        if (characterManager == null)
+        {
+            Debug.LogError("[CardManager] CharacterManager no está asignado!");
             return false;
         }
 
         int totalCost = partA.intelectCost + partB.intelectCost;
 
+        // Verificar intelecto
         if (intelectManager != null)
         {
             if (!intelectManager.CanConsume(totalCost))
             {
+                Debug.Log($"[CardManager] No hay intelecto suficiente para combinación (coste {totalCost})");
                 return false;
             }
             bool consumed = intelectManager.Consume(totalCost);
             if (!consumed)
             {
+                Debug.LogWarning("[CardManager] Consume falló en combinación.");
                 return false;
             }
         }
 
-        return true;
+        // NUEVA PARTE: Instanciar el personaje combinado real
+        GameObject spawnedCombined = characterManager.InstantiateCombinedCharacter(
+            partA, partB, spawnPosition, operationResult, teamTag
+        );
+
+        if (spawnedCombined != null)
+        {
+            Debug.Log($"[CardManager] ✓ Combinación {partA.cardName}+{partB.cardName} (valor:{operationResult}) instanciada en {spawnPosition}");
+            return true;
+        }
+        else
+        {
+            Debug.LogError($"[CardManager] Error al instanciar combinación");
+            // Devolver el intelecto si falló
+            if (intelectManager != null)
+            {
+                intelectManager.AddIntelect(totalCost);
+            }
+            return false;
+        }
     }
+
 }
 
 

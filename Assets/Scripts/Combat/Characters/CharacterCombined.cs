@@ -1,60 +1,138 @@
-using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UI;
-using System.Collections.Generic;
-
 
 public class CharacterCombined : MonoBehaviour
 {
-    [System.Serializable]
-    public class CombinedCharacter
-    {
-        public float velocity;
-        public int life;
-        public int value;
-        NavMeshAgent agent;
-        public GameObject characterCombinedPrefab;
-    }
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private int combinedValue;
+    private float velocity;
 
-    public List<CombinedCharacter> attackCharacters = new List<CombinedCharacter>();
-    public CombinedCharacter attackCharacter = new CombinedCharacter();
+    private NavMeshAgent agent;
+    private Transform targetBridge;
+    private Transform enemyTower;
+    private bool reachedBridge = false;
+    private CharacterManager manager;
 
-    CharacterManager characterManager;
+    [Header("Posiciones para personajes combinados")]
+    public Transform frontPosition;  
+    public Transform backPosition;
+
+    private GameObject frontCharacterInstance;
+    private GameObject backCharacterInstance;
 
     void Start()
     {
-
+        manager = FindObjectOfType<CharacterManager>();
     }
 
-    public CombinedCharacter SetCombinedCharacterValues(List<CharacterManager.Characters> characters)
+    public void InitializeCombined(int value, float speed)
     {
-        if (characters.Count != 2)
+        combinedValue = value;
+        velocity = speed;
+    }
+
+    public void SetupMovement(NavMeshAgent navAgent, Transform bridge, Transform tower)
+    {
+        agent = navAgent;
+        targetBridge = bridge;
+        enemyTower = tower;
+
+        if (agent != null && targetBridge != null)
         {
-            Debug.LogError("Se requieren exactamente 2 personajes para combinar");
-            return null;
+            agent.SetDestination(targetBridge.position);
+        }
+    }
+
+    public void SetupCharacterModels(GameObject frontModel, GameObject backModel)
+    {
+        if (frontPosition != null && frontModel != null)
+        {
+            frontCharacterInstance = Instantiate(frontModel, frontPosition.position, frontPosition.rotation, frontPosition);
+            // Opcional: ajustar escala o rotación si es necesario
+            frontCharacterInstance.transform.localPosition = Vector3.zero;
+            frontCharacterInstance.transform.localRotation = Quaternion.identity;
+        }
+        else
+        {
+            Debug.LogWarning("[CharacterCombined] frontPosition o frontModel es null");
         }
 
-        var characterA = characters[0];
-        var characterB = characters[1];
-
-        CombinedCharacter attacker = new CombinedCharacter();
-
-        
-        attacker.velocity = (characterA.velocity + characterB.velocity) / 2; 
-        attacker.value = characterA.value + characterB.value; 
-
-        
-        attacker.characterCombinedPrefab = characterA.characterPrefab;
-
-        attackCharacter = attacker; // Actualiza la referencia del personaje actual
-        return attacker;
+        if (backPosition != null && backModel != null)
+        {
+            backCharacterInstance = Instantiate(backModel, backPosition.position, backPosition.rotation, backPosition);
+            backCharacterInstance.transform.localPosition = Vector3.zero;
+            backCharacterInstance.transform.localRotation = Quaternion.identity;
+        }
+        else
+        {
+            Debug.LogWarning("[CharacterCombined] backPosition o backModel es null");
+        }
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
+        if (agent == null || enemyTower == null) return;
+
+        // Si aún no llegó al puente
+        if (!reachedBridge && targetBridge != null)
+        {
+            if (Vector3.Distance(transform.position, targetBridge.position) < 1f)
+            {
+                reachedBridge = true;
+                agent.SetDestination(enemyTower.position);
+            }
+        }
+
+        // Si llegó a la torre enemiga, hace daño
+        if (reachedBridge)
+        {
+            if (Vector3.Distance(transform.position, enemyTower.position) < 1.5f)
+            {
+                Debug.Log($"[CharacterCombined] Attacker {combinedValue} hace {combinedValue} de daño a la torre");
+                if (manager != null)
+                {
+                    manager.DamageEnemyTower(combinedValue);
+                }
+                Destroy(gameObject);
+            }
+        }
     }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("AITeam") || other.CompareTag("PlayerTeam"))
+        {
+            if (other.tag == gameObject.tag) return;
+
+            Character otherChar = other.GetComponent<Character>();
+            CharacterCombined otherCombined = other.GetComponent<CharacterCombined>();
+
+            int otherValue = 0;
+
+            if (otherChar != null)
+            {
+                otherValue = otherChar.GetValue();
+            }
+            else if (otherCombined != null)
+            {
+                otherValue = otherCombined.combinedValue;
+            }
+            else
+            {
+                return;
+            }
+
+            if (combinedValue == otherValue)
+            {
+                Debug.Log($"[CharacterCombined] {combinedValue} == {otherValue} - Ambos se destruyen");
+                if (manager != null)
+                {
+                    manager.ResolveOperation();
+                }
+                Destroy(other.gameObject);
+                Destroy(gameObject);
+            }
+        }
+    }
+
+    public int GetValue() => combinedValue;
 }

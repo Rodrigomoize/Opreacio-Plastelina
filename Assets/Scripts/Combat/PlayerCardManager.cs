@@ -169,12 +169,10 @@ public class PlayerCardManager : MonoBehaviour
         }
     }
 
-   
     public void HandlePlayAreaClick(Vector3 spawnPosition)
     {
         if (selectedDisplays.Count == 0)
         {
-            
             Debug.Log("[PlayerCardManager] PlayArea clic: nada seleccionado.");
             return;
         }
@@ -193,7 +191,6 @@ public class PlayerCardManager : MonoBehaviour
 
         if (selectedDisplays.Count == 2)
         {
-
             if (currentOperator == '\0')
             {
                 Debug.Log("[PlayerCardManager] Dos cartas seleccionadas pero sin operación: se deseleccionan.");
@@ -203,28 +200,78 @@ public class PlayerCardManager : MonoBehaviour
 
             var a = selectedDisplays[0].GetCardData();
             var b = selectedDisplays[1].GetCardData();
-            if (a == null || b == null) { Debug.LogWarning("Carta null en combinación"); DeselectAll(); return; }
+            if (a == null || b == null)
+            {
+                Debug.LogWarning("Carta null en combinación");
+                DeselectAll();
+                return;
+            }
 
-            // ordenar valores: el mayor debe ir segundo
             int firstVal = Mathf.Min(a.cardValue, b.cardValue);
             int secondVal = Mathf.Max(a.cardValue, b.cardValue);
             int operationResult = currentOperator == '+' ? firstVal + secondVal : firstVal - secondVal;
 
-            bool played = cardManager.GenerateCombinedCharacter(a, b, spawnPosition, operationResult, currentOperator);
+            bool played = cardManager.GenerateCombinedCharacter(a, b, spawnPosition, operationResult, currentOperator, "PlayerTeam");
+
             if (played)
             {
-                // eliminar UI y reponer
                 foreach (var d in new List<CardDisplay>(selectedDisplays)) RemoveCardUI(d);
                 selectedDisplays.Clear();
             }
             else
             {
-                Debug.Log("[PlayerCardManager] No se pudo jugar la combinación (coste u otro fallo).");
+                Debug.Log("[PlayerCardManager] No se pudo jugar la combinación.");
             }
 
             currentOperator = '\0';
             return;
         }
+    }
+
+    public bool RequestGenerateCharacter(CardManager.Card cardData, Vector3 spawnPosition, GameObject cardUI)
+    {
+        Debug.Log($"[PlayerCardManager] RequestGenerateCharacter: intentando jugar {cardData.cardName} coste {cardData.intelectCost}");
+
+        // CORREGIDO: Ahora GenerateCharacter espera 3 parámetros
+        bool ok = cardManager.GenerateCharacter(cardData, spawnPosition, "PlayerTeam");
+
+        if (ok)
+        {
+            // Guardar el slot antes de destruir
+            Transform slotOfCard = null;
+            if (cardUI != null)
+            {
+                slotOfCard = cardUI.transform.parent;
+            }
+
+            if (cardUI != null && spawnedCards.Contains(cardUI))
+            {
+                spawnedCards.Remove(cardUI);
+                Destroy(cardUI);
+            }
+
+            if (playerCards.Contains(cardData)) playerCards.Remove(cardData);
+
+            if (slotOfCard != null)
+            {
+                List<CardManager.Card> newCards = GetRandomCards(1);
+                if (newCards != null && newCards.Count > 0)
+                {
+                    CreateCard(newCards[0], slotOfCard);
+                }
+                else
+                {
+                    AddNextCard();
+                }
+            }
+            else
+            {
+                AddNextCard();
+            }
+
+            return true;
+        }
+        return false;
     }
 
     private void RemoveCardUI(CardDisplay display)
@@ -238,60 +285,6 @@ public class PlayerCardManager : MonoBehaviour
         AddNextCard();
     }
 
-    public bool RequestGenerateCharacter(CardManager.Card cardData, Vector3 spawnPosition, GameObject cardUI)
-    {
-        Debug.Log($"[PlayerCardManager] RequestGenerateCharacter: intentando jugar {cardData.cardName} coste {cardData.intelectCost}");
-        bool ok = cardManager.GenerateCharacter(cardData, spawnPosition);
-        if (ok)
-        {
-            Debug.Log($"[PlayerCardManager] Carta spawn creada (figurative): {cardData.cardName} en {spawnPosition}");
-
-            // Guardar el slot (parent) de la carta antes de destruirla
-            Transform slotOfCard = null;
-            if (cardUI != null)
-            {
-                slotOfCard = cardUI.transform.parent;
-            }
-
-            // quitar la UI de la mano
-            if (cardUI != null && spawnedCards.Contains(cardUI))
-            {
-                spawnedCards.Remove(cardUI);
-                Destroy(cardUI);
-            }
-
-            // quitar la carta lógica del mazo/hand
-            if (playerCards.Contains(cardData)) playerCards.Remove(cardData);
-
-            // Crear inmediatamente la siguiente carta en el mismo slot si sabemos cuál era
-            if (slotOfCard != null)
-            {
-                // pedir 1 carta nueva y crearla en el slotOfCard
-                List<CardManager.Card> newCards = GetRandomCards(1);
-                if (newCards != null && newCards.Count > 0)
-                {
-                    CreateCard(newCards[0], slotOfCard);
-                }
-                else
-                {
-                    // fallback: usar AddNextCard normal
-                    AddNextCard();
-                }
-            }
-            else
-            {
-                // fallback cuando no teníamos referencia al slot
-                AddNextCard();
-            }
-
-            // PARA CUANDO HAGAS EL GENERATECOMBINEDCHARACTERS
-            //List<CharacterManager.Characters> characters = characterManager.GenerateCombinedCharacter(firstCharacter, secondCharacter);
-            //CombinedCharacter combinedCharacter = SetCombinedCharacterValues(characters);
-
-            return true;
-        }
-        return false;
-    }
 
     private Transform GetFirstFreeSlot()
     {
