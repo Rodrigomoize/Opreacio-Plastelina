@@ -332,6 +332,7 @@ MonoBehaviour:
     cardSprite: {fileID: 21300000, guid: b9d604acbc917bc44ae556ce5fa78e2e, type: 3}
     fbxCharacter: {fileID: 1646741652745046729, guid: b0b8752fc72f00d4182da24890d405c4, type: 3}
   intelectManager: {fileID: 1639695185}
+  characterManager: {fileID: 611915976}
 --- !u!4 &88149203
 Transform:
   m_ObjectHideFlags: 0
