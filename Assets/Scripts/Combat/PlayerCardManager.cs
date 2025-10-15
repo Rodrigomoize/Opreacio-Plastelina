@@ -294,7 +294,7 @@ public class PlayerCardManager : MonoBehaviour
             }
             else if (currentOperator == '-')
             {
-                // Queremos que la PRIMERA carta elegida sea la mayor.
+                
                 if (a.cardValue < b.cardValue)
                 {
                     // Intercambia visual y lógicamente

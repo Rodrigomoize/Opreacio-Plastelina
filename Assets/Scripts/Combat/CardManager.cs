@@ -147,7 +147,9 @@ public class CardManager : MonoBehaviour
             return false;
         }
 
-        int totalCost = partA.intelectCost + partB.intelectCost;
+        // NUEVO: el coste de intelecto será el resultado de la operación (operationResult),
+        // no la suma de los costes de las cartas.
+        int totalCost = Mathf.Max(0, operationResult); // asegurar no negativo
 
         // Verificar intelecto
         if (intelectManager != null)
@@ -169,16 +171,16 @@ public class CardManager : MonoBehaviour
             partA, partB, spawnPosition, operationResult, opSymbol, teamTag
         );
 
-
         if (spawnedCombined != null)
         {
-            Debug.Log($"[CardManager] ✓ Combinación {partA.cardName}+{partB.cardName} (valor:{operationResult}) instanciada en {spawnPosition}");
+            Debug.Log($"[CardManager] ✓ Combinación {partA.cardName}+{partB.cardName} (valor:{operationResult}, op:{opSymbol}) instanciada en {spawnPosition}");
             return true;
         }
         else
         {
             Debug.LogError($"[CardManager] Error al instanciar combinación");
-            // Devolver el intelecto si falló
+
+            // Devolver el intelecto si la instanciación falla
             if (intelectManager != null)
             {
                 intelectManager.AddIntelect(totalCost);
@@ -186,6 +188,7 @@ public class CardManager : MonoBehaviour
             return false;
         }
     }
+
 
 }
 

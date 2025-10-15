@@ -29,6 +29,7 @@ public class CharacterManager : MonoBehaviour
 
     public float combinedModelTargetSize = 1.0f;
     public float modelFitPadding = 0.9f;
+    private float groundSnapPadding = 0.01f;
 
 
     void Start()
@@ -67,13 +68,25 @@ public class CharacterManager : MonoBehaviour
         // Inicializar con los datos de la carta
         charScript.InitializeCharacter(cardData.cardValue, cardData.cardLife, cardData.cardVelocity, true);
 
+
+        AlignModelBottomToGround(instance, spawnPosition.y);
         // Configurar NavMeshAgent
         NavMeshAgent agent = instance.GetComponent<NavMeshAgent>();
-        if (agent == null)
+        if (agent == null) agent = instance.AddComponent<NavMeshAgent>();
+
+        // intenta colocar sobre NavMesh cercano (rango pequeño)
+        NavMeshHit navHit;
+        float sampleRadius = 2.0f; // ajusta si necesitas buscar más lejos
+        if (NavMesh.SamplePosition(instance.transform.position, out navHit, sampleRadius, NavMesh.AllAreas))
         {
-            agent = instance.AddComponent<NavMeshAgent>();
+            instance.transform.position = navHit.position;
+            agent.Warp(navHit.position);
         }
-        agent.speed = cardData.cardVelocity;
+        else
+        {
+            // fallback: warp a spawn original (mejor que quedarse fuera)
+            agent.Warp(instance.transform.position);
+        }
 
         // Decidir camino según posición (izquierda o derecha)
         Transform targetBridge = (spawnPosition.x < 0) ? leftBridge : rightBridge;
@@ -133,7 +146,6 @@ public class CharacterManager : MonoBehaviour
             return null;
         }
 
-        // --- Prefab del "camión"
         GameObject truckPrefab = (opSymbol == '+') ? combinedPrefabSum : combinedPrefabSub;
         if (truckPrefab == null)
         {
@@ -187,8 +199,6 @@ public class CharacterManager : MonoBehaviour
             backSlot = b.transform;
         }
 
-        // Si el slot detectado es en realidad un objeto con BoxCollider, creamos/obtenemos un "anchor"
-        // hijo posicionado en el center del BoxCollider (local).
         Transform GetSlotAnchor(Transform slotTransform, string anchorName)
         {
             if (slotTransform == null) return null;
@@ -196,8 +206,7 @@ public class CharacterManager : MonoBehaviour
             BoxCollider box = slotTransform.GetComponent<BoxCollider>();
             if (box == null)
             {
-                // si no hay BoxCollider, pero el slotTransform tiene hijos con centro definido,
-                // buscamos un child llamado anchorName y lo usamos; si no existe, creamos uno en local (0,0,0).
+               
                 Transform existing = slotTransform.Find(anchorName);
                 if (existing != null) return existing;
                 GameObject a = new GameObject(anchorName);
@@ -208,13 +217,12 @@ public class CharacterManager : MonoBehaviour
             }
             else
             {
-                // Si hay BoxCollider, intentamos reutilizar un child "Anchor" para ese collider (para no generar muchos objetos)
+                
                 Transform existing = slotTransform.Find(anchorName);
                 if (existing != null) return existing;
 
                 GameObject anchorGO = new GameObject(anchorName);
                 anchorGO.transform.SetParent(slotTransform, false);
-                // BoxCollider.center está en espacio local del collider. Lo usamos directamente como localPosition.
                 anchorGO.transform.localPosition = box.center;
                 anchorGO.transform.localRotation = Quaternion.identity;
                 return anchorGO.transform;
@@ -239,11 +247,11 @@ public class CharacterManager : MonoBehaviour
             backAnchor = b.transform;
         }
 
-        // Determinar orden visual: partA (primera elegida) = front, partB = back
+        
         CardManager.Card frontCard = partA;
         CardManager.Card backCard = partB;
 
-        // --- Instanciar los modelos (sin parent todavía)
+        
         GameObject frontModel;
         if (frontCard.fbxCharacter != null)
         {
@@ -294,19 +302,35 @@ public class CharacterManager : MonoBehaviour
             }
         }
 
-        // --- Asegurar componente CharacterCombined en el camión (contenedor)
+        // --- Asegurar componente CharacterCombined en el camión
         CharacterCombined cc = instance.GetComponent<CharacterCombined>();
         if (cc == null) cc = instance.AddComponent<CharacterCombined>();
 
-        // Pasamos las referencias de anchor/visual slots al CharacterCombined si lo usa
+        
         cc.frontPosition = frontAnchor;
         cc.backPosition = backAnchor;
         cc.InitializeCombined(result, (frontCard.cardVelocity + backCard.cardVelocity) / 2f);
 
-        // NavMeshAgent en el camión
+
+        // With this corrected line:
+        AlignModelBottomToGround(instance, spawnPosition.y);
+        // Configurar NavMeshAgent
         NavMeshAgent agent = instance.GetComponent<NavMeshAgent>();
         if (agent == null) agent = instance.AddComponent<NavMeshAgent>();
-        agent.speed = (frontCard.cardVelocity + backCard.cardVelocity) / 2f;
+
+        // intenta colocar sobre NavMesh cercano (rango pequeño)
+        NavMeshHit navHit;
+        float sampleRadius = 2.0f; // ajusta si necesitas buscar más lejos
+        if (NavMesh.SamplePosition(instance.transform.position, out navHit, sampleRadius, NavMesh.AllAreas))
+        {
+            instance.transform.position = navHit.position;
+            agent.Warp(navHit.position);
+        }
+        else
+        {
+            // fallback: warp a spawn original (mejor que quedarse fuera)
+            agent.Warp(instance.transform.position);
+        }
 
         // Ruteo
         Transform targetBridge = (spawnPosition.x < 0) ? leftBridge : rightBridge;
@@ -316,6 +340,8 @@ public class CharacterManager : MonoBehaviour
             Debug.LogWarning("[CharacterManager] leftBridge/rightBridge/enemyTower no asignados, el camión no tiene ruta.");
 
         Debug.Log($"[CharacterManager] Combined created: {frontCard.cardName}+{backCard.cardName} -> anchors used (front:{frontAnchor.name}, back:{backAnchor.name}).");
+
+
         return instance;
     }
 
@@ -376,5 +402,28 @@ public class CharacterManager : MonoBehaviour
     {
         Debug.Log($"[TOWER DAMAGE] Torre enemiga recibe {damage} de daño");
         // Aquí después añadirás la lógica real de la torre
+    }
+
+    private void AlignModelBottomToGround(GameObject model, float targetY)
+    {
+        if (model == null) return;
+
+        Renderer[] rends = model.GetComponentsInChildren<Renderer>(true);
+        if (rends == null || rends.Length == 0)
+        {
+            // fallback sencillo: colocar root en targetY
+            Vector3 p = model.transform.position; p.y = targetY; model.transform.position = p;
+            return;
+        }
+
+        Bounds b = rends[0].bounds;
+        for (int i = 1; i < rends.Length; i++) b.Encapsulate(rends[i].bounds);
+
+        float bottomY = b.min.y;
+        float delta = (targetY + groundSnapPadding) - bottomY;
+        if (Mathf.Abs(delta) > 0.0001f)
+        {
+            model.transform.position += new Vector3(0f, delta, 0f);
+        }
     }
 }
