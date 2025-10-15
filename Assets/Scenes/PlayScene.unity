@@ -1194,7 +1194,7 @@ GameObject:
   - component: {fileID: 611915977}
   - component: {fileID: 611915976}
   m_Layer: 0
-  m_Name: CharacterMamager
+  m_Name: CharacterManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1217,6 +1217,8 @@ MonoBehaviour:
   enemyTower: {fileID: 863191583}
   leftBridge: {fileID: 158759333}
   rightBridge: {fileID: 1860888794}
+  combinedPrefabSum: {fileID: 4485164346710184342, guid: b3351e2176a211e4685edbcf170820a6, type: 3}
+  combinedPrefabSub: {fileID: 3326580399756746706, guid: 87a5d165c5337104b84005d1fe578854, type: 3}
 --- !u!4 &611915977
 Transform:
   m_ObjectHideFlags: 0
@@ -2937,6 +2939,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -8465380652282305317, guid: 68b66536edfc01f45bc5bfd2aeafb04f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.04
+      objectReference: {fileID: 0}
     - target: {fileID: -7664728788398519507, guid: 68b66536edfc01f45bc5bfd2aeafb04f, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -3097,6 +3103,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 6331a6fd7be8490449ea3d9d67c5dee7, type: 2}
+    - target: {fileID: 5254385616608680870, guid: 68b66536edfc01f45bc5bfd2aeafb04f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.21
+      objectReference: {fileID: 0}
     - target: {fileID: 7326787068500067195, guid: 68b66536edfc01f45bc5bfd2aeafb04f, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 

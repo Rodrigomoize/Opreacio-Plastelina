@@ -12,24 +12,26 @@ public class CharacterManager : MonoBehaviour
         public int value;
         public NavMeshAgent agent;
         public GameObject characterPrefab;
-        public GameObject instancedObject; // referencia al objeto instanciado
-        public bool isDefender; // true = defender, false = attacker
+        public GameObject instancedObject; 
+        public bool isDefender;
     }
 
     public List<Characters> CharacterSetting = new List<Characters>();
-    public Transform playerTower; // Torre del jugador
-    public Transform enemyTower; // Torre enemiga
-    public Transform leftBridge; // Puente izquierdo
-    public Transform rightBridge; // Puente derecho
+    public Transform playerTower; 
+    public Transform enemyTower; 
+    public Transform leftBridge;
+    public Transform rightBridge;
 
     private IntelectManager intelectManager;
+
+    public GameObject combinedPrefabSum;
+    public GameObject combinedPrefabSub;
 
     void Start()
     {
         intelectManager = FindObjectOfType<IntelectManager>();
     }
 
-    // Instanciar personaje simple (defender)
     public GameObject InstantiateSingleCharacter(CardManager.Card cardData, Vector3 spawnPosition, string teamTag)
     {
         if (cardData == null)
@@ -85,78 +87,62 @@ public class CharacterManager : MonoBehaviour
         return instance;
     }
 
-    public GameObject InstantiateCombinedCharacter(CardManager.Card cardA, CardManager.Card cardB,
-                                                Vector3 spawnPosition, int combinedValue, string teamTag)
+    public GameObject InstantiateCombinedCharacter(CardManager.Card cardA, CardManager.Card cardB, Vector3 spawnPosition, int combinedValue, char opSymbol, string teamTag)
     {
-        if (cardA == null || cardB == null)
+        GameObject truckPrefab = (opSymbol == '+') ? combinedPrefabSum : combinedPrefabSub;
+        if (truckPrefab == null)
         {
-            Debug.LogError("[CharacterManager] Alguna de las cartas es null");
+            Debug.LogError("[CharacterManager] Prefab combinado no asignado para el operador " + opSymbol);
             return null;
         }
 
-        if (cardA.fbxCharacter == null || cardB.fbxCharacter == null)
+        // Instancia el "camión" que ya contiene dos transforms llamados "FrontSlot" y "BackSlot"
+        GameObject instance = Instantiate(truckPrefab, spawnPosition, Quaternion.identity);
+        AssignTag(instance, teamTag);
+
+        // Busca dentro del prefab las posiciones donde poner los models
+        Transform frontSlot = instance.transform.Find("FrontSlot");
+        Transform backSlot = instance.transform.Find("BackSlot");
+
+        if (frontSlot == null || backSlot == null)
         {
-            Debug.LogError("[CharacterManager] Alguna carta no tiene fbxCharacter asignado");
-            return null;
+            Debug.LogWarning("[CharacterManager] FrontSlot/BackSlot no encontrados en el prefab combinado; se crearán posiciones fallback.");
+            GameObject f = new GameObject("FrontSlot"); f.transform.SetParent(instance.transform); f.transform.localPosition = new Vector3(0, 0.5f, 0.5f);
+            GameObject b = new GameObject("BackSlot"); b.transform.SetParent(instance.transform); b.transform.localPosition = new Vector3(0, 0.5f, -0.5f);
+            frontSlot = f.transform; backSlot = b.transform;
         }
 
-        // Determinar quién va delante según el valor (el mayor va adelante)
+        // Decidir orden: el mayor value delante
         CardManager.Card frontCard = cardA.cardValue >= cardB.cardValue ? cardA : cardB;
         CardManager.Card backCard = cardA.cardValue >= cardB.cardValue ? cardB : cardA;
 
-        // Crear un GameObject vacío como contenedor
-        GameObject instance = new GameObject($"Combined_{frontCard.cardName}+{backCard.cardName}");
-        instance.transform.position = spawnPosition;
-        instance.transform.rotation = Quaternion.identity;
-
-        // Asignar tag
-        AssignTag(instance, teamTag);
-
-        // Añadir CharacterCombined
-        CharacterCombined combinedScript = instance.AddComponent<CharacterCombined>();
-
-        // Añadir collider para las colisiones (ajusta el tamaño según necesites)
-        CapsuleCollider col = instance.AddComponent<CapsuleCollider>();
-        col.isTrigger = true;
-        col.radius = 0.5f;
-        col.height = 2f;
-
-        // Crear posiciones para los personajes
-        GameObject frontPosObj = new GameObject("FrontPosition");
-        frontPosObj.transform.SetParent(instance.transform);
-        frontPosObj.transform.localPosition = new Vector3(0, 0, 0.5f); // Adelante
-
-        GameObject backPosObj = new GameObject("BackPosition");
-        backPosObj.transform.SetParent(instance.transform);
-        backPosObj.transform.localPosition = new Vector3(0, 0, -0.5f); // Atrás
-
-        // Asignar las referencias en el script
-        combinedScript.frontPosition = frontPosObj.transform;
-        combinedScript.backPosition = backPosObj.transform;
-
-        // Inicializar valores
-        float avgVelocity = (cardA.cardVelocity + cardB.cardVelocity) / 2f;
-        combinedScript.InitializeCombined(combinedValue, avgVelocity);
-
-        // Colocar los modelos FBX en sus posiciones
-        combinedScript.SetupCharacterModels(frontCard.fbxCharacter, backCard.fbxCharacter);
-
-        // Configurar NavMeshAgent
-        NavMeshAgent agent = instance.AddComponent<NavMeshAgent>();
-        agent.speed = avgVelocity;
-
-        // Decidir camino
-        Transform targetBridge = (spawnPosition.x < 0) ? leftBridge : rightBridge;
-
-        if (targetBridge == null || enemyTower == null)
+        // Instanciar los modelos (FBX) de las cartas dentro del camión
+        if (frontCard.fbxCharacter != null)
         {
-            Debug.LogError("[CharacterManager] leftBridge, rightBridge o enemyTower no están asignados!");
-            return instance;
+            GameObject fModel = Instantiate(frontCard.fbxCharacter, frontSlot.position, frontSlot.rotation, frontSlot);
+            fModel.transform.localPosition = Vector3.zero;
+            fModel.transform.localRotation = Quaternion.identity;
+        }
+        if (backCard.fbxCharacter != null)
+        {
+            GameObject bModel = Instantiate(backCard.fbxCharacter, backSlot.position, backSlot.rotation, backSlot);
+            bModel.transform.localPosition = Vector3.zero;
+            bModel.transform.localRotation = Quaternion.identity;
         }
 
-        combinedScript.SetupMovement(agent, targetBridge, enemyTower);
+        // Añade/ajusta componente CharacterCombined en el truck (si lo necesita)
+        CharacterCombined cc = instance.GetComponent<CharacterCombined>();
+        if (cc == null) cc = instance.AddComponent<CharacterCombined>();
+        cc.InitializeCombined(combinedValue, (frontCard.cardVelocity + backCard.cardVelocity) / 2f);
 
-        Debug.Log($"[CharacterManager] ✓ Combinado {frontCard.cardName}+{backCard.cardName} (valor:{combinedValue}) creado como ATTACKER con tag {teamTag}");
+        // Configura NavMeshAgent si tu camión se mueve por NavMesh
+        NavMeshAgent agent = instance.GetComponent<NavMeshAgent>();
+        if (agent == null) agent = instance.AddComponent<NavMeshAgent>();
+        agent.speed = (frontCard.cardVelocity + backCard.cardVelocity) / 2f;
+
+        // target bridge / tower logic: igual que antes (left/right)
+        Transform targetBridge = (spawnPosition.x < 0) ? leftBridge : rightBridge;
+        cc.SetupMovement(agent, targetBridge, enemyTower);
 
         return instance;
     }

@@ -10,7 +10,8 @@ public class CardDisplay : MonoBehaviour, IPointerClickHandler
 
     [HideInInspector] public bool isSelected = false;
 
-    public Image artworkImage; 
+    public Image artworkImage;
+    public GameObject selectionHighlight; // opcional: un objeto UI que marca selección
 
     public void SetCardData(CardManager.Card data)
     {
@@ -18,25 +19,25 @@ public class CardDisplay : MonoBehaviour, IPointerClickHandler
         if (artworkImage != null && cardData != null && cardData.cardSprite != null)
         {
             artworkImage.sprite = cardData.cardSprite;
-            artworkImage.gameObject.SetActive(true); // asegúrate de que la imagen esté visible
+            artworkImage.gameObject.SetActive(true);
         }
     }
 
-    // Toggle lógico de selección + notificar al manager
-    public void ToggleSelected()
-    {
-        isSelected = !isSelected;
-        Debug.Log($"[CardDisplay] ToggleSelected -> {cardData?.cardName}  isSelected={isSelected}");
-        ownerManager?.OnCardClicked(this);
-    }
-
-    // Cuando el usuario hace click en la carta
+    // NO TOGGLE aquí: delegamos al manager
     public void OnPointerClick(PointerEventData eventData)
     {
-        // simple debounce ligero (evita clicks duplicados muy rápidos)
-        ToggleSelected();
+        ownerManager?.OnCardClickedRequest(this);
     }
 
-    // API pequeña de compatibilidad (si tu manager la usa)
+    // API que el manager usa para marcar/desmarcar visualmente
+    public void SetSelectedVisual(bool on)
+    {
+        isSelected = on;
+        if (selectionHighlight != null)
+            selectionHighlight.SetActive(on);
+        else
+            Debug.Log($"[CardDisplay] Visual select {cardData?.cardName} = {on}");
+    }
+
     public CardManager.Card GetCardData() => cardData;
 }

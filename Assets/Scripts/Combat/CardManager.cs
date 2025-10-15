@@ -20,10 +20,6 @@ public class CardManager : MonoBehaviour
         public Sprite cardSprite;
         public GameObject fbxCharacter;
 
-        public void ShowHimSelf()
-        {
-            Debug.Log($"{cardName} attacks with {cardValue} power at a cost of {intelectCost} intelect.");
-        }
     }
 
 
@@ -33,6 +29,8 @@ public class CardManager : MonoBehaviour
     [Header("Intelect Manager")]
     public IntelectManager intelectManager;
     public CharacterManager characterManager;
+
+
     public Card CloneCard(Card original)
     {
         Card clone = new Card();
@@ -167,10 +165,10 @@ public class CardManager : MonoBehaviour
             }
         }
 
-        // NUEVA PARTE: Instanciar el personaje combinado real
         GameObject spawnedCombined = characterManager.InstantiateCombinedCharacter(
-            partA, partB, spawnPosition, operationResult, teamTag
+            partA, partB, spawnPosition, operationResult, opSymbol, teamTag
         );
+
 
         if (spawnedCombined != null)
         {

@@ -18,7 +18,10 @@ public class PlayerCardManager : MonoBehaviour
     private List<CardDisplay> selectedDisplays = new List<CardDisplay>(2);
     private List<CardManager.Card> playerCards = new List<CardManager.Card>();
     private List<GameObject> spawnedCards = new List<GameObject>();
-    private char currentOperator = '\0'; 
+    private char currentOperator = '\0';
+
+    private float lastOperatorToggleTime = -10f;
+    private const float operatorToggleCooldown = 0.18f;
 
     void Awake()
     {
@@ -29,8 +32,16 @@ public class PlayerCardManager : MonoBehaviour
 
     void OnEnable()
     {
-        if (SumaButton != null) SumaButton.onClick.AddListener(OnSumaButtonClicked);
-        if (RestaButton != null) RestaButton.onClick.AddListener(OnRestaButtonClicked);
+        if (SumaButton != null)
+        {
+            SumaButton.onClick.RemoveListener(OnSumaButtonClicked);
+            SumaButton.onClick.AddListener(OnSumaButtonClicked);
+        }
+        if (RestaButton != null)
+        {
+            RestaButton.onClick.RemoveListener(OnRestaButtonClicked);
+            RestaButton.onClick.AddListener(OnRestaButtonClicked);
+        }
     }
 
     void OnDisable()
@@ -38,6 +49,7 @@ public class PlayerCardManager : MonoBehaviour
         if (SumaButton != null) SumaButton.onClick.RemoveListener(OnSumaButtonClicked);
         if (RestaButton != null) RestaButton.onClick.RemoveListener(OnRestaButtonClicked);
     }
+
 
     void Start()
     {
@@ -110,39 +122,68 @@ public class PlayerCardManager : MonoBehaviour
         }
 
         spawnedCards.Add(newCard);
-        data.ShowHimSelf();
     }
 
-
-    public void OnCardClicked(CardDisplay display)
+    public void OnCardClickedRequest(CardDisplay display)
     {
         if (display == null) return;
 
-        if (display.isSelected)
+        Debug.Log($"[PlayerCardManager] Click en carta {display.GetCardData()?.cardName} (operator='{currentOperator}')");
+
+        // 0) Si no hay ninguna seleccionada -> esta carta = card1
+        if (selectedDisplays.Count == 0)
         {
-            if (!selectedDisplays.Contains(display))
-            {
-                if (selectedDisplays.Count >= 2)
-                {
-                    var old = selectedDisplays[0];
-                    selectedDisplays.RemoveAt(0);
-                    old.isSelected = false;
-                    
-                }
-                selectedDisplays.Add(display);
-                Debug.Log($"[PlayerCardManager] Selected: {display.GetCardData()?.cardName}");
-            }
+            selectedDisplays.Add(display);
+            display.SetSelectedVisual(true);
+            Debug.Log($"[PlayerCardManager] Carta1 seleccionada: {display.GetCardData()?.cardName}");
+            return;
         }
-        else
+
+        // 1) Si hay exactamente 1 seleccionada:
+        if (selectedDisplays.Count == 1)
         {
-            if (selectedDisplays.Contains(display))
+            var first = selectedDisplays[0];
+
+            // Si hacen click en la misma carta -> deseleccionar
+            if (display == first)
             {
-                selectedDisplays.Remove(display);
-                Debug.Log($"[PlayerCardManager] Deselected by click: {display.GetCardData()?.cardName}");
+                first.SetSelectedVisual(false);
+                selectedDisplays.Clear();
+                Debug.Log("[PlayerCardManager] Carta1 deseleccionada (click en la misma carta).");
+                return;
+            }
+
+            // Si NO hay operador seleccionado -> reemplazamos la carta1 por la nueva
+            if (currentOperator == '\0')
+            {
+                first.SetSelectedVisual(false);
+                selectedDisplays.Clear();
+                selectedDisplays.Add(display);
+                display.SetSelectedVisual(true);
+                Debug.Log($"[PlayerCardManager] Reemplazamos Carta1 por: {display.GetCardData()?.cardName} (aún sin operador).");
+                return;
+            }
+            else
+            {
+                // Si HAY operador -> esta carta es la carta2 (válida)
+                selectedDisplays.Add(display);
+                display.SetSelectedVisual(true);
+                Debug.Log($"[PlayerCardManager] Carta2 seleccionada: {display.GetCardData()?.cardName}. Lista lista para combinar.");
+                return;
             }
         }
 
-        string list = selectedDisplays.Count == 0 ? "(ninguna)" : string.Join(", ", selectedDisplays.ConvertAll(d => d.GetCardData()?.cardName ?? "null"));
+        // 2) Si ya había 2 seleccionadas (caso improbable) -> reseteamos y tomamos esta como carta1
+        if (selectedDisplays.Count >= 2)
+        {
+            foreach (var d in selectedDisplays) d.SetSelectedVisual(false);
+            selectedDisplays.Clear();
+
+            selectedDisplays.Add(display);
+            display.SetSelectedVisual(true);
+            Debug.Log("[PlayerCardManager] Había 2 seleccionadas, reseteando. Nueva Carta1 = " + display.GetCardData()?.cardName);
+            return;
+        }
     }
 
     public void DeselectAll()
@@ -154,20 +195,49 @@ public class PlayerCardManager : MonoBehaviour
 
     public bool IsSelected(CardDisplay d) => selectedDisplays.Contains(d);
 
-    private void OnSumaButtonClicked() => ToggleOperator('+');
-    private void OnRestaButtonClicked() => ToggleOperator('-');
+    private void OnSumaButtonClicked() => TryToggleOperator('+');
+    private void OnRestaButtonClicked() => TryToggleOperator('-');
 
-    private void ToggleOperator(char op)
+    private void TryToggleOperator(char op)
     {
+        float now = Time.time;
+        if (now - lastOperatorToggleTime < operatorToggleCooldown)
+        {
+            Debug.Log("[PlayerCardManager] Ignorando toggle rápido (debounce).");
+            return;
+        }
+        lastOperatorToggleTime = now;
+
+        // Forzar regla: primero debe haber carta1 seleccionada
+        if (selectedDisplays.Count == 0)
+        {
+            Debug.Log("[PlayerCardManager] Selecciona primero una carta (card1) antes de elegir operador.");
+            return;
+        }
+
+        // Comportamiento toggle pero con protecciones
         if (currentOperator == op)
         {
+            // deselecciona operador
             currentOperator = '\0';
+            Debug.Log("[PlayerCardManager] Operador desactivado");
+            // Si había carta2, la quitamos al desactivar operador
+            if (selectedDisplays.Count == 2)
+            {
+                var second = selectedDisplays[1];
+                second.SetSelectedVisual(false);
+                selectedDisplays.RemoveAt(1);
+                Debug.Log("[PlayerCardManager] Carta2 deseleccionada al quitar operador.");
+            }
         }
         else
         {
+            // seleccionar operador
             currentOperator = op;
+            Debug.Log($"[PlayerCardManager] Operador seleccionado: {op}");
         }
     }
+
 
     public void HandlePlayAreaClick(Vector3 spawnPosition)
     {
