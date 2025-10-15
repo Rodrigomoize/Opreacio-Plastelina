@@ -19,7 +19,7 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler
     {
         if (playerManager == null) Debug.LogWarning("PlayableAreaUI: playerManager no asignado.");
         if (worldCamera == null) Debug.Log("[PlayableAreaUI] worldCamera no asignada (usa Camera.main si corresponde).");
-        if (mapRawImage == null) Debug.Log("[PlayableAreaUI] mapRawImage no asignado: se usará ScreenPointToRay si es posible.");
+        if (mapRawImage == null) Debug.Log("[PlayableAreaUI] mapRawImage no asignado: se usarï¿½ ScreenPointToRay si es posible.");
         if (worldCamera == null) worldCamera = Camera.main;
     }
 
@@ -36,7 +36,7 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler
             RectTransform rt = mapRawImage.rectTransform;
             Vector2 localPoint;
 
-            // IMPORTANTE: seleccionar la cámara correcta para ScreenPointToLocalPointInRectangle:
+            // IMPORTANTE: seleccionar la cï¿½mara correcta para ScreenPointToLocalPointInRectangle:
             // - si el Canvas es Screen Space - Overlay -> usar null
             // - si es Screen Space - Camera -> usar canvas.worldCamera
             // - si es World Space -> usar canvas.worldCamera (o eventData.pressEventCamera)
@@ -79,11 +79,11 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler
             }
             else
             {
-                Debug.LogWarning("[PlayableAreaUI] ScreenPointToLocalPointInRectangle falló para el RawImage. (camera para rect = " + (camForRect ? camForRect.name : "null") + ")");
+                Debug.LogWarning("[PlayableAreaUI] ScreenPointToLocalPointInRectangle fallï¿½ para el RawImage. (camera para rect = " + (camForRect ? camForRect.name : "null") + ")");
             }
         }
 
-        // 2) Fallback - ScreenPointToRay con la cámara del evento o main
+        // 2) Fallback - ScreenPointToRay con la cï¿½mara del evento o main
         if (!hitFound)
         {
             Camera cam = eventData.pressEventCamera ?? worldCamera ?? Camera.main;
@@ -101,12 +101,12 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler
                 }
                 else
                 {
-                    Debug.Log("[PlayableAreaUI] ScreenPointToRay no golpeó nada. Intentando fallback plano.");
+                    Debug.Log("[PlayableAreaUI] ScreenPointToRay no golpeï¿½ nada. Intentando fallback plano.");
                 }
             }
             else
             {
-                Debug.LogWarning("[PlayableAreaUI] No hay cámara disponible para ScreenPointToRay.");
+                Debug.LogWarning("[PlayableAreaUI] No hay cï¿½mara disponible para ScreenPointToRay.");
             }
         }
 
@@ -120,16 +120,16 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler
             {
                 spawnPos = rayToUse.GetPoint(enter);
                 Debug.DrawRay(rayToUse.origin, rayToUse.direction * enter, Color.magenta, 2f);
-                Debug.Log($"[PlayableAreaUI] Ningún hit en Physics; usando intersección con plano Y={planeY} -> {spawnPos}");
+                Debug.Log($"[PlayableAreaUI] Ningï¿½n hit en Physics; usando intersecciï¿½n con plano Y={planeY} -> {spawnPos}");
                 hitFound = true;
             }
             else
             {
-                Debug.LogError("[PlayableAreaUI] No hubo hit y la intersección con el plano falló; spawnPos queda en Vector3.zero");
+                Debug.LogError("[PlayableAreaUI] No hubo hit y la intersecciï¿½n con el plano fallï¿½; spawnPos queda en Vector3.zero");
             }
         }
 
-        // 4) Forzar lado según normalized.x — pero preservando magnitud y aplicando clamp:
+        // 4) Forzar lado segï¿½n normalized.x ï¿½ pero preservando magnitud y aplicando clamp:
         int sideSign = (normalized.x > 0.5f) ? 1 : -1; // >0.5 derecha, <=0.5 izquierda
         if (Mathf.Abs(spawnPos.x) > 0.001f)
         {
@@ -138,13 +138,13 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler
         }
         else
         {
-            // si no tenemos magnitud (ej: spawnPos.x == 0 por fallback raro), colocamos en una X razonable dentro de límites
+            // si no tenemos magnitud (ej: spawnPos.x == 0 por fallback raro), colocamos en una X razonable dentro de lï¿½mites
             spawnPos.x = sideSign * maxSpawnX;
         }
 
         const float rayDownFromAbove = 50f;    // altura desde la que raycastamos hacia abajo (tweak)
         const float navSampleRadius = 4f;      // radio para buscar NavMesh cercano (tweak)
-        const float spawnYOffset = 0.05f;      // elevar ligeramente para evitar interpenetración
+        const float spawnYOffset = 0.05f;      // elevar ligeramente para evitar interpenetraciï¿½n
 
         // 1) Raycast vertical hacia abajo desde una altura razonable por encima de spawnPos
         Ray downRay = new Ray(new Vector3(spawnPos.x, spawnPos.y + rayDownFromAbove * 0.5f, spawnPos.z), Vector3.down);
@@ -160,20 +160,20 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler
             if (NavMesh.SamplePosition(spawnPos, out NavMeshHit navHit, navSampleRadius, NavMesh.AllAreas))
             {
                 spawnPos = navHit.position + Vector3.up * spawnYOffset;
-                Debug.Log($"[PlayableAreaUI] NavMesh.SamplePosition ajustó spawn a {spawnPos}");
+                Debug.Log($"[PlayableAreaUI] NavMesh.SamplePosition ajustï¿½ spawn a {spawnPos}");
             }
             else
             {
-                // 3) Último recurso: intentar samplear en un rango más grande o usar planeY (tu fallback)
+                // 3) ï¿½ltimo recurso: intentar samplear en un rango mï¿½s grande o usar planeY (tu fallback)
                 if (NavMesh.SamplePosition(spawnPos, out NavMeshHit navHit2, navSampleRadius * 2f, NavMesh.AllAreas))
                 {
                     spawnPos = navHit2.position + Vector3.up * spawnYOffset;
-                    Debug.LogWarning($"[PlayableAreaUI] NavMesh.SamplePosition (rango2) ajustó spawn a {spawnPos}");
+                    Debug.LogWarning($"[PlayableAreaUI] NavMesh.SamplePosition (rango2) ajustï¿½ spawn a {spawnPos}");
                 }
                 else
                 {
-                    Debug.LogWarning("[PlayableAreaUI] No se encontró suelo ni NavMesh cerca; spawnPos puede quedarse en plano. Revisa colliders / NavMesh.");
-                    // opcional: forzamos Y = planeY si quieres evitar altísimos
+                    Debug.LogWarning("[PlayableAreaUI] No se encontrï¿½ suelo ni NavMesh cerca; spawnPos puede quedarse en plano. Revisa colliders / NavMesh.");
+                    // opcional: forzamos Y = planeY si quieres evitar altï¿½simos
                     spawnPos.y = planeY + spawnYOffset;
                 }
             }
@@ -183,7 +183,7 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler
 
         Debug.Log($"[PlayableAreaUI] Final spawnPos usado: {spawnPos}  (normalized.x={normalized.x})");
 
-        // 5) Llamar al manager con la posición calculada
+        // 5) Llamar al manager con la posiciï¿½n calculada
         playerManager?.HandlePlayAreaClick(spawnPos);
     }
 }
