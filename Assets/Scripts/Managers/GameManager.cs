@@ -8,12 +8,12 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
+    [Header("References")]
     [SerializeField] UIManager uiManager;
     [SerializeField] AudioManager audioManager;
     [SerializeField] CardManager combatManager;
     [SerializeField] AICardManager aiCardManager;
     [SerializeField] PlayerCardManager playerCardManager;
-
 
     private void Awake()
     {
@@ -25,43 +25,67 @@ public class GameManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(this.gameObject);
-
     }
-    void Start()
+
+    public static void GoToMainMenu()
     {
-        
+        if (Instance != null)
+        {
+            Instance.LoadMainMenu();
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    public static void GoToInstructionScene()
     {
-        
+        if (Instance != null)
+        {
+            Instance.LoadInstructionScene();
+        }
     }
 
-    public void PlayGame()
+    public static void GoToLevelScene()
     {
-        SceneManager.LoadScene("LevelScene");
+        if (Instance != null)
+        {
+            Instance.LoadLevelScene();
+        }
     }
 
-    public void StopGame()
+    public static void GoToPlayScene()
     {
-         SceneManager.LoadScene("PauseMenu");
+        if (Instance != null)
+        {
+            Instance.LoadPlayScene();
+        }
+        else
+        {
+            Debug.LogError("GameManager.Instance es null.");
+        }
     }
 
-    public void MainMenuScene()
+    private void LoadMainMenu()
     {
         SceneManager.LoadScene("MainMenu");
     }
 
-    public void Settings()
+    private void LoadInstructionScene()
     {
-       SceneManager.LoadScene("SettingsMenu");
+        SceneManager.LoadScene("InstructionScene");
     }
 
-    public void HelpButton()
+    private void LoadLevelScene()
     {
-        SceneManager.LoadScene("HelpMenu");
+        SceneManager.LoadScene("LevelScene");
     }
 
+    private void LoadPlayScene()
+    {
+        SceneManager.LoadScene("PlayScene");
+    }
 
+    public UIManager GetUIManager() => uiManager;
+    public AudioManager GetAudioManager() => audioManager;
+    public CardManager GetCombatManager() => combatManager;
+    public AICardManager GetAICardManager() => aiCardManager;
+    public PlayerCardManager GetPlayerCardManager() => playerCardManager;
 }

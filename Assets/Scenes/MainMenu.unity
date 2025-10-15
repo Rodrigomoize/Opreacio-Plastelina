@@ -910,7 +910,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 834170842}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: PlayGame
+        m_MethodName: GoToInstructionScene
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
