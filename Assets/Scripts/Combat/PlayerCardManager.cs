@@ -332,11 +332,36 @@ public class PlayerCardManager : MonoBehaviour
 
             if (played)
             {
-                // eliminar UI de las dos cartas jugadas y reponer nuevas cartas
-                foreach (var d in new List<CardDisplay>(selectedDisplays)) RemoveCardUI(d);
+                List<Transform> slotsToRefill = new List<Transform>();
+                foreach (var d in selectedDisplays)
+                {
+                    if (d != null && d.transform != null && d.transform.parent != null)
+                        slotsToRefill.Add(d.transform.parent);
+                }
+
+                // 2) Eliminamos las UIs de las cartas (Destroy será procesado al final del frame)
+                foreach (var d in new List<CardDisplay>(selectedDisplays))
+                {
+                    RemoveCardUI(d); // ya no hace AddNextCard()
+                }
                 selectedDisplays.Clear();
 
-                EnsureHandSize(4);
+                // 3) Reponemos explícitamente en los mismos slots
+                foreach (var slot in slotsToRefill)
+                {
+                    if (slot == null) continue;
+                    // Pedimos una nueva carta y la forzamos en ese mismo slot
+                    List<CardManager.Card> newCards = GetRandomCards(1);
+                    if (newCards != null && newCards.Count > 0)
+                    {
+                        CreateCard(newCards[0], slot);
+                    }
+                    else
+                    {
+                        // fallback: intenta AddNextCard (igual que antes)
+                        AddNextCard();
+                    }
+                }
             }
             else
             {
@@ -395,37 +420,15 @@ public class PlayerCardManager : MonoBehaviour
         return false;
     }
 
-    private void RemoveCardUI(CardDisplay display, bool callRefill = false)
+    private void RemoveCardUI(CardDisplay display)
     {
         if (display == null) return;
         GameObject go = display.gameObject;
         if (spawnedCards.Contains(go)) spawnedCards.Remove(go);
         Destroy(go);
+
         var cd = display.GetCardData();
         if (playerCards.Contains(cd)) playerCards.Remove(cd);
-
-        if (callRefill)
-            EnsureHandSize(4);
-    }
-
-    private void EnsureHandSize(int target)
-    {
-        // Aseguramos que haya target cartas en pantalla (spawnedCards)
-        int attemptsGuard = 0;
-        while (spawnedCards.Count < target && attemptsGuard < 10)
-        {
-            attemptsGuard++;
-            List<CardManager.Card> newCards = GetRandomCards(1);
-            if (newCards != null && newCards.Count > 0)
-            {
-                CreateCard(newCards[0]);
-            }
-            else
-            {
-                Debug.LogWarning("[PlayerCardManager] No quedan cartas para reponer en EnsureHandSize.");
-                break;
-            }
-        }
     }
 
 
