@@ -263,13 +263,16 @@ public class PlayerCardManager : MonoBehaviour
         {
             if (currentOperator == '\0')
             {
-                Debug.Log("[PlayerCardManager] Dos cartas seleccionadas pero sin operación: se deseleccionan.");
+                Debug.Log("[PlayerCardManager] Dos cartas seleccionadas pero sin operador: se deseleccionan.");
                 DeselectAll();
                 return;
             }
 
-            var a = selectedDisplays[0].GetCardData();
-            var b = selectedDisplays[1].GetCardData();
+            var firstDisplay = selectedDisplays[0];
+            var secondDisplay = selectedDisplays[1];
+
+            var a = firstDisplay.GetCardData();
+            var b = secondDisplay.GetCardData();
             if (a == null || b == null)
             {
                 Debug.LogWarning("Carta null en combinación");
@@ -277,20 +280,68 @@ public class PlayerCardManager : MonoBehaviour
                 return;
             }
 
-            int firstVal = Mathf.Min(a.cardValue, b.cardValue);
-            int secondVal = Mathf.Max(a.cardValue, b.cardValue);
-            int operationResult = currentOperator == '+' ? firstVal + secondVal : firstVal - secondVal;
+            int operationResult = 0;
 
+            if (currentOperator == '+')
+            {
+                operationResult = a.cardValue + b.cardValue;
+                if (operationResult > 5)
+                {
+                    Debug.Log($"[PlayerCardManager] Suma inválida: {a.cardValue} + {b.cardValue} = {operationResult} (>5). Cancela selección.");
+                    DeselectAll();
+                    return;
+                }
+            }
+            else if (currentOperator == '-')
+            {
+                // Queremos que la PRIMERA carta elegida sea la mayor.
+                if (a.cardValue < b.cardValue)
+                {
+                    // Intercambia visual y lógicamente
+                    Debug.Log($"[PlayerCardManager] Intercambiando cartas para que la primera sea mayor: {a.cardValue} < {b.cardValue}");
+                    // swap in list
+                    selectedDisplays[0] = secondDisplay;
+                    selectedDisplays[1] = firstDisplay;
+                    // actualizar referencias locales
+                    var tmp = a; a = b; b = tmp;
+
+                    // actualizar highlight visual si tienes uno
+                    firstDisplay.SetSelectedVisual(false);
+                    secondDisplay.SetSelectedVisual(false);
+                    selectedDisplays[0].SetSelectedVisual(true);
+                    selectedDisplays[1].SetSelectedVisual(true);
+                }
+
+                operationResult = a.cardValue - b.cardValue; // ahora debería ser >= 0
+                if (operationResult < 0 || operationResult > 5)
+                {
+                    Debug.Log($"[PlayerCardManager] Resta inválida: {a.cardValue} - {b.cardValue} = {operationResult}. Debe estar en [0..5]. Cancela selección.");
+                    DeselectAll();
+                    return;
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[PlayerCardManager] Operador desconocido: " + currentOperator);
+                DeselectAll();
+                return;
+            }
+
+            // Llamada al CardManager con parámetros correctos (incluyendo opSymbol)
             bool played = cardManager.GenerateCombinedCharacter(a, b, spawnPosition, operationResult, currentOperator, "PlayerTeam");
 
             if (played)
             {
+                // eliminar UI de las dos cartas jugadas y reponer nuevas cartas
                 foreach (var d in new List<CardDisplay>(selectedDisplays)) RemoveCardUI(d);
                 selectedDisplays.Clear();
+
+                EnsureHandSize(4);
             }
             else
             {
                 Debug.Log("[PlayerCardManager] No se pudo jugar la combinación.");
+                // Nota: CardManager/CharacterManager deberían devolver el intelecto si fallan al instanciar
             }
 
             currentOperator = '\0';
@@ -344,7 +395,7 @@ public class PlayerCardManager : MonoBehaviour
         return false;
     }
 
-    private void RemoveCardUI(CardDisplay display)
+    private void RemoveCardUI(CardDisplay display, bool callRefill = false)
     {
         if (display == null) return;
         GameObject go = display.gameObject;
@@ -352,8 +403,31 @@ public class PlayerCardManager : MonoBehaviour
         Destroy(go);
         var cd = display.GetCardData();
         if (playerCards.Contains(cd)) playerCards.Remove(cd);
-        AddNextCard();
+
+        if (callRefill)
+            EnsureHandSize(4);
     }
+
+    private void EnsureHandSize(int target)
+    {
+        // Aseguramos que haya target cartas en pantalla (spawnedCards)
+        int attemptsGuard = 0;
+        while (spawnedCards.Count < target && attemptsGuard < 10)
+        {
+            attemptsGuard++;
+            List<CardManager.Card> newCards = GetRandomCards(1);
+            if (newCards != null && newCards.Count > 0)
+            {
+                CreateCard(newCards[0]);
+            }
+            else
+            {
+                Debug.LogWarning("[PlayerCardManager] No quedan cartas para reponer en EnsureHandSize.");
+                break;
+            }
+        }
+    }
+
 
 
     private Transform GetFirstFreeSlot()

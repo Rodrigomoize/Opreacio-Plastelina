@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 584843750846361261}
+  - component: {fileID: 8388624357994826567}
   m_Layer: 0
   m_Name: Atras
   m_TagString: Untagged
@@ -25,12 +26,33 @@ Transform:
   m_GameObject: {fileID: 6985524317443932343}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 5.8500004, z: -7.6000023}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -0, y: 23.17, z: -16.56}
+  m_LocalScale: {x: 14.3, y: 14.3, z: 14.3}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2693631497142224232}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &8388624357994826567
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6985524317443932343}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8189218969810793352
 GameObject:
   m_ObjectHideFlags: 0
@@ -40,7 +62,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8491410585855544065}
-  - component: {fileID: 5495080820531590591}
+  - component: {fileID: 2791570108721191585}
   m_Layer: 0
   m_Name: Delante
   m_TagString: Untagged
@@ -57,26 +79,33 @@ Transform:
   m_GameObject: {fileID: 8189218969810793352}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 5.8500004, z: 7.25}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -0, y: 22.05, z: 1.1}
+  m_LocalScale: {x: 14.3, y: 14.3, z: 14.3}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2693631497142224232}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5495080820531590591
-MonoBehaviour:
+--- !u!65 &2791570108721191585
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8189218969810793352}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e551f0494d389da4e8272b676e25c413, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CharacterCombined
-  frontPosition: {fileID: 0}
-  backPosition: {fileID: 0}
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &2516116835213648515
 PrefabInstance:
   m_ObjectHideFlags: 0
