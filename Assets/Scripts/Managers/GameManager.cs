@@ -63,7 +63,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // Métodos privados de carga
+    // MÉTODOS PRIVADOS DE CARGA
 
     private void LoadMainMenu()
     {
@@ -82,10 +82,13 @@ public class GameManager : MonoBehaviour
 
     private void LoadPlayScene()
     {
+        Time.timeScale = 1f;
+        isPaused = false;
+
         SceneManager.LoadScene("PlayScene");
     }
 
-    // Menú de pausa
+    // PAUSE MENU
 
     public void PauseGame()
     {
@@ -125,7 +128,7 @@ public class GameManager : MonoBehaviour
         LoadPlayScene();
     }
 
-    //Getters públicos
+    //GETTERS PÚBLICOS
 
     public UIManager GetUIManager() => uiManager;
     public AudioManager GetAudioManager() => audioManager;

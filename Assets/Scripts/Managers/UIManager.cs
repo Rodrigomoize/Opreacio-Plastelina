@@ -7,7 +7,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject pausePanel;
     [SerializeField] private Button pauseButton;
     [SerializeField] private Image pauseButtonImage;
-
+    
     [Header("Pause Icons")]
     [SerializeField] private Sprite pauseIcon;
     [SerializeField] private Sprite resumeIcon;
@@ -16,6 +16,7 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
+        // Panel de pausa oculto al inicio
         if (pausePanel != null)
         {
             pausePanel.SetActive(false);
@@ -26,13 +27,17 @@ public class UIManager : MonoBehaviour
             pauseButtonImage.sprite = pauseIcon;
         }
 
+        // Conecta el botón de pausa automáticamente
         if (pauseButton != null)
         {
+            pauseButton.onClick.RemoveAllListeners();
             pauseButton.onClick.AddListener(TogglePause);
         }
+
+        Debug.Log("[UIManager] Inicializado correctamente");
     }
 
-    /// Alterna entre pausar y reanudar el juego
+    /// Este método se llama AUTOMÁTICAMENTE desde el botón (sin necesidad de asignarlo)
     public void TogglePause()
     {
         if (isPaused)
@@ -45,24 +50,22 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    /// Pausa el juego
-    public void PauseGame()
+    /// Pausa el juego: muestra el panel y cambia el icono
+    private void PauseGame()
     {
         isPaused = true;
 
-        // Mostrar el panel de pausa
         if (pausePanel != null)
         {
             pausePanel.SetActive(true);
         }
 
-        // Cambiar el icono a "resume" (play)
         if (pauseButtonImage != null && resumeIcon != null)
         {
             pauseButtonImage.sprite = resumeIcon;
         }
 
-        // Pausar el tiempo del juego
+        // Llamar al GameManager para congelar el tiempo
         if (GameManager.Instance != null)
         {
             GameManager.Instance.PauseGame();
@@ -70,29 +73,27 @@ public class UIManager : MonoBehaviour
         else
         {
             Time.timeScale = 0f;
+            Debug.LogWarning("[UIManager] GameManager no encontrado, pausando directamente");
         }
 
-        Debug.Log("Juego pausado desde UIManager");
+        Debug.Log("[UIManager] Juego pausado - Panel visible");
     }
 
-    /// Reanuda el juego
-    public void ResumeGame()
+    /// Reanuda el juego: oculta el panel y cambia el icono
+    private void ResumeGame()
     {
         isPaused = false;
 
-        // Ocultar el panel de pausa
         if (pausePanel != null)
         {
             pausePanel.SetActive(false);
         }
 
-        // Cambiar el icono a "pause" (||)
         if (pauseButtonImage != null && pauseIcon != null)
         {
             pauseButtonImage.sprite = pauseIcon;
         }
 
-        // Reanudar el tiempo del juego
         if (GameManager.Instance != null)
         {
             GameManager.Instance.ResumeGame();
@@ -100,39 +101,10 @@ public class UIManager : MonoBehaviour
         else
         {
             Time.timeScale = 1f;
+            Debug.LogWarning("[UIManager] GameManager no encontrado, reanudando directamente");
         }
 
-        Debug.Log("Juego reanudado desde UIManager");
-    }
-
-    /// Método auxiliar para botones del panel de pausa
-    public void OnResumeButtonClick()
-    {
-        ResumeGame();
-    }
-
-    /// Volver al menú principal desde el panel de pausa
-    public void OnMainMenuButtonClick()
-    {
-        Time.timeScale = 1f;
-        isPaused = false;
-
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.BackToMainMenu();
-        }
-    }
-
-    /// Reiniciar el nivel actual
-    public void OnRestartButtonClick()
-    {
-        Time.timeScale = 1f;
-        isPaused = false;
-
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.RestartCurrentLevel();
-        }
+        Debug.Log("[UIManager] Juego reanudado - Panel oculto");
     }
 
     private void OnDestroy()
