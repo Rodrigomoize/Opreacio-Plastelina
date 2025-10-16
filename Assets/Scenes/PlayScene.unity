@@ -1844,7 +1844,7 @@ GameObject:
   - component: {fileID: 1035249384}
   - component: {fileID: 1035249387}
   - component: {fileID: 1035249388}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: PlayableArea
   m_TagString: PlayableArea
   m_Icon: {fileID: 0}
@@ -1912,9 +1912,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   playerManager: {fileID: 468729724}
-  worldCamera: {fileID: 0}
-  mapRawImage: {fileID: 0}
-  playAreaCollider: {fileID: 0}
+  worldCamera: {fileID: 962538953}
+  mapRawImage: {fileID: 727956710}
+  playAreaCollider: {fileID: 1813244267}
   raycastMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -3322,7 +3322,7 @@ GameObject:
   - component: {fileID: 1813244269}
   - component: {fileID: 1813244268}
   - component: {fileID: 1813244267}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Cube
   m_TagString: PlayableArea
   m_Icon: {fileID: 0}
