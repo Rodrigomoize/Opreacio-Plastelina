@@ -15,6 +15,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] AICardManager aiCardManager;
     [SerializeField] PlayerCardManager playerCardManager;
 
+    [Header("Game State")]
+    private bool isPaused = false;
+    public bool IsPaused => isPaused;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -57,11 +61,9 @@ public class GameManager : MonoBehaviour
         {
             Instance.LoadPlayScene();
         }
-        else
-        {
-            Debug.LogError("GameManager.Instance es null.");
-        }
     }
+
+    // Métodos privados de carga
 
     private void LoadMainMenu()
     {
@@ -82,6 +84,48 @@ public class GameManager : MonoBehaviour
     {
         SceneManager.LoadScene("PlayScene");
     }
+
+    // Menú de pausa
+
+    public void PauseGame()
+    {
+        if (!isPaused)
+        {
+            isPaused = true;
+            Time.timeScale = 0f;
+            Debug.Log("[GameManager] Juego pausado (Time.timeScale = 0)");
+        }
+    }
+
+    public void ResumeGame()
+    {
+        if (isPaused)
+        {
+            isPaused = false;
+            Time.timeScale = 1f;
+            Debug.Log("[GameManager] Juego reanudado (Time.timeScale = 1)");
+        }
+    }
+
+    public void TogglePause()
+    {
+        if (isPaused)
+            ResumeGame();
+        else
+            PauseGame();
+    }
+
+    public void BackToMainMenu()
+    {
+        LoadMainMenu();
+    }
+
+    public void RestartCurrentLevel()
+    {
+        LoadPlayScene();
+    }
+
+    //Getters públicos
 
     public UIManager GetUIManager() => uiManager;
     public AudioManager GetAudioManager() => audioManager;
