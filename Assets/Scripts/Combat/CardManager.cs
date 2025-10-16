@@ -147,8 +147,6 @@ public class CardManager : MonoBehaviour
             return false;
         }
 
-        // NUEVO: el coste de intelecto será el resultado de la operación (operationResult),
-        // no la suma de los costes de las cartas.
         int totalCost = Mathf.Max(0, operationResult); // asegurar no negativo
 
         // Verificar intelecto
@@ -156,13 +154,11 @@ public class CardManager : MonoBehaviour
         {
             if (!intelectManager.CanConsume(totalCost))
             {
-                Debug.Log($"[CardManager] No hay intelecto suficiente para combinación (coste {totalCost})");
                 return false;
             }
             bool consumed = intelectManager.Consume(totalCost);
             if (!consumed)
             {
-                Debug.LogWarning("[CardManager] Consume falló en combinación.");
                 return false;
             }
         }
@@ -173,14 +169,11 @@ public class CardManager : MonoBehaviour
 
         if (spawnedCombined != null)
         {
-            Debug.Log($"[CardManager] ✓ Combinación {partA.cardName}+{partB.cardName} (valor:{operationResult}, op:{opSymbol}) instanciada en {spawnPosition}");
             return true;
         }
         else
         {
-            Debug.LogError($"[CardManager] Error al instanciar combinación");
 
-            // Devolver el intelecto si la instanciación falla
             if (intelectManager != null)
             {
                 intelectManager.AddIntelect(totalCost);

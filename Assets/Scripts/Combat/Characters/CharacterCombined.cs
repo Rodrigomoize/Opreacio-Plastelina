@@ -47,7 +47,6 @@ public class CharacterCombined : MonoBehaviour
         if (frontPosition != null && frontModel != null)
         {
             frontCharacterInstance = Instantiate(frontModel, frontPosition.position, frontPosition.rotation, frontPosition);
-            // Opcional: ajustar escala o rotación si es necesario
             frontCharacterInstance.transform.localPosition = Vector3.zero;
             frontCharacterInstance.transform.localRotation = Quaternion.identity;
         }
@@ -72,7 +71,6 @@ public class CharacterCombined : MonoBehaviour
     {
         if (agent == null || enemyTower == null) return;
 
-        // Si aún no llegó al puente
         if (!reachedBridge && targetBridge != null)
         {
             if (Vector3.Distance(transform.position, targetBridge.position) < 1f)
@@ -81,13 +79,10 @@ public class CharacterCombined : MonoBehaviour
                 agent.SetDestination(enemyTower.position);
             }
         }
-
-        // Si llegó a la torre enemiga, hace daño
         if (reachedBridge)
         {
             if (Vector3.Distance(transform.position, enemyTower.position) < 1.5f)
             {
-                Debug.Log($"[CharacterCombined] Attacker {combinedValue} hace {combinedValue} de daño a la torre");
                 if (manager != null)
                 {
                     manager.DamageEnemyTower(combinedValue);

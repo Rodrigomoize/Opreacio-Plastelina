@@ -128,52 +128,41 @@ public class PlayerCardManager : MonoBehaviour
     {
         if (display == null) return;
 
-        Debug.Log($"[PlayerCardManager] Click en carta {display.GetCardData()?.cardName} (operator='{currentOperator}')");
 
-        // 0) Si no hay ninguna seleccionada -> esta carta = card1
         if (selectedDisplays.Count == 0)
         {
             selectedDisplays.Add(display);
             display.SetSelectedVisual(true);
-            Debug.Log($"[PlayerCardManager] Carta1 seleccionada: {display.GetCardData()?.cardName}");
             return;
         }
 
-        // 1) Si hay exactamente 1 seleccionada:
         if (selectedDisplays.Count == 1)
         {
             var first = selectedDisplays[0];
 
-            // Si hacen click en la misma carta -> deseleccionar
             if (display == first)
             {
                 first.SetSelectedVisual(false);
                 selectedDisplays.Clear();
-                Debug.Log("[PlayerCardManager] Carta1 deseleccionada (click en la misma carta).");
                 return;
             }
 
-            // Si NO hay operador seleccionado -> reemplazamos la carta1 por la nueva
             if (currentOperator == '\0')
             {
                 first.SetSelectedVisual(false);
                 selectedDisplays.Clear();
                 selectedDisplays.Add(display);
                 display.SetSelectedVisual(true);
-                Debug.Log($"[PlayerCardManager] Reemplazamos Carta1 por: {display.GetCardData()?.cardName} (aún sin operador).");
                 return;
             }
             else
             {
-                // Si HAY operador -> esta carta es la carta2 (válida)
                 selectedDisplays.Add(display);
                 display.SetSelectedVisual(true);
-                Debug.Log($"[PlayerCardManager] Carta2 seleccionada: {display.GetCardData()?.cardName}. Lista lista para combinar.");
                 return;
             }
         }
 
-        // 2) Si ya había 2 seleccionadas (caso improbable) -> reseteamos y tomamos esta como carta1
         if (selectedDisplays.Count >= 2)
         {
             foreach (var d in selectedDisplays) d.SetSelectedVisual(false);
@@ -181,7 +170,6 @@ public class PlayerCardManager : MonoBehaviour
 
             selectedDisplays.Add(display);
             display.SetSelectedVisual(true);
-            Debug.Log("[PlayerCardManager] Había 2 seleccionadas, reseteando. Nueva Carta1 = " + display.GetCardData()?.cardName);
             return;
         }
     }
@@ -203,7 +191,6 @@ public class PlayerCardManager : MonoBehaviour
         float now = Time.time;
         if (now - lastOperatorToggleTime < operatorToggleCooldown)
         {
-            Debug.Log("[PlayerCardManager] Ignorando toggle rápido (debounce).");
             return;
         }
         lastOperatorToggleTime = now;
@@ -211,7 +198,6 @@ public class PlayerCardManager : MonoBehaviour
         // Forzar regla: primero debe haber carta1 seleccionada
         if (selectedDisplays.Count == 0)
         {
-            Debug.Log("[PlayerCardManager] Selecciona primero una carta (card1) antes de elegir operador.");
             return;
         }
 
@@ -221,20 +207,16 @@ public class PlayerCardManager : MonoBehaviour
             // deselecciona operador
             currentOperator = '\0';
             Debug.Log("[PlayerCardManager] Operador desactivado");
-            // Si había carta2, la quitamos al desactivar operador
             if (selectedDisplays.Count == 2)
             {
                 var second = selectedDisplays[1];
                 second.SetSelectedVisual(false);
                 selectedDisplays.RemoveAt(1);
-                Debug.Log("[PlayerCardManager] Carta2 deseleccionada al quitar operador.");
             }
         }
         else
         {
-            // seleccionar operador
             currentOperator = op;
-            Debug.Log($"[PlayerCardManager] Operador seleccionado: {op}");
         }
     }
 
@@ -297,22 +279,19 @@ public class PlayerCardManager : MonoBehaviour
                 
                 if (a.cardValue < b.cardValue)
                 {
-                    // Intercambia visual y lógicamente
                     Debug.Log($"[PlayerCardManager] Intercambiando cartas para que la primera sea mayor: {a.cardValue} < {b.cardValue}");
-                    // swap in list
+
                     selectedDisplays[0] = secondDisplay;
                     selectedDisplays[1] = firstDisplay;
-                    // actualizar referencias locales
                     var tmp = a; a = b; b = tmp;
 
-                    // actualizar highlight visual si tienes uno
                     firstDisplay.SetSelectedVisual(false);
                     secondDisplay.SetSelectedVisual(false);
                     selectedDisplays[0].SetSelectedVisual(true);
                     selectedDisplays[1].SetSelectedVisual(true);
                 }
 
-                operationResult = a.cardValue - b.cardValue; // ahora debería ser >= 0
+                operationResult = a.cardValue - b.cardValue; 
                 if (operationResult < 0 || operationResult > 5)
                 {
                     Debug.Log($"[PlayerCardManager] Resta inválida: {a.cardValue} - {b.cardValue} = {operationResult}. Debe estar en [0..5]. Cancela selección.");
@@ -327,7 +306,6 @@ public class PlayerCardManager : MonoBehaviour
                 return;
             }
 
-            // Llamada al CardManager con parámetros correctos (incluyendo opSymbol)
             bool played = cardManager.GenerateCombinedCharacter(a, b, spawnPosition, operationResult, currentOperator, "PlayerTeam");
 
             if (played)
@@ -339,18 +317,16 @@ public class PlayerCardManager : MonoBehaviour
                         slotsToRefill.Add(d.transform.parent);
                 }
 
-                // 2) Eliminamos las UIs de las cartas (Destroy será procesado al final del frame)
                 foreach (var d in new List<CardDisplay>(selectedDisplays))
                 {
-                    RemoveCardUI(d); // ya no hace AddNextCard()
+                    RemoveCardUI(d);
                 }
                 selectedDisplays.Clear();
 
-                // 3) Reponemos explícitamente en los mismos slots
+
                 foreach (var slot in slotsToRefill)
                 {
                     if (slot == null) continue;
-                    // Pedimos una nueva carta y la forzamos en ese mismo slot
                     List<CardManager.Card> newCards = GetRandomCards(1);
                     if (newCards != null && newCards.Count > 0)
                     {
@@ -358,7 +334,6 @@ public class PlayerCardManager : MonoBehaviour
                     }
                     else
                     {
-                        // fallback: intenta AddNextCard (igual que antes)
                         AddNextCard();
                     }
                 }
@@ -366,7 +341,6 @@ public class PlayerCardManager : MonoBehaviour
             else
             {
                 Debug.Log("[PlayerCardManager] No se pudo jugar la combinación.");
-                // Nota: CardManager/CharacterManager deberían devolver el intelecto si fallan al instanciar
             }
 
             currentOperator = '\0';
@@ -376,9 +350,7 @@ public class PlayerCardManager : MonoBehaviour
 
     public bool RequestGenerateCharacter(CardManager.Card cardData, Vector3 spawnPosition, GameObject cardUI)
     {
-        Debug.Log($"[PlayerCardManager] RequestGenerateCharacter: intentando jugar {cardData.cardName} coste {cardData.intelectCost}");
 
-        // CORREGIDO: Ahora GenerateCharacter espera 3 parámetros
         bool ok = cardManager.GenerateCharacter(cardData, spawnPosition, "PlayerTeam");
 
         if (ok)
