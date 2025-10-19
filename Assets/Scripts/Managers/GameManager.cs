@@ -12,7 +12,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] UIManager uiManager;
     [SerializeField] AudioManager audioManager;
     [SerializeField] CardManager combatManager;
-    [SerializeField] AICardManager aiCardManager;
+    [SerializeField] IAController aiCardManager;
     [SerializeField] PlayerCardManager playerCardManager;
 
     [Header("Game State")]
@@ -133,6 +133,6 @@ public class GameManager : MonoBehaviour
     public UIManager GetUIManager() => uiManager;
     public AudioManager GetAudioManager() => audioManager;
     public CardManager GetCombatManager() => combatManager;
-    public AICardManager GetAICardManager() => aiCardManager;
+    public IAController GetAICardManager() => aiCardManager;
     public PlayerCardManager GetPlayerCardManager() => playerCardManager;
 }

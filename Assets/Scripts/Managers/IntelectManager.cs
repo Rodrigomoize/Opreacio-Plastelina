@@ -4,7 +4,6 @@ using UnityEngine.UI;
 
 public class IntelectManager : MonoBehaviour
 {
-    
 
     public int maxIntelect = 10;
     public int minIntelect = 0;
@@ -22,7 +21,6 @@ public class IntelectManager : MonoBehaviour
         currentIntelect = maxIntelect;
         UpdateUI();
     }
-
 
     private IEnumerator Regenerate()
     {

@@ -51,10 +51,8 @@ public class CharacterManager : MonoBehaviour
             return null;
         }
 
-        // Instanciar directamente el prefab de la carta (ya tiene el script Character)
         GameObject instance = Instantiate(cardData.fbxCharacter, spawnPosition, Quaternion.identity);
 
-        // Asignar tag
         AssignTag(instance, teamTag);
 
         // Obtener o añadir componente Character
@@ -97,7 +95,9 @@ public class CharacterManager : MonoBehaviour
             return instance; // Devuelve el personaje pero sin movimiento configurado
         }
 
-        charScript.SetupMovement(agent, targetBridge, enemyTower, true);
+        Transform enemyForThisTeam = (teamTag == "AITeam") ? playerTower : enemyTower;
+
+        charScript.SetupMovement(agent, targetBridge, enemyForThisTeam, true);
 
         Debug.Log($"[CharacterManager] ✓ {cardData.cardName} (valor:{cardData.cardValue}) creado como DEFENDER con tag {teamTag}");
 
@@ -229,11 +229,9 @@ public class CharacterManager : MonoBehaviour
             }
         }
 
-        // obtenemos anchors concretos
         Transform frontAnchor = GetSlotAnchor(frontSlot, "FrontAnchor");
         Transform backAnchor = GetSlotAnchor(backSlot, "BackAnchor");
 
-        // Aseguramos que frontAnchor/backAnchor no sean null (fallback)
         if (frontAnchor == null)
         {
             GameObject f = new GameObject("FrontAnchor");
@@ -334,12 +332,18 @@ public class CharacterManager : MonoBehaviour
 
         // Ruteo
         Transform targetBridge = (spawnPosition.x < 0) ? leftBridge : rightBridge;
-        if (targetBridge != null && enemyTower != null)
-            cc.SetupMovement(agent, targetBridge, enemyTower);
-        else
-            Debug.LogWarning("[CharacterManager] leftBridge/rightBridge/enemyTower no asignados, el camión no tiene ruta.");
 
-        Debug.Log($"[CharacterManager] Combined created: {frontCard.cardName}+{backCard.cardName} -> anchors used (front:{frontAnchor.name}, back:{backAnchor.name}).");
+        Transform enemyForThisTeam = (teamTag == "AITeam") ? playerTower : enemyTower;
+
+        if (targetBridge != null && enemyForThisTeam != null)
+        {
+            cc.SetupMovement(agent, targetBridge, enemyForThisTeam);
+        }
+        else
+        {
+            Debug.LogWarning("[CharacterManager] leftBridge/rightBridge/playerTower/enemyTower no asignados correctamente, el camión puede no tener ruta.");
+        }
+
 
 
         return instance;

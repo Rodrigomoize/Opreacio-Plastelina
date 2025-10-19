@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI;
 
 public class CharacterCombined : MonoBehaviour
@@ -13,8 +13,11 @@ public class CharacterCombined : MonoBehaviour
     private CharacterManager manager;
 
     [Header("Posiciones para personajes combinados")]
-    public Transform frontPosition;  
+    public Transform frontPosition;
     public Transform backPosition;
+
+    public Transform AITower;
+    public Transform PlayerTower;
 
     private GameObject frontCharacterInstance;
     private GameObject backCharacterInstance;
@@ -22,6 +25,17 @@ public class CharacterCombined : MonoBehaviour
     void Start()
     {
         manager = FindObjectOfType<CharacterManager>();
+        if (enemyTower == null)
+        {
+            GameObject torreAI = GameObject.Find("TorreEnemiga");
+            GameObject torrePlayer = GameObject.Find("TorrePlayer");
+
+            if (torreAI != null) AITower = torreAI.transform;
+            if (torrePlayer != null) PlayerTower = torrePlayer.transform;
+
+            // NO sobreescribimos enemyTower automáticamente aquí.
+            Debug.Log("[CharacterCombined] Start(): fallback towers loaded (no asignadas a enemyTower si ya venían por param).");
+        }
     }
 
     public void InitializeCombined(int value, float speed)
@@ -34,13 +48,23 @@ public class CharacterCombined : MonoBehaviour
     {
         agent = navAgent;
         targetBridge = bridge;
+
         enemyTower = tower;
+
+        Debug.Log($"[CharacterCombined] SetupMovement() llamado en {gameObject.name} (tag:{gameObject.tag}) -> bridge:{targetBridge?.name} enemyTower:{enemyTower?.name}");
 
         if (agent != null && targetBridge != null)
         {
             agent.SetDestination(targetBridge.position);
+            Debug.Log($"[CharacterCombined] Navegando hacia puente: {targetBridge.name}");
+        }
+        else
+        {
+            Debug.LogError($"[CharacterCombined] Agent o targetBridge son null en {gameObject.name}!");
         }
     }
+
+
 
     public void SetupCharacterModels(GameObject frontModel, GameObject backModel)
     {
@@ -69,33 +93,47 @@ public class CharacterCombined : MonoBehaviour
 
     void Update()
     {
-        if (agent == null || enemyTower == null) return;
+        if (agent == null) return; // solo esto
 
+        // FASE 1: Ir al puente
         if (!reachedBridge && targetBridge != null)
         {
-            if (Vector3.Distance(transform.position, targetBridge.position) < 1f)
+            float distanciaPuente = Vector3.Distance(transform.position, targetBridge.position);
+            if (distanciaPuente < 2f)
             {
                 reachedBridge = true;
-                agent.SetDestination(enemyTower.position);
+                // si enemyTower ya está asignada, cambiar destino; si no, esperar a que se asigne
+                if (enemyTower != null)
+                {
+                    agent.SetDestination(enemyTower.position);
+                    Debug.Log($"[CharacterCombined] {gameObject.name} cruzó el puente, yendo a {enemyTower.name}");
+                }
+                else
+                {
+                    Debug.LogWarning($"[CharacterCombined] {gameObject.name} cruzó puente pero enemyTower == null -> esperará que se asigne.");
+                }
             }
         }
-        if (reachedBridge)
+
+        
+        if (reachedBridge && enemyTower != null)
         {
-            if (Vector3.Distance(transform.position, enemyTower.position) < 1.5f)
+            float distanciaTorre = Vector3.Distance(transform.position, enemyTower.position);
+            if (distanciaTorre < 2f)
             {
-                if (manager != null)
-                {
-                    manager.DamageEnemyTower(combinedValue);
-                }
+                Debug.Log($"[CharacterCombined] {gameObject.name} llegó a torre, haciendo {combinedValue} de daño");
+                if (manager != null) manager.DamageEnemyTower(combinedValue);
                 Destroy(gameObject);
             }
         }
     }
 
+
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("AITeam") || other.CompareTag("PlayerTeam"))
         {
+            // No colisionar con mi propio equipo
             if (other.tag == gameObject.tag) return;
 
             Character otherChar = other.GetComponent<Character>();
@@ -116,6 +154,7 @@ public class CharacterCombined : MonoBehaviour
                 return;
             }
 
+            // Si los valores son iguales, ambos se destruyen
             if (combinedValue == otherValue)
             {
                 Debug.Log($"[CharacterCombined] {combinedValue} == {otherValue} - Ambos se destruyen");

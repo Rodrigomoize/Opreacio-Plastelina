@@ -4,7 +4,6 @@ using UnityEngine.UI;
 
 public class CardManager : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     [System.Serializable]
     public class Card
     {
@@ -19,17 +18,14 @@ public class CardManager : MonoBehaviour
         public bool isUsed;
         public Sprite cardSprite;
         public GameObject fbxCharacter;
-
     }
-
 
     [Header("Cartas configurables en el inspector")]
     public List<Card> availableCards = new List<Card>();
 
-    [Header("Intelect Manager")]
-    public IntelectManager intelectManager;
+    [Header("Managers")]
+    public IntelectManager intelectManagerPlayer; 
     public CharacterManager characterManager;
-
 
     public Card CloneCard(Card original)
     {
@@ -45,18 +41,6 @@ public class CardManager : MonoBehaviour
         clone.isSingle = original.isSingle;
         clone.isCombined = original.isCombined;
         return clone;
-    }
-
-
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     public Card GetRandomCloneFromAvailable()
@@ -81,7 +65,7 @@ public class CardManager : MonoBehaviour
         return result;
     }
 
-    public bool GenerateCharacter(Card cardData, Vector3 spawnPosition, string teamTag)
+    public bool GenerateCharacter(Card cardData, Vector3 spawnPosition, string teamTag, IntelectManager customIntelectManager = null)
     {
         if (cardData == null)
         {
@@ -89,22 +73,22 @@ public class CardManager : MonoBehaviour
             return false;
         }
 
-        // Verificar que tengamos CharacterManager
         if (characterManager == null)
         {
             Debug.LogError("[CardManager] CharacterManager no está asignado!");
             return false;
         }
 
-        // Verificar intelecto
-        if (intelectManager != null)
+        IntelectManager intelectToUse = customIntelectManager ?? intelectManagerPlayer;
+
+        if (intelectToUse != null)
         {
-            if (!intelectManager.CanConsume(cardData.intelectCost))
+            if (!intelectToUse.CanConsume(cardData.intelectCost))
             {
                 Debug.Log($"[CardManager] No hay intelecto suficiente para {cardData.cardName} (coste {cardData.intelectCost})");
                 return false;
             }
-            bool consumed = intelectManager.Consume(cardData.intelectCost);
+            bool consumed = intelectToUse.Consume(cardData.intelectCost);
             if (!consumed)
             {
                 Debug.LogWarning("[CardManager] Consume falló aunque CanConsume devolvió true.");
@@ -112,7 +96,6 @@ public class CardManager : MonoBehaviour
             }
         }
 
-        // NUEVA PARTE: Instanciar el personaje real usando CharacterManager
         GameObject spawnedCharacter = characterManager.InstantiateSingleCharacter(cardData, spawnPosition, teamTag);
 
         if (spawnedCharacter != null)
@@ -123,16 +106,16 @@ public class CardManager : MonoBehaviour
         else
         {
             Debug.LogError($"[CardManager] Error al instanciar {cardData.cardName}");
-            // Devolver el intelecto si falló la instanciación
-            if (intelectManager != null)
+            // Devolver el intelecto si falló
+            if (intelectToUse != null)
             {
-                intelectManager.AddIntelect(cardData.intelectCost);
+                intelectToUse.AddIntelect(cardData.intelectCost);
             }
             return false;
         }
     }
 
-    public bool GenerateCombinedCharacter(Card partA, Card partB, Vector3 spawnPosition, int operationResult, char opSymbol, string teamTag)
+    public bool GenerateCombinedCharacter(Card partA, Card partB, Vector3 spawnPosition, int operationResult, char opSymbol, string teamTag, IntelectManager customIntelectManager = null)
     {
         if (partA == null || partB == null)
         {
@@ -140,23 +123,23 @@ public class CardManager : MonoBehaviour
             return false;
         }
 
-        // Verificar que tengamos CharacterManager
         if (characterManager == null)
         {
             Debug.LogError("[CardManager] CharacterManager no está asignado!");
             return false;
         }
 
-        int totalCost = Mathf.Max(0, operationResult); // asegurar no negativo
+        int totalCost = Mathf.Max(0, operationResult);
 
-        // Verificar intelecto
-        if (intelectManager != null)
+        IntelectManager intelectToUse = customIntelectManager ?? intelectManagerPlayer;
+
+        if (intelectToUse != null)
         {
-            if (!intelectManager.CanConsume(totalCost))
+            if (!intelectToUse.CanConsume(totalCost))
             {
                 return false;
             }
-            bool consumed = intelectManager.Consume(totalCost);
+            bool consumed = intelectToUse.Consume(totalCost);
             if (!consumed)
             {
                 return false;
@@ -173,16 +156,11 @@ public class CardManager : MonoBehaviour
         }
         else
         {
-
-            if (intelectManager != null)
+            if (intelectToUse != null)
             {
-                intelectManager.AddIntelect(totalCost);
+                intelectToUse.AddIntelect(totalCost);
             }
             return false;
         }
     }
-
-
 }
-
-
