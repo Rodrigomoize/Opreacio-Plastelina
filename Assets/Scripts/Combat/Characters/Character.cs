@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI;
 
 public class Character : MonoBehaviour
@@ -7,7 +7,6 @@ public class Character : MonoBehaviour
     private int life;
     private float speed;
     private bool isDefender;
-
     private NavMeshAgent agent;
     private Transform targetBridge;
     private Transform enemyTower;
@@ -20,19 +19,42 @@ public class Character : MonoBehaviour
 
     void Start()
     {
-        manager = FindFirstObjectByType<CharacterManager>();
-        
-        // Crear el UI de la tropa si hay prefab asignado
-        if (troopUIPrefab != null)
+
+        manager = FindObjectOfType<CharacterManager>();
+
+        // CRÍTICO: Asegurar que tiene collider trigger
+        EnsureColliderSetup();
+    }
+
+    private void EnsureColliderSetup()
+    {
+        // Buscar si ya tiene un SphereCollider
+        SphereCollider sphereCol = GetComponent<SphereCollider>();
+
+        if (sphereCol == null)
         {
-            GameObject uiObj = Instantiate(troopUIPrefab);
-            troopUIInstance = uiObj.GetComponent<TroopUI>();
-            if (troopUIInstance != null)
-            {
-                // Pasar el tag del equipo para usar el sprite correcto
-                troopUIInstance.Initialize(transform, value, gameObject.tag);
-            }
+            // Si no existe, crearlo
+            sphereCol = gameObject.AddComponent<SphereCollider>();
+            sphereCol.radius = 0.5f; // Ajusta según el tamaño de tus personajes
+            Debug.Log($"[Character] Añadido SphereCollider a {gameObject.name}");
         }
+
+        // ASEGURAR que está en modo trigger
+        sphereCol.isTrigger = true;
+
+        // CRÍTICO: Asegurar que NO tiene Rigidbody o está en modo kinematic
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb == null)
+        {
+            rb = gameObject.AddComponent<Rigidbody>();
+            Debug.Log($"[Character] Añadido Rigidbody a {gameObject.name}");
+        }
+
+        // Configurar para que no interfiera con NavMeshAgent
+        rb.isKinematic = true;
+        rb.useGravity = false;
+
+        Debug.Log($"[Character] {gameObject.name} - Collider configurado: trigger={sphereCol.isTrigger}, radius={sphereCol.radius}");
     }
 
     public void InitializeCharacter(int val, int hp, float spd, bool defender)
@@ -41,6 +63,8 @@ public class Character : MonoBehaviour
         life = hp;
         speed = spd;
         isDefender = defender;
+
+        Debug.Log($"[Character] Inicializado: {gameObject.name}, valor={value}, tag={gameObject.tag}");
     }
 
     public void SetupMovement(NavMeshAgent navAgent, Transform bridge, Transform tower, bool isDefenderUnit)
@@ -53,6 +77,7 @@ public class Character : MonoBehaviour
         if (agent != null && targetBridge != null)
         {
             agent.SetDestination(targetBridge.position);
+            Debug.Log($"[Character] {gameObject.name} navegando hacia puente {targetBridge.name}");
         }
     }
 
@@ -60,41 +85,32 @@ public class Character : MonoBehaviour
     {
         if (agent == null || enemyTower == null) return;
 
-        // Si a�n no lleg� al puente
         if (!reachedBridge && targetBridge != null)
         {
             if (Vector3.Distance(transform.position, targetBridge.position) < 1f)
             {
                 reachedBridge = true;
                 agent.SetDestination(enemyTower.position);
+                Debug.Log($"[Character] {gameObject.name} cruzó el puente, yendo a torre");
             }
         }
 
-        // Si lleg� a la torre enemiga (solo defenders se destruyen)
-        if (reachedBridge && isDefender)
-        {
-            if (Vector3.Distance(transform.position, enemyTower.position) < 1.5f)
-            {
-                Debug.Log($"[Character] Defender {value} lleg� a torre y se destruye");
-                
-                // Destruir el UI junto con el personaje
-                if (troopUIInstance != null)
-                {
-                    Destroy(troopUIInstance.gameObject);
-                }
-                
-                Destroy(gameObject);
-            }
-        }
+      
     }
 
     void OnTriggerEnter(Collider other)
     {
+        Debug.Log($"[Character] {gameObject.name} (tag:{gameObject.tag}, valor:{value}) TRIGGER con {other.gameObject.name} (tag:{other.tag})");
+
         // Solo comparar con el equipo contrario
         if (other.CompareTag("AITeam") || other.CompareTag("PlayerTeam"))
         {
             // Evitar compararse con su propio equipo
-            if (other.tag == gameObject.tag) return;
+            if (other.tag == gameObject.tag)
+            {
+                Debug.Log($"[Character] Mismo equipo, ignorando");
+                return;
+            }
 
             // Verificar si es Character o CharacterCombined
             Character otherChar = other.GetComponent<Character>();
@@ -105,20 +121,25 @@ public class Character : MonoBehaviour
             if (otherChar != null)
             {
                 otherValue = otherChar.value;
+                Debug.Log($"[Character] Detectado otro Character con valor {otherValue}");
             }
             else if (otherCombined != null)
             {
                 otherValue = otherCombined.GetValue();
+                Debug.Log($"[Character] Detectado CharacterCombined con valor {otherValue}");
             }
             else
             {
-                return; // No es un personaje v�lido
+
+                Debug.Log($"[Character] El otro objeto no tiene Character ni CharacterCombined");
+                return;
+
             }
 
             // Comparar valores
             if (value == otherValue)
             {
-                Debug.Log($"[Character] {value} == {otherValue} - Ambos se destruyen");
+                Debug.Log($"[Character] ⚔️ COMBATE: {value} == {otherValue} - Ambos se destruyen!");
                 if (manager != null)
                 {
                     manager.ResolveOperation();
@@ -133,7 +154,10 @@ public class Character : MonoBehaviour
                 Destroy(other.gameObject);
                 Destroy(gameObject);
             }
-            // Si no son iguales, no pasa nada (siguen su camino)
+            else
+            {
+                Debug.Log($"[Character] Valores diferentes ({value} vs {otherValue}), continúan su camino");
+            }
         }
     }
 

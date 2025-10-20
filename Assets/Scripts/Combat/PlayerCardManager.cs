@@ -6,13 +6,14 @@ using static CharacterCombined;
 public class PlayerCardManager : MonoBehaviour
 {
     public CardManager cardManager;
-    public GameObject cardPrefab;            
-    public List<Transform> cardSlots = new List<Transform>(4);
+    public GameObject cardPrefab;
+    public List<Transform> cardSlots = new List<Transform>(5);
     public Button SumaButton;
     public Button RestaButton;
 
-    [Header("Spawn figurativo en mundo")]
     public Transform spawnPoint;
+
+    public float elevationAmount = 500f; 
 
     // Estado de selección / operación
     private List<CardDisplay> selectedDisplays = new List<CardDisplay>(2);
@@ -50,29 +51,22 @@ public class PlayerCardManager : MonoBehaviour
         if (RestaButton != null) RestaButton.onClick.RemoveListener(OnRestaButtonClicked);
     }
 
+    [Header("Regla especial: Duplicar carta")]
+    public bool allowSelfCombination = true; // Permitir usar la misma carta dos veces (ej: 1+1 con una sola carta)
 
     void Start()
     {
-        // Inicializa mano
-        List<CardManager.Card> randomCards = GetRandomCards(4);
-        foreach (var card in randomCards) CreateCard(card);
-    }
-
-    private List<CardManager.Card> GetRandomCards(int n)
-    {
-        List<CardManager.Card> tempList = new List<CardManager.Card>(cardManager.availableCards);
-        List<CardManager.Card> result = new List<CardManager.Card>();
-
-        for (int i = 0; i < n && tempList.Count > 0; i++)
+        // Inicializa mano con cartas ordenadas del 1-5 (una de cada)
+        for (int i = 0; i < 5 && i < cardSlots.Count; i++)
         {
-            int randomIndex = Random.Range(0, tempList.Count);
-            CardManager.Card clone = cardManager.CloneCard(tempList[randomIndex]);
-            result.Add(clone);
-            tempList.RemoveAt(randomIndex);
+            CardManager.Card originalCard = cardManager.GetCardByIndex(i);
+            if (originalCard != null)
+            {
+                CardManager.Card clonedCard = cardManager.CloneCard(originalCard);
+                CreateCard(clonedCard, cardSlots[i]);
+            }
         }
-        return result;
     }
-
 
     public void CreateCard(CardManager.Card data, Transform forcedSlot = null)
     {
@@ -82,14 +76,12 @@ public class PlayerCardManager : MonoBehaviour
             return;
         }
 
-        // Añadir al listado lógico de cartas del jugador
         playerCards.Add(data);
 
         Transform slotToUse = forcedSlot != null ? forcedSlot : GetFirstFreeSlot();
         if (slotToUse == null)
         {
             Debug.LogWarning("No hay slots libres");
-            // si no hay slot, revertir la adición lógica
             playerCards.Remove(data);
             return;
         }
@@ -97,7 +89,6 @@ public class PlayerCardManager : MonoBehaviour
         GameObject newCard = Instantiate(cardPrefab, slotToUse, false);
         newCard.name = data.cardName;
 
-        // Ajustar rectTransform
         RectTransform rt = newCard.GetComponent<RectTransform>();
         RectTransform slotRT = slotToUse.GetComponent<RectTransform>();
         if (rt != null && slotRT != null)
@@ -126,60 +117,129 @@ public class PlayerCardManager : MonoBehaviour
 
     public void OnCardClickedRequest(CardDisplay display)
     {
-        if (display == null) return;
-
-
-        if (selectedDisplays.Count == 0)
+        if (display == null)
         {
-            selectedDisplays.Add(display);
-            display.SetSelectedVisual(true);
+            Debug.LogWarning("[PlayerCardManager] CardDisplay es null!");
             return;
         }
 
+        Debug.Log($"[PlayerCardManager] Click en carta. InstanceID: {display.GetInstanceID()}, Valor: {display.cardData?.cardValue}, Cartas seleccionadas: {selectedDisplays.Count}, Operador: '{currentOperator}'");
+
+        // PRIMERA SELECCIÓN
+        if (selectedDisplays.Count == 0)
+        {
+            selectedDisplays.Add(display);
+            SetCardElevation(display, true);
+            Debug.Log($"[PlayerCardManager] ✓ Primera carta seleccionada: {display.cardData.cardName} (ID: {display.GetInstanceID()})");
+            return;
+        }
+
+        // YA HAY UNA CARTA SELECCIONADA
         if (selectedDisplays.Count == 1)
         {
             var first = selectedDisplays[0];
+            bool isSameCard = ReferenceEquals(display, first);
 
-            if (display == first)
+            Debug.Log($"[PlayerCardManager] Comparando: First ID={first.GetInstanceID()}, Current ID={display.GetInstanceID()}, Same={isSameCard}");
+
+            // Si es LA MISMA carta física
+            if (isSameCard)
             {
-                first.SetSelectedVisual(false);
-                selectedDisplays.Clear();
-                return;
+                // Si NO hay operador: deseleccionar
+                if (currentOperator == '\0')
+                {
+                    Debug.Log($"[PlayerCardManager] ✗ Deseleccionando carta (mismo GameObject, sin operador)");
+                    SetCardElevation(first, false);
+                    selectedDisplays.Clear();
+                    return;
+                }
+                // Si HAY operador Y permitimos auto-combinación: usar la misma carta dos veces
+                else if (allowSelfCombination)
+                {
+                    Debug.Log($"[PlayerCardManager] ✓ Auto-combinación: usando la misma carta dos veces con operador '{currentOperator}'");
+                    selectedDisplays.Add(display); // Añadir la misma carta otra vez
+                    // No elevamos más porque ya está elevada
+                    return;
+                }
+                // Si HAY operador pero NO permitimos auto-combinación: deseleccionar
+                else
+                {
+                    Debug.Log($"[PlayerCardManager] ✗ Auto-combinación no permitida");
+                    SetCardElevation(first, false);
+                    selectedDisplays.Clear();
+                    currentOperator = '\0';
+                    return;
+                }
             }
 
+            // Si NO es la misma carta (carta diferente)
+            // Si NO hay operador, reemplazar selección
             if (currentOperator == '\0')
             {
-                first.SetSelectedVisual(false);
+                Debug.Log($"[PlayerCardManager] ⚠ Cambiando selección (sin operador activo)");
+                SetCardElevation(first, false);
                 selectedDisplays.Clear();
                 selectedDisplays.Add(display);
-                display.SetSelectedVisual(true);
+                SetCardElevation(display, true);
                 return;
             }
             else
             {
+                // SI hay operador, añadir segunda carta
+                Debug.Log($"[PlayerCardManager] ✓ Segunda carta seleccionada: {display.cardData.cardName} (ID: {display.GetInstanceID()}) con operador '{currentOperator}'");
                 selectedDisplays.Add(display);
-                display.SetSelectedVisual(true);
+                SetCardElevation(display, true);
                 return;
             }
         }
 
+        // YA HAY DOS CARTAS - reiniciar selección
         if (selectedDisplays.Count >= 2)
         {
-            foreach (var d in selectedDisplays) d.SetSelectedVisual(false);
+            Debug.Log($"[PlayerCardManager] ⚠ Ya hay 2 cartas seleccionadas, reiniciando");
+            foreach (var d in selectedDisplays) SetCardElevation(d, false);
             selectedDisplays.Clear();
+            currentOperator = '\0';
 
             selectedDisplays.Add(display);
-            display.SetSelectedVisual(true);
+            SetCardElevation(display, true);
             return;
         }
     }
 
+    // Método para elevar o bajar la carta (efecto UNO)
+    private void SetCardElevation(CardDisplay display, bool elevated)
+    {
+        if (display == null) return;
+
+        RectTransform rt = display.GetComponent<RectTransform>();
+        if (rt != null)
+        {
+            Vector2 offset = rt.anchoredPosition;
+            if (elevated)
+            {
+                offset.y = elevationAmount;
+            }
+            else
+            {
+                offset.y = 0f;
+            }
+            rt.anchoredPosition = offset;
+        }
+
+        // Mantener el visual de selección también
+        display.SetSelectedVisual(elevated);
+    }
+
     public void DeselectAll()
     {
+        foreach (var d in selectedDisplays)
+        {
+            SetCardElevation(d, false);
+        }
         selectedDisplays.Clear();
         currentOperator = '\0';
     }
-
 
     public bool IsSelected(CardDisplay d) => selectedDisplays.Contains(d);
 
@@ -195,22 +255,19 @@ public class PlayerCardManager : MonoBehaviour
         }
         lastOperatorToggleTime = now;
 
-        // Forzar regla: primero debe haber carta1 seleccionada
         if (selectedDisplays.Count == 0)
         {
             return;
         }
 
-        // Comportamiento toggle pero con protecciones
         if (currentOperator == op)
         {
-            // deselecciona operador
             currentOperator = '\0';
             Debug.Log("[PlayerCardManager] Operador desactivado");
             if (selectedDisplays.Count == 2)
             {
                 var second = selectedDisplays[1];
-                second.SetSelectedVisual(false);
+                SetCardElevation(second, false);
                 selectedDisplays.RemoveAt(1);
             }
         }
@@ -219,7 +276,6 @@ public class PlayerCardManager : MonoBehaviour
             currentOperator = op;
         }
     }
-
 
     public void HandlePlayAreaClick(Vector3 spawnPosition)
     {
@@ -231,11 +287,8 @@ public class PlayerCardManager : MonoBehaviour
 
         if (selectedDisplays.Count == 1)
         {
-            // spawn single
             CardManager.Card c = selectedDisplays[0].GetCardData();
-
             bool ok = RequestGenerateCharacter(c, spawnPosition, selectedDisplays[0].gameObject);
-
             DeselectAll();
             currentOperator = '\0';
             return;
@@ -252,6 +305,9 @@ public class PlayerCardManager : MonoBehaviour
 
             var firstDisplay = selectedDisplays[0];
             var secondDisplay = selectedDisplays[1];
+
+            // CASO ESPECIAL: Si ambos displays son la misma referencia (auto-combinación)
+            bool isAutoCombo = ReferenceEquals(firstDisplay, secondDisplay);
 
             var a = firstDisplay.GetCardData();
             var b = secondDisplay.GetCardData();
@@ -276,7 +332,6 @@ public class PlayerCardManager : MonoBehaviour
             }
             else if (currentOperator == '-')
             {
-                
                 if (a.cardValue < b.cardValue)
                 {
                     Debug.Log($"[PlayerCardManager] Intercambiando cartas para que la primera sea mayor: {a.cardValue} < {b.cardValue}");
@@ -285,13 +340,13 @@ public class PlayerCardManager : MonoBehaviour
                     selectedDisplays[1] = firstDisplay;
                     var tmp = a; a = b; b = tmp;
 
-                    firstDisplay.SetSelectedVisual(false);
-                    secondDisplay.SetSelectedVisual(false);
-                    selectedDisplays[0].SetSelectedVisual(true);
-                    selectedDisplays[1].SetSelectedVisual(true);
+                    SetCardElevation(firstDisplay, false);
+                    SetCardElevation(secondDisplay, false);
+                    SetCardElevation(selectedDisplays[0], true);
+                    SetCardElevation(selectedDisplays[1], true);
                 }
 
-                operationResult = a.cardValue - b.cardValue; 
+                operationResult = a.cardValue - b.cardValue;
                 if (operationResult < 0 || operationResult > 5)
                 {
                     Debug.Log($"[PlayerCardManager] Resta inválida: {a.cardValue} - {b.cardValue} = {operationResult}. Debe estar en [0..5]. Cancela selección.");
@@ -310,31 +365,59 @@ public class PlayerCardManager : MonoBehaviour
 
             if (played)
             {
-                List<Transform> slotsToRefill = new List<Transform>();
-                foreach (var d in selectedDisplays)
+                // Si es auto-combo, solo guardamos UNA carta y UN slot
+                if (isAutoCombo)
                 {
-                    if (d != null && d.transform != null && d.transform.parent != null)
-                        slotsToRefill.Add(d.transform.parent);
-                }
+                    Debug.Log("[PlayerCardManager] Auto-combo jugado: removiendo UNA carta y reponiendo UNA");
+                    int valueUsed = a.cardValue;
+                    Transform slotToRefill = firstDisplay.transform.parent;
 
-                foreach (var d in new List<CardDisplay>(selectedDisplays))
-                {
-                    RemoveCardUI(d);
-                }
-                selectedDisplays.Clear();
+                    RemoveCardUI(firstDisplay);
+                    selectedDisplays.Clear();
 
-
-                foreach (var slot in slotsToRefill)
-                {
-                    if (slot == null) continue;
-                    List<CardManager.Card> newCards = GetRandomCards(1);
-                    if (newCards != null && newCards.Count > 0)
+                    // Reponer la misma carta
+                    if (slotToRefill != null)
                     {
-                        CreateCard(newCards[0], slot);
+                        int indexToGet = valueUsed - 1;
+                        CardManager.Card newCard = cardManager.GetCardByIndex(indexToGet);
+                        if (newCard != null)
+                        {
+                            CreateCard(cardManager.CloneCard(newCard), slotToRefill);
+                        }
                     }
-                    else
+                }
+                else
+                {
+                    // Combo normal: dos cartas diferentes
+                    int valueA = a.cardValue;
+                    int valueB = b.cardValue;
+
+                    List<Transform> slotsToRefill = new List<Transform>();
+                    foreach (var d in selectedDisplays)
                     {
-                        AddNextCard();
+                        if (d != null && d.transform != null && d.transform.parent != null)
+                            slotsToRefill.Add(d.transform.parent);
+                    }
+
+                    foreach (var d in new List<CardDisplay>(selectedDisplays))
+                    {
+                        RemoveCardUI(d);
+                    }
+                    selectedDisplays.Clear();
+
+                    // Rellenar con las cartas correspondientes a los valores jugados
+                    for (int i = 0; i < slotsToRefill.Count; i++)
+                    {
+                        Transform slot = slotsToRefill[i];
+                        if (slot == null) continue;
+
+                        int indexToGet = i == 0 ? (valueA - 1) : (valueB - 1);
+                        CardManager.Card newCard = cardManager.GetCardByIndex(indexToGet);
+
+                        if (newCard != null)
+                        {
+                            CreateCard(cardManager.CloneCard(newCard), slot);
+                        }
                     }
                 }
             }
@@ -350,12 +433,12 @@ public class PlayerCardManager : MonoBehaviour
 
     public bool RequestGenerateCharacter(CardManager.Card cardData, Vector3 spawnPosition, GameObject cardUI)
     {
-
         bool ok = cardManager.GenerateCharacter(cardData, spawnPosition, "PlayerTeam");
 
         if (ok)
         {
-            // Guardar el slot antes de destruir
+            int cardValuePlayed = cardData.cardValue;
+
             Transform slotOfCard = null;
             if (cardUI != null)
             {
@@ -370,21 +453,16 @@ public class PlayerCardManager : MonoBehaviour
 
             if (playerCards.Contains(cardData)) playerCards.Remove(cardData);
 
+            // Robar la misma carta que se jugó
             if (slotOfCard != null)
             {
-                List<CardManager.Card> newCards = GetRandomCards(1);
-                if (newCards != null && newCards.Count > 0)
+                int indexToGet = cardValuePlayed - 1;
+                CardManager.Card newCard = cardManager.GetCardByIndex(indexToGet);
+
+                if (newCard != null)
                 {
-                    CreateCard(newCards[0], slotOfCard);
+                    CreateCard(cardManager.CloneCard(newCard), slotOfCard);
                 }
-                else
-                {
-                    AddNextCard();
-                }
-            }
-            else
-            {
-                AddNextCard();
             }
 
             return true;
@@ -403,8 +481,6 @@ public class PlayerCardManager : MonoBehaviour
         if (playerCards.Contains(cd)) playerCards.Remove(cd);
     }
 
-
-
     private Transform GetFirstFreeSlot()
     {
         foreach (Transform slot in cardSlots)
@@ -412,12 +488,6 @@ public class PlayerCardManager : MonoBehaviour
             if (slot.childCount == 0) return slot;
         }
         return null;
-    }
-
-    private void AddNextCard()
-    {
-        List<CardManager.Card> randomCards = GetRandomCards(1);
-        foreach (var card in randomCards) CreateCard(card);
     }
 
     public void DiscardCard(GameObject card)

@@ -5,8 +5,7 @@ public class AICardHand
 {
     private List<CardManager.Card> mano;
     private CardManager cardManager;
-    public int tamaño = 4;
-
+    public int tamaño = 5;
 
     public AICardHand(CardManager cm)
     {
@@ -17,23 +16,46 @@ public class AICardHand
 
     private void InicializarMano()
     {
-        for (int i = 0; i < tamaño; i++)
+        // Inicializar con cartas ordenadas del 1-5 (CLONES, no las originales)
+        for (int i = 0; i < 5; i++)
         {
-            RobarCarta();
+            CardManager.Card originalCard = cardManager.GetCardByIndex(i);
+            if (originalCard != null)
+            {
+                CardManager.Card clonedCard = cardManager.CloneCard(originalCard);
+                mano.Add(clonedCard);
+            }
         }
 
-        Debug.Log($"[AICardHand] Mano inicial: {ObtenerDescripcionMano()}");
+        Debug.Log($"[AICardHand] Mano inicial ordenada (5 cartas): {ObtenerDescripcionMano()}");
     }
 
+    // Robar carta específica por su valor (índice en availableCards)
+    public void RobarCartaPorValor(int cardValue)
+    {
+        int index = cardValue - 1; // Carta 1 está en índice 0, etc.
+        CardManager.Card nueva = cardManager.GetCardByIndex(index);
+
+        if (nueva != null)
+        {
+            mano.Add(cardManager.CloneCard(nueva));
+            Debug.Log($"[AICardHand] Robé carta específica: {nueva.cardName} (valor {nueva.cardValue})");
+        }
+        else
+        {
+            Debug.LogWarning($"[AICardHand] No se pudo robar carta con valor {cardValue}");
+        }
+    }
+
+    // Método legacy por si se necesita
     public void RobarCarta()
     {
-        // Usa el método que ya tienes en CardManager
         CardManager.Card nueva = cardManager.GetRandomCloneFromAvailable();
 
         if (nueva != null)
         {
             mano.Add(nueva);
-            Debug.Log($"[AICardHand] Robé carta: {nueva.cardName} (valor {nueva.cardValue})");
+            Debug.Log($"[AICardHand] Robé carta aleatoria: {nueva.cardName} (valor {nueva.cardValue})");
         }
         else
         {
@@ -63,6 +85,35 @@ public class AICardHand
         }
     }
 
+    // Remover y robar la misma carta
+    public void RemoverYRobarMisma(CardManager.Card carta)
+    {
+        if (mano.Contains(carta))
+        {
+            int valorJugado = carta.cardValue;
+            mano.Remove(carta);
+            Debug.Log($"[AICardHand] Removí carta: {carta.cardName}");
+
+            // Robar la misma carta
+            RobarCartaPorValor(valorJugado);
+        }
+    }
+
+    // Remover dos cartas y robar las mismas
+    public void RemoverYRobarDos(CardManager.Card cartaA, CardManager.Card cartaB)
+    {
+        int valorA = cartaA.cardValue;
+        int valorB = cartaB.cardValue;
+
+        RemoverCarta(cartaA);
+        RemoverCarta(cartaB);
+
+        RobarCartaPorValor(valorA);
+        RobarCartaPorValor(valorB);
+
+        Debug.Log($"[AICardHand] Reemplacé dos cartas. Nueva mano: {ObtenerDescripcionMano()}");
+    }
+
     public int CantidadCartas()
     {
         return mano.Count;
@@ -72,7 +123,6 @@ public class AICardHand
     {
         return new List<CardManager.Card>(mano);
     }
-
 
     public class ComboAtaque
     {

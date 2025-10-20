@@ -50,6 +50,30 @@ public class CardManager : MonoBehaviour
         return CloneCard(availableCards[idx]);
     }
 
+    public Card GetCardByIndex(int index)
+    {
+        if (availableCards == null || availableCards.Count == 0) return null;
+        if (index < 0 || index >= availableCards.Count)
+        {
+            Debug.LogWarning($"[CardManager] Índice {index} fuera de rango. Debe estar entre 0 y {availableCards.Count - 1}");
+            return null;
+        }
+        return availableCards[index];
+    }
+
+    public List<Card> GetOrderedCards(int count)
+    {
+        List<Card> result = new List<Card>();
+        if (availableCards == null || availableCards.Count == 0 || count <= 0) return result;
+
+        int cardsToGet = Mathf.Min(count, availableCards.Count);
+        for (int i = 0; i < cardsToGet; i++)
+        {
+            result.Add(CloneCard(availableCards[i]));
+        }
+        return result;
+    }
+
     public List<Card> GetRandomClones(int n)
     {
         List<Card> result = new List<Card>();

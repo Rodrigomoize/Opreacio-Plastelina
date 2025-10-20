@@ -4,13 +4,14 @@ using static CharacterManager;
 public class Tower : MonoBehaviour
 {
     [Header("Health")]
-    public int maxHealth = 100;
+    private int maxHealth = 10;
     private int currentHealth;
     
     [Header("UI")]
     public GameObject healthBarPrefab; // Prefab de la barra de vida
     private TowerHealthBar healthBarInstance;
     
+    GameManager gameManager;
     void Start()
     {
         // Inicializar salud
@@ -51,9 +52,6 @@ public class Tower : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Cura la torre
-    /// </summary>
     public void Heal(int amount)
     {
         currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
@@ -89,10 +87,10 @@ public class Tower : MonoBehaviour
     private void OnTowerDestroyed()
     {
         Debug.Log($"[Tower] {gameObject.name} ha sido destruida!");
-        
+
         // Aquí puedes añadir lógica de fin de juego
         // Por ejemplo: activar pantalla de victoria/derrota
-        
+        gameManager.GoToWinScene();
         // Opcionalmente destruir el objeto de la torre
         // Destroy(gameObject);
     }

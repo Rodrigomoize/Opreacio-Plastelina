@@ -404,20 +404,20 @@ public class CharacterManager : MonoBehaviour
         }
     }
 
-    // Daño a la torre (por ahora solo logs)
-    public void DamageEnemyTower(int damage)
+
+    public void DamageTower(Transform towerTransform, int damage)
     {
-        Debug.Log($"[TOWER DAMAGE] Torre enemiga recibe {damage} de daño");
-        
-        // Buscar la torre enemiga y aplicar el daño
-        Tower tower = enemyTower?.GetComponent<Tower>();
-        if (tower != null)
+
+
+        Tower towerComp = towerTransform.GetComponent<Tower>();
+        if (towerComp != null)
         {
-            tower.TakeDamage(damage);
+            towerComp.TakeDamage(damage);
+            Debug.Log($"[CharacterManager] DamageTower: {towerTransform.name} recibió {damage} de daño vía CharacterManager.");
         }
         else
         {
-            Debug.LogWarning("[CharacterManager] No se encontró el componente Tower en la torre enemiga");
+            Debug.LogWarning($"[CharacterManager] DamageTower: {towerTransform.name} no tiene componente Tower.");
         }
     }
 

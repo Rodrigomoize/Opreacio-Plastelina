@@ -35,7 +35,7 @@ public class IntelectManager : MonoBehaviour
             yield return new WaitForSeconds(regenInterval);
         }
 
-        regenCoroutine = null; // ya no hay regeneración activa
+        regenCoroutine = null; 
     }
 
 
@@ -65,12 +65,6 @@ public class IntelectManager : MonoBehaviour
 
         currentIntelect = Mathf.Min(maxIntelect, currentIntelect + amount);
     }
-
-    void Update()
-    {
-
-    }
-
 
     void UpdateUI()
     {

@@ -22,7 +22,7 @@ public class TowerHealthBar : MonoBehaviour
     public Color lowHealthColor = Color.red;
     
     [Header("Health")]
-    public int maxHealth = 100;
+    private int maxHealth = 10;
     private int currentHealth;
     
     private Transform targetTransform;

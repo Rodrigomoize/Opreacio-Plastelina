@@ -1,10 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-/// <summary>
-/// Acción: NO HACER NADA (esperar y regenerar intelecto)
-/// Es buena cuando: poco intelecto, sin amenazas, malas cartas
-/// </summary>
+
 public class AccionEsperar : AIAction
 {
     private IntelectManager intelectManager;

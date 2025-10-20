@@ -131,7 +131,7 @@ public class CharacterCombined : MonoBehaviour
             if (distanciaPuente < 2f)
             {
                 reachedBridge = true;
-                // si enemyTower ya está asignada, cambiar destino; si no, esperar a que se asigne
+             
                 if (enemyTower != null)
                 {
                     agent.SetDestination(enemyTower.position);
@@ -150,15 +150,27 @@ public class CharacterCombined : MonoBehaviour
             float distanciaTorre = Vector3.Distance(transform.position, enemyTower.position);
             if (distanciaTorre < 2f)
             {
-                Debug.Log($"[CharacterCombined] {gameObject.name} llegó a torre, haciendo {combinedValue} de daño");
-                if (manager != null) manager.DamageEnemyTower(combinedValue);
-                
-                // Destruir el UI junto con el personaje
-                if (operationUIInstance != null)
+
+                Tower towerComp = enemyTower.GetComponent<Tower>();
+                if (towerComp != null)
                 {
-                    Destroy(operationUIInstance.gameObject);
+                    towerComp.TakeDamage(combinedValue);
+                    Debug.Log($"[CharacterCombined] Aplicado {combinedValue} de daño directamente a {enemyTower.name}");
                 }
-                
+                else if (manager != null)
+                {
+                    // fallback: pedir al manager que aplique daño (usa DamageTower)
+                    manager.DamageTower(enemyTower, combinedValue);
+                    Debug.Log($"[CharacterCombined] Fallback a CharacterManager para dañar {enemyTower.name} por {combinedValue}");
+                }
+                else
+                {
+                    Debug.LogWarning("[CharacterCombined] No se pudo aplicar daño: no hay Tower ni CharacterManager.");
+                }
+
+                // Destruir el UI junto con el personaje
+                if (operationUIInstance != null) Destroy(operationUIInstance.gameObject);
+
                 Destroy(gameObject);
             }
         }
@@ -184,13 +196,12 @@ public class CharacterCombined : MonoBehaviour
             else if (otherCombined != null)
             {
                 otherValue = otherCombined.combinedValue;
-            }
+            } 
             else
             {
                 return;
             }
 
-            // Si los valores son iguales, ambos se destruyen
             if (combinedValue == otherValue)
             {
                 Debug.Log($"[CharacterCombined] {combinedValue} == {otherValue} - Ambos se destruyen");
@@ -207,6 +218,16 @@ public class CharacterCombined : MonoBehaviour
                 
                 Destroy(other.gameObject);
                 Destroy(gameObject);
+            }
+
+        }
+
+        if (other.CompareTag("Tower"))
+        {
+            Tower tower = other.GetComponentInParent<Tower>();
+            if (tower != null)
+            {
+                tower.TakeDamage(combinedValue);
             }
         }
     }
