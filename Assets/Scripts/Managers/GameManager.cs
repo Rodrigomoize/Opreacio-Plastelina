@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] CardManager combatManager;
     [SerializeField] IAController aiCardManager;
     [SerializeField] PlayerCardManager playerCardManager;
+    [SerializeField] GameTimer gameTimerManager;
 
     [Header("Game State")]
     private bool isPaused = false;
@@ -29,6 +30,7 @@ public class GameManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(this.gameObject);
+        SceneManager.sceneLoaded += HandleSceneLoaded;
     }
 
     public static void GoToMainMenu()
@@ -63,7 +65,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // M�TODOS PRIVADOS DE CARGA
+    // M�TODOS PRIVADOS DE CARGA
 
     private void LoadMainMenu()
     {
@@ -86,6 +88,7 @@ public class GameManager : MonoBehaviour
         isPaused = false;
 
         SceneManager.LoadScene("PlayScene");
+        // La inicialización específica de PlayScene se hace en HandleSceneLoaded
     }
 
     // PAUSE MENU
@@ -128,11 +131,43 @@ public class GameManager : MonoBehaviour
         LoadPlayScene();
     }
 
-    //GETTERS P�BLICOS
+    //GETTERS P�BLICOS
 
     public UIManager GetUIManager() => uiManager;
     public AudioManager GetAudioManager() => audioManager;
     public CardManager GetCombatManager() => combatManager;
     public IAController GetAICardManager() => aiCardManager;
     public PlayerCardManager GetPlayerCardManager() => playerCardManager;
+    public GameTimer GetGameTimer() => gameTimerManager;
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            SceneManager.sceneLoaded -= HandleSceneLoaded;
+        }
+    }
+
+    private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "PlayScene")
+        {
+            // Reiniciar puntuación
+            if (ScoreManager.Instance != null)
+            {
+                ScoreManager.Instance.ResetScore();
+            }
+        }
+    }
+
+    // Navegación a escenas de resultado
+    public void GoToWinScene()
+    {
+        SceneManager.LoadScene("WinScene");
+    }
+
+    public void GoToLoseScene()
+    {
+        SceneManager.LoadScene("LoseScene");
+    }
 }
