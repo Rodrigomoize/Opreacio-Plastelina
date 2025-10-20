@@ -542,7 +542,7 @@ MonoBehaviour:
   tmpTimeText: {fileID: 1957488186}
   useMinutesSeconds: 1
   countdownMode: 0
-  countdownDuration: 20
+  countdownDuration: 200
 --- !u!4 &104346809
 Transform:
   m_ObjectHideFlags: 0
@@ -2964,7 +2964,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 300a0aeebeed02d40bdac044fe4419f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tower
-  maxHealth: 100
   healthBarPrefab: {fileID: 8608500109205576431, guid: de29a2f92f9b54443a64fae0fe2d29fc, type: 3}
 --- !u!1 &1191100312
 GameObject:
@@ -4078,7 +4077,7 @@ MonoBehaviour:
   spawnPointIA: {fileID: 863191583}
   torreIA: {fileID: 1188949408}
   intervaloDecision: 4
-  agresividad: 0
+  agresividad: 1
   debugMode: 0
 --- !u!4 &1556190453
 Transform:
@@ -4124,7 +4123,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d528b74a52dd0f4cb3bcc372b02b1a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::IntelectManager
-  maxIntelect: 0
+  maxIntelect: 10
   minIntelect: 0
   currentIntelect: 0
   regenDelay: 4

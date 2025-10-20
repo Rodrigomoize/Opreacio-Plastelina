@@ -48,7 +48,7 @@ public class CharacterCombined : MonoBehaviour
     public void InitializeCombined(int value, float speed)
     {
         combinedValue = value;
-        velocity = speed;
+        velocity = 0.75f;
     }
     
     /// <summary>
