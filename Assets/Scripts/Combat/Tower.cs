@@ -4,16 +4,23 @@ using static CharacterManager;
 public class Tower : MonoBehaviour
 {
     [Header("Health")]
-    private int maxHealth = 10;
+    public int maxHealth = 10;
     private int currentHealth;
     
     [Header("UI")]
     public GameObject healthBarPrefab; // Prefab de la barra de vida
     private TowerHealthBar healthBarInstance;
     
-    GameManager gameManager;
+    [Header("Tower Type")]
+    public bool isEnemyTower = true; // Marcar como true para la torre enemiga
+    
+    private GameFlow gameFlow;
+    
     void Start()
     {
+        // Buscar el GameFlow
+        gameFlow = FindFirstObjectByType<GameFlow>();
+        
         // Inicializar salud
         currentHealth = maxHealth;
         
@@ -88,9 +95,18 @@ public class Tower : MonoBehaviour
     {
         Debug.Log($"[Tower] {gameObject.name} ha sido destruida!");
 
-        // Aquí puedes añadir lógica de fin de juego
-        // Por ejemplo: activar pantalla de victoria/derrota
-        gameManager.GoToWinScene();
+        if (isEnemyTower && gameFlow != null)
+        {
+            Debug.Log("[Tower] Torre enemiga destruida - Cargando LoseScene");
+            gameFlow.LoadWinScene();
+        }
+        
+        else if (!isEnemyTower && gameFlow != null)
+        {
+            Debug.Log("[Tower] Torre del jugador destruida - Jugador pierde");
+            gameFlow.LoadLoseScene();
+        }
+        
         // Opcionalmente destruir el objeto de la torre
         // Destroy(gameObject);
     }

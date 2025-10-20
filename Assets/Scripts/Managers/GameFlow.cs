@@ -9,6 +9,7 @@ using UnityEngine.SceneManagement;
 public class GameFlow : MonoBehaviour
 {
     [SerializeField] private GameTimer timer;
+    private TowerHealthBar enemyHealth;
 
     private void Awake()
     {
@@ -23,6 +24,11 @@ public class GameFlow : MonoBehaviour
         if (timer != null)
         {
             timer.OnCountdownCompleted += HandleTimeoutLose;
+        }
+
+        if (enemyHealth != null)
+        {
+            enemyHealth = FindFirstObjectByType<TowerHealthBar>();
         }
     }
 

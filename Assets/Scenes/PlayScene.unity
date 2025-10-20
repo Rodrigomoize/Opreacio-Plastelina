@@ -2964,7 +2964,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 300a0aeebeed02d40bdac044fe4419f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tower
+  maxHealth: 10
   healthBarPrefab: {fileID: 8608500109205576431, guid: de29a2f92f9b54443a64fae0fe2d29fc, type: 3}
+  isEnemyTower: 1
 --- !u!1 &1191100312
 GameObject:
   m_ObjectHideFlags: 0

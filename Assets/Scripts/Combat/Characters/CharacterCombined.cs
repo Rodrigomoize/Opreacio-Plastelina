@@ -221,15 +221,6 @@ public class CharacterCombined : MonoBehaviour
             }
 
         }
-
-        if (other.CompareTag("Tower"))
-        {
-            Tower tower = other.GetComponentInParent<Tower>();
-            if (tower != null)
-            {
-                tower.TakeDamage(combinedValue);
-            }
-        }
     }
 
     public int GetValue() => combinedValue;

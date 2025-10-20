@@ -44,11 +44,6 @@ En el prefab `OperationUI.prefab`:
 
 En el prefab `TowerHealthBar.prefab`:
 
-#### Componente Slider
-La barra de vida usa un **Slider de Unity** para representar la salud:
-- **Health Slider**: El componente Slider que muestra la vida
-- **Slider Fill Image**: La imagen de relleno del slider (se colorea automáticamente)
-
 #### Team Colors
 - **Use Team Colors**: Activa esta opción para usar colores sólidos por equipo
 - **Blue Team Color**: Color para la torre del jugador
@@ -155,7 +150,6 @@ troopUI.iconImage.sprite = nuevoSprite;
 - **Azul sugerido**: RGB(51, 128, 255) o #3380FF
 - **Rojo sugerido**: RGB(255, 51, 51) o #FF3333
 - **Contraste**: Usa colores visibles sobre el fondo del juego
-- **Slider**: El slider se actualiza automáticamente, sin necesidad de configuración adicional
 
 ## Solución de Problemas
 
