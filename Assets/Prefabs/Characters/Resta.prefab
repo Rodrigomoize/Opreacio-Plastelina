@@ -144,7 +144,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: eaa46aff53702d9469150dbc504d00a6, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.8290439
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: eaa46aff53702d9469150dbc504d00a6, type: 3}
       propertyPath: m_LocalPosition.y
@@ -152,7 +152,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: eaa46aff53702d9469150dbc504d00a6, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 3.7064214
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: eaa46aff53702d9469150dbc504d00a6, type: 3}
       propertyPath: m_LocalRotation.w
@@ -359,6 +359,7 @@ MonoBehaviour:
   backPosition: {fileID: 584843750846361261}
   AITower: {fileID: 0}
   PlayerTower: {fileID: 0}
+  operationUIPrefab: {fileID: 7733706771787178017, guid: b1c2fd52c17441548a08b3b698f8cc5c, type: 3}
 --- !u!195 &-4487751598518270676
 NavMeshAgent:
   m_ObjectHideFlags: 0

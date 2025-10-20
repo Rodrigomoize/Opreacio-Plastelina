@@ -34,7 +34,7 @@ public class CharacterManager : MonoBehaviour
 
     void Start()
     {
-        intelectManager = FindObjectOfType<IntelectManager>();
+        intelectManager = FindFirstObjectByType<IntelectManager>();
     }
 
     public GameObject InstantiateSingleCharacter(CardManager.Card cardData, Vector3 spawnPosition, string teamTag)
@@ -308,6 +308,9 @@ public class CharacterManager : MonoBehaviour
         cc.frontPosition = frontAnchor;
         cc.backPosition = backAnchor;
         cc.InitializeCombined(result, (frontCard.cardVelocity + backCard.cardVelocity) / 2f);
+        
+        // Configurar los valores de la operación para el UI
+        cc.SetOperationValues(partA.cardValue, partB.cardValue, opSymbol);
 
 
         // With this corrected line:
@@ -405,7 +408,17 @@ public class CharacterManager : MonoBehaviour
     public void DamageEnemyTower(int damage)
     {
         Debug.Log($"[TOWER DAMAGE] Torre enemiga recibe {damage} de daño");
-        // Aquí después añadirás la lógica real de la torre
+        
+        // Buscar la torre enemiga y aplicar el daño
+        Tower tower = enemyTower?.GetComponent<Tower>();
+        if (tower != null)
+        {
+            tower.TakeDamage(damage);
+        }
+        else
+        {
+            Debug.LogWarning("[CharacterManager] No se encontró el componente Tower en la torre enemiga");
+        }
     }
 
     private void AlignModelBottomToGround(GameObject model, float targetY)

@@ -21,10 +21,17 @@ public class CharacterCombined : MonoBehaviour
 
     private GameObject frontCharacterInstance;
     private GameObject backCharacterInstance;
+    
+    [Header("UI")]
+    public GameObject operationUIPrefab; // Prefab del UI de la operación
+    private OperationUI operationUIInstance;
+    private int valueA; // Primer valor de la operación
+    private int valueB; // Segundo valor de la operación
+    private char operatorSymbol; // Símbolo de la operación
 
     void Start()
     {
-        manager = FindObjectOfType<CharacterManager>();
+        manager = FindFirstObjectByType<CharacterManager>();
         if (enemyTower == null)
         {
             GameObject torreAI = GameObject.Find("TorreEnemiga");
@@ -42,6 +49,28 @@ public class CharacterCombined : MonoBehaviour
     {
         combinedValue = value;
         velocity = speed;
+    }
+    
+    /// <summary>
+    /// Inicializa la operación con los valores originales para mostrar en el UI
+    /// </summary>
+    public void SetOperationValues(int valA, int valB, char op)
+    {
+        valueA = valA;
+        valueB = valB;
+        operatorSymbol = op;
+        
+        // Crear el UI de la operación si hay prefab asignado
+        if (operationUIPrefab != null)
+        {
+            GameObject uiObj = Instantiate(operationUIPrefab);
+            operationUIInstance = uiObj.GetComponent<OperationUI>();
+            if (operationUIInstance != null)
+            {
+                // Pasar el tag del equipo para usar el sprite correcto
+                operationUIInstance.Initialize(transform, valueA, valueB, operatorSymbol, gameObject.tag);
+            }
+        }
     }
 
     public void SetupMovement(NavMeshAgent navAgent, Transform bridge, Transform tower)
@@ -123,6 +152,13 @@ public class CharacterCombined : MonoBehaviour
             {
                 Debug.Log($"[CharacterCombined] {gameObject.name} llegó a torre, haciendo {combinedValue} de daño");
                 if (manager != null) manager.DamageEnemyTower(combinedValue);
+                
+                // Destruir el UI junto con el personaje
+                if (operationUIInstance != null)
+                {
+                    Destroy(operationUIInstance.gameObject);
+                }
+                
                 Destroy(gameObject);
             }
         }
@@ -162,6 +198,13 @@ public class CharacterCombined : MonoBehaviour
                 {
                     manager.ResolveOperation();
                 }
+                
+                // Destruir el UI junto con el personaje
+                if (operationUIInstance != null)
+                {
+                    Destroy(operationUIInstance.gameObject);
+                }
+                
                 Destroy(other.gameObject);
                 Destroy(gameObject);
             }

@@ -13,10 +13,26 @@ public class Character : MonoBehaviour
     private Transform enemyTower;
     private bool reachedBridge = false;
     private CharacterManager manager;
+    
+    [Header("UI")]
+    public GameObject troopUIPrefab; // Prefab del UI de la tropa
+    private TroopUI troopUIInstance;
 
     void Start()
     {
-        manager = FindObjectOfType<CharacterManager>();
+        manager = FindFirstObjectByType<CharacterManager>();
+        
+        // Crear el UI de la tropa si hay prefab asignado
+        if (troopUIPrefab != null)
+        {
+            GameObject uiObj = Instantiate(troopUIPrefab);
+            troopUIInstance = uiObj.GetComponent<TroopUI>();
+            if (troopUIInstance != null)
+            {
+                // Pasar el tag del equipo para usar el sprite correcto
+                troopUIInstance.Initialize(transform, value, gameObject.tag);
+            }
+        }
     }
 
     public void InitializeCharacter(int val, int hp, float spd, bool defender)
@@ -44,7 +60,7 @@ public class Character : MonoBehaviour
     {
         if (agent == null || enemyTower == null) return;
 
-        // Si aún no llegó al puente
+        // Si aï¿½n no llegï¿½ al puente
         if (!reachedBridge && targetBridge != null)
         {
             if (Vector3.Distance(transform.position, targetBridge.position) < 1f)
@@ -54,12 +70,19 @@ public class Character : MonoBehaviour
             }
         }
 
-        // Si llegó a la torre enemiga (solo defenders se destruyen)
+        // Si llegï¿½ a la torre enemiga (solo defenders se destruyen)
         if (reachedBridge && isDefender)
         {
             if (Vector3.Distance(transform.position, enemyTower.position) < 1.5f)
             {
-                Debug.Log($"[Character] Defender {value} llegó a torre y se destruye");
+                Debug.Log($"[Character] Defender {value} llegï¿½ a torre y se destruye");
+                
+                // Destruir el UI junto con el personaje
+                if (troopUIInstance != null)
+                {
+                    Destroy(troopUIInstance.gameObject);
+                }
+                
                 Destroy(gameObject);
             }
         }
@@ -89,7 +112,7 @@ public class Character : MonoBehaviour
             }
             else
             {
-                return; // No es un personaje válido
+                return; // No es un personaje vï¿½lido
             }
 
             // Comparar valores
@@ -100,6 +123,13 @@ public class Character : MonoBehaviour
                 {
                     manager.ResolveOperation();
                 }
+                
+                // Destruir el UI junto con el personaje
+                if (troopUIInstance != null)
+                {
+                    Destroy(troopUIInstance.gameObject);
+                }
+                
                 Destroy(other.gameObject);
                 Destroy(gameObject);
             }

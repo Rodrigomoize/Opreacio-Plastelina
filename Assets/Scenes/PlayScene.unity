@@ -542,7 +542,7 @@ MonoBehaviour:
   tmpTimeText: {fileID: 1957488186}
   useMinutesSeconds: 1
   countdownMode: 0
-  countdownDuration: 181
+  countdownDuration: 20
 --- !u!4 &104346809
 Transform:
   m_ObjectHideFlags: 0
@@ -2792,7 +2792,7 @@ GameObject:
   - component: {fileID: 1188949409}
   m_Layer: 0
   m_Name: TorreEnemiga
-  m_TagString: Untagged
+  m_TagString: AITeam
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2806,7 +2806,7 @@ Transform:
   m_GameObject: {fileID: 1188949406}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.25, y: 0.114, z: 6.85}
+  m_LocalPosition: {x: -0.01, y: 0.114, z: 6.85}
   m_LocalScale: {x: 0.88509, y: 0.88509, z: 0.88509}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2859,6 +2859,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 300a0aeebeed02d40bdac044fe4419f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tower
+  maxHealth: 100
+  healthBarPrefab: {fileID: 8608500109205576431, guid: de29a2f92f9b54443a64fae0fe2d29fc, type: 3}
 --- !u!1 &1191100312
 GameObject:
   m_ObjectHideFlags: 0
@@ -4050,7 +4052,7 @@ GameObject:
   - component: {fileID: 1632648659}
   m_Layer: 0
   m_Name: TorrePlayer
-  m_TagString: Untagged
+  m_TagString: PlayerTeam
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4064,7 +4066,7 @@ Transform:
   m_GameObject: {fileID: 1632648658}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.124, z: -7.19}
+  m_LocalPosition: {x: 0.2, y: 0.124, z: -7.19}
   m_LocalScale: {x: 1.1057872, y: 1.1057872, z: 1.1057872}
   m_ConstrainProportionsScale: 0
   m_Children:
