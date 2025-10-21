@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.AI;
+using System.Collections;
 
 public class CharacterCombined : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class CharacterCombined : MonoBehaviour
     private Transform enemyTower;
     private bool reachedBridge = false;
     private CharacterManager manager;
+    private bool isInCombat = false; // Nuevo: evitar múltiples combates
 
     [Header("Posiciones para personajes combinados")]
     public Transform frontPosition;
@@ -29,6 +31,10 @@ public class CharacterCombined : MonoBehaviour
     private int valueB;
     private char operatorSymbol;
 
+    [Header("Combate")]
+    [Tooltip("Duración de la animación de combate en segundos")]
+    public float combatDuration = 2f;
+
     void Start()
     {
         manager = FindFirstObjectByType<CharacterManager>();
@@ -40,7 +46,7 @@ public class CharacterCombined : MonoBehaviour
             if (torreAI != null) AITower = torreAI.transform;
             if (torrePlayer != null) PlayerTower = torrePlayer.transform;
 
-            Debug.Log("[CharacterCombined] Start(): fallback towers loaded (no asignadas a enemyTower si ya venían por param).");
+            Debug.Log("[CharacterCombined] Start(): fallback towers loaded.");
         }
     }
 
@@ -75,7 +81,6 @@ public class CharacterCombined : MonoBehaviour
         targetBridge = bridge;
         enemyTower = tower;
 
-        
         if (agent != null)
         {
             UpdateSpeed();
@@ -97,9 +102,6 @@ public class CharacterCombined : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Actualiza la velocidad del agente aplicando el multiplicador de velocidad de juego
-    /// </summary>
     public void UpdateSpeed()
     {
         if (agent != null && GameSpeedManager.Instance != null)
@@ -108,7 +110,6 @@ public class CharacterCombined : MonoBehaviour
         }
         else if (agent != null)
         {
-            // Si no hay GameSpeedManager, usar velocidad base
             agent.speed = velocity;
         }
     }
@@ -140,7 +141,7 @@ public class CharacterCombined : MonoBehaviour
 
     void Update()
     {
-        if (agent == null) return;
+        if (agent == null || isInCombat) return;
 
         if (!reachedBridge && targetBridge != null)
         {
@@ -156,7 +157,7 @@ public class CharacterCombined : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning($"[CharacterCombined] {gameObject.name} cruzó puente pero enemyTower == null -> esperará que se asigne.");
+                    Debug.LogWarning($"[CharacterCombined] {gameObject.name} cruzó puente pero enemyTower == null");
                 }
             }
         }
@@ -191,24 +192,24 @@ public class CharacterCombined : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
+        if (isInCombat) return; // Ya está en combate
+
         // Verificar si llegó a una torre enemiga
         Tower tower = other.GetComponent<Tower>();
         if (tower != null)
         {
-            // Verificar que es torre enemiga (tag diferente al nuestro)
             bool isTowerEnemy = (gameObject.CompareTag("PlayerTeam") && other.CompareTag("AITeam")) ||
                                 (gameObject.CompareTag("AITeam") && other.CompareTag("PlayerTeam"));
-            
+
             if (isTowerEnemy)
             {
                 Debug.Log($"[CharacterCombined] {gameObject.name} llegó a torre enemiga {other.name}, causando {combinedValue} de daño!");
-                
+
                 if (manager != null)
                 {
                     manager.DamageTower(other.transform, combinedValue);
                 }
-                
-                // Destruir el camión después de atacar
+
                 if (operationUIInstance != null)
                 {
                     Destroy(operationUIInstance.gameObject);
@@ -217,13 +218,17 @@ public class CharacterCombined : MonoBehaviour
                 return;
             }
         }
-        
+
         if (other.CompareTag("AITeam") || other.CompareTag("PlayerTeam"))
         {
             if (other.tag == gameObject.tag) return;
 
             Character otherChar = other.GetComponent<Character>();
             CharacterCombined otherCombined = other.GetComponent<CharacterCombined>();
+
+            // Evitar combate si el otro ya está en combate
+            if (otherChar != null && otherChar.isInCombat) return;
+            if (otherCombined != null && otherCombined.isInCombat) return;
 
             int otherValue = 0;
 
@@ -242,23 +247,75 @@ public class CharacterCombined : MonoBehaviour
 
             if (combinedValue == otherValue)
             {
-                Debug.Log($"[CharacterCombined] {combinedValue} == {otherValue} - Ambos se destruyen");
-                if (manager != null)
-                {
-                    // Pasar el tag del equipo que hizo la operación (este gameObject)
-                    manager.ResolveOperation(gameObject.tag);
-                }
+                Debug.Log($"[CharacterCombined] ⚔️ COMBATE: {combinedValue} == {otherValue} - Iniciando animación!");
 
-                if (operationUIInstance != null)
-                {
-                    Destroy(operationUIInstance.gameObject);
-                }
+                // Marcar ambos como en combate
+                isInCombat = true;
+                if (otherChar != null) otherChar.isInCombat = true;
+                if (otherCombined != null) otherCombined.isInCombat = true;
 
-                Destroy(other.gameObject);
-                Destroy(gameObject);
+                // Iniciar corrutina de combate
+                StartCoroutine(CombatSequence(other.gameObject));
             }
         }
     }
 
+    /// <summary>
+    /// Secuencia de combate animada de 2 segundos
+    /// </summary>
+    private IEnumerator CombatSequence(GameObject enemy)
+    {
+        // Detener ambos NavMeshAgents
+        if (agent != null)
+        {
+            agent.isStopped = true;
+            agent.velocity = Vector3.zero;
+        }
+
+        NavMeshAgent enemyAgent = enemy.GetComponent<NavMeshAgent>();
+        if (enemyAgent != null)
+        {
+            enemyAgent.isStopped = true;
+            enemyAgent.velocity = Vector3.zero;
+        }
+
+        // Orientar uno hacia el otro
+        Vector3 directionToEnemy = enemy.transform.position - transform.position;
+        directionToEnemy.y = 0;
+
+        if (directionToEnemy != Vector3.zero)
+        {
+            transform.rotation = Quaternion.LookRotation(directionToEnemy);
+            enemy.transform.rotation = Quaternion.LookRotation(-directionToEnemy);
+        }
+
+        Debug.Log($"[CharacterCombined] ⚔️ Combate iniciado entre {gameObject.name} y {enemy.name} - 2 segundos de animación");
+
+        // AQUÍ puedes añadir efectos visuales, partículas, etc.
+
+        // Esperar el tiempo configurado
+        yield return new WaitForSeconds(combatDuration);
+
+        Debug.Log($"[CharacterCombined] ⚔️ Combate finalizado - Destruyendo ambas unidades");
+
+        // Resolver operación
+        if (manager != null)
+        {
+            manager.ResolveOperation(gameObject.tag);
+        }
+
+        // Destruir UI
+        if (operationUIInstance != null)
+        {
+            Destroy(operationUIInstance.gameObject);
+        }
+
+        // Destruir ambos
+        Destroy(enemy);
+        Destroy(gameObject);
+    }
+
     public int GetValue() => combinedValue;
+    public bool IsInCombat() => isInCombat;
+    public void SetInCombat(bool value) => isInCombat = value;
 }

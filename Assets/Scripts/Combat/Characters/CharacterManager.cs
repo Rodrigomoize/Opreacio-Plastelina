@@ -9,12 +9,16 @@ public class CharacterManager : MonoBehaviour
     public Transform leftBridge;
     public Transform rightBridge;
 
+    [Header("Área de spawn AI (defensas)")]
+    [Tooltip("Transform que define la zona donde la IA puede spawnear defensas (puede tener un BoxCollider para bounds exactos)")]
+    public Transform playableAreaAI;
+
     private IntelectManager intelectManager;
-    
+
     [Header("Referencias de Intelecto")]
     [Tooltip("IntelectManager del jugador")]
     public IntelectManager playerIntelectManager;
-    
+
     [Tooltip("IntelectManager de la IA")]
     public IntelectManager aiIntelectManager;
 
@@ -27,7 +31,7 @@ public class CharacterManager : MonoBehaviour
     void Start()
     {
         intelectManager = FindFirstObjectByType<IntelectManager>();
-        
+
         // Si no se asignó manualmente el playerIntelectManager, usar el encontrado
         if (playerIntelectManager == null)
         {
@@ -94,7 +98,16 @@ public class CharacterManager : MonoBehaviour
 
         Transform enemyForThisTeam = (teamTag == "AITeam") ? playerTower : enemyTower;
 
+        // Orientar hacia la torre enemiga (preservando la altura para evitar inclinación)
+        if (enemyForThisTeam != null)
+        {
+            Vector3 lookTarget = new Vector3(enemyForThisTeam.position.x, instance.transform.position.y, enemyForThisTeam.position.z);
+            instance.transform.LookAt(lookTarget);
+        }
+
         // SetupMovement ahora aplicará la velocidad al NavMeshAgent
+        // Nota: si luego necesitas que esa unidad cambie su destino (por ejemplo para interceptar un ataque),
+        // puedes usar agent.SetDestination(...) desde el código que la creó.
         charScript.SetupMovement(agent, targetBridge, enemyForThisTeam, true);
 
         Debug.Log($"[CharacterManager] ✓ {cardData.cardName} (valor:{cardData.cardValue}, velocidad:{cardData.cardVelocity}) creado como DEFENDER con tag {teamTag}");
@@ -161,7 +174,7 @@ public class CharacterManager : MonoBehaviour
             {
                 outline.enabled = true;
             }
-            
+
             EnemyRedEmissiveTint tint = instance.GetComponent<EnemyRedEmissiveTint>();
             if (tint != null)
             {
@@ -176,7 +189,7 @@ public class CharacterManager : MonoBehaviour
             {
                 outline.enabled = false;
             }
-            
+
             EnemyRedEmissiveTint tint = instance.GetComponent<EnemyRedEmissiveTint>();
             if (tint != null)
             {
@@ -325,19 +338,19 @@ public class CharacterManager : MonoBehaviour
             {
                 Destroy(col);
             }
-            
+
             // Eliminar todos los Rigidbodies
             foreach (var rb in frontModel.GetComponentsInChildren<Rigidbody>(true))
             {
                 Destroy(rb);
             }
-            
+
             // Eliminar todos los NavMeshAgents
             foreach (var navAgent in frontModel.GetComponentsInChildren<NavMeshAgent>(true))
             {
                 Destroy(navAgent);
             }
-            
+
             // Eliminar todos los MonoBehaviour scripts (Character, CharacterCombined, etc.)
             // Mantener solo Animator
             MonoBehaviour[] scripts = frontModel.GetComponentsInChildren<MonoBehaviour>(true);
@@ -349,7 +362,7 @@ public class CharacterManager : MonoBehaviour
                 }
             }
         }
-        
+
         if (backModel != null)
         {
             // Eliminar todos los Colliders
@@ -357,19 +370,19 @@ public class CharacterManager : MonoBehaviour
             {
                 Destroy(col);
             }
-            
+
             // Eliminar todos los Rigidbodies
             foreach (var rb in backModel.GetComponentsInChildren<Rigidbody>(true))
             {
                 Destroy(rb);
             }
-            
+
             // Eliminar todos los NavMeshAgents
             foreach (var navAgent in backModel.GetComponentsInChildren<NavMeshAgent>(true))
             {
                 Destroy(navAgent);
             }
-            
+
             // Eliminar todos los MonoBehaviour scripts
             // Mantener solo Animator
             MonoBehaviour[] scripts = backModel.GetComponentsInChildren<MonoBehaviour>(true);
@@ -407,7 +420,7 @@ public class CharacterManager : MonoBehaviour
         Quaternion frontAnchorLocalRot = frontAnchor.localRotation;
         Vector3 backAnchorLocalPos = backAnchor.localPosition;
         Quaternion backAnchorLocalRot = backAnchor.localRotation;
-        
+
         Vector3 frontLocalPos = frontModel.transform.localPosition;
         Quaternion frontLocalRot = frontModel.transform.localRotation;
         Vector3 backLocalPos = backModel.transform.localPosition;
@@ -420,7 +433,7 @@ public class CharacterManager : MonoBehaviour
         frontAnchor.localRotation = frontAnchorLocalRot;
         backAnchor.localPosition = backAnchorLocalPos;
         backAnchor.localRotation = backAnchorLocalRot;
-        
+
         // Restaurar posiciones locales de modelos
         frontModel.transform.localPosition = frontLocalPos;
         frontModel.transform.localRotation = frontLocalRot;
@@ -447,6 +460,13 @@ public class CharacterManager : MonoBehaviour
         Transform targetBridge = (spawnPosition.x < 0) ? leftBridge : rightBridge;
         Transform enemyForThisTeam = (teamTag == "AITeam") ? playerTower : enemyTower;
 
+        // Orientar camión hacia torre enemiga (preservando altura)
+        if (enemyForThisTeam != null)
+        {
+            Vector3 lookTarget = new Vector3(enemyForThisTeam.position.x, instance.transform.position.y, enemyForThisTeam.position.z);
+            instance.transform.LookAt(lookTarget);
+        }
+
         if (targetBridge != null && enemyForThisTeam != null)
         {
             // SetupMovement ahora aplicará la velocidad al NavMeshAgent
@@ -457,7 +477,7 @@ public class CharacterManager : MonoBehaviour
             Debug.LogWarning("[CharacterManager] leftBridge/rightBridge/playerTower/enemyTower no asignados correctamente, el camión puede no tener ruta.");
         }
 
-        Debug.Log($"[CharacterManager] ✓ Camión combinado creado: {partA.cardName}({partA.cardValue}) {opSymbol} {partB.cardName}({partB.cardValue}) = {result}, velocidad promedio={combinedVelocity}");
+        Debug.Log($"[CharacterManager] ✓ Camión combinado creado: {partA.cardName}({partA.cardValue}) {opSymbol} {partB.cardName}({partB.cardValue}) = {result}, velocidad promedio={combinedVelocity}{combinedValue}");
 
         return instance;
     }
@@ -475,11 +495,11 @@ public class CharacterManager : MonoBehaviour
     {
         // Determinar qué IntelectManager usar según el equipo
         IntelectManager targetManager = null;
-        
+
         if (teamTag == "PlayerTeam")
         {
             targetManager = playerIntelectManager;
-            
+
             // Registrar operación correcta para el jugador en el ScoreManager
             if (ScoreManager.Instance != null)
             {
@@ -491,13 +511,13 @@ public class CharacterManager : MonoBehaviour
         {
             targetManager = aiIntelectManager;
         }
-        
+
         // Fallback al intelectManager genérico si no hay uno específico asignado
         if (targetManager == null)
         {
             targetManager = intelectManager;
         }
-        
+
         if (targetManager != null)
         {
             Debug.Log($"[CharacterManager] ResolveOperation - Equipo: {teamTag} - Dando +1 intelecto. Intelecto actual: {targetManager.currentIntelect}");
@@ -541,9 +561,9 @@ public class CharacterManager : MonoBehaviour
         foreach (Renderer rend in allRends)
         {
             // Excluir renderers que estén en objetos que son modelos de tropas
-            if (!rend.gameObject.name.Contains("FrontModel") && 
+            if (!rend.gameObject.name.Contains("FrontModel") &&
                 !rend.gameObject.name.Contains("BackModel") &&
-                !rend.gameObject.name.Contains("PH_Front") && 
+                !rend.gameObject.name.Contains("PH_Front") &&
                 !rend.gameObject.name.Contains("PH_Back"))
             {
                 validRends.Add(rend);

@@ -1,6 +1,10 @@
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.InputSystem.XR;
+using UnityEngine.SceneManagement;
+using static IAController;
 
 public class GameManager : MonoBehaviour
 {
@@ -15,6 +19,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] IAController aiCardManager;
     [SerializeField] PlayerCardManager playerCardManager;
     [SerializeField] GameTimer gameTimerManager;
+
+    [Header("Defaults")]
+    [SerializeField] IAController.AIDificultad defaultAIDifficulty = IAController.AIDificultad.Media;
 
     [Header("Game State")]
     private bool isPaused = false;
@@ -150,6 +157,9 @@ public class GameManager : MonoBehaviour
 
     private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        // Asignar managers presentes en la escena cargada
+        AssignSceneManagers(scene);
+
         if (scene.name == "PlayScene")
         {
             // Reiniciar puntuación
@@ -157,7 +167,46 @@ public class GameManager : MonoBehaviour
             {
                 ScoreManager.Instance.ResetScore();
             }
+
+            // Asegurar que la IA reciba la dificultad por defecto una vez esté presente
+            if (aiCardManager != null)
+            {
+                aiCardManager.SetDificultad(defaultAIDifficulty);
+            }
+            else
+            {
+                Debug.LogWarning("[GameManager] IAController no encontrado en PlayScene para asignar dificultad");
+            }
         }
+    }
+
+    /// <summary>
+    /// Busca e asigna los managers que existan en la escena especificada.
+    /// Solo asigna si el campo aún es null (permite preconfiguración por Inspector).
+    /// </summary>
+    private void AssignSceneManagers(Scene scene)
+    {
+        uiManager = uiManager ?? FindInScene<UIManager>(scene);
+        audioManager = audioManager ?? FindInScene<AudioManager>(scene);
+        combatManager = combatManager ?? FindInScene<CardManager>(scene);
+        aiCardManager = aiCardManager ?? FindInScene<IAController>(scene);
+        playerCardManager = playerCardManager ?? FindInScene<PlayerCardManager>(scene);
+        gameTimerManager = gameTimerManager ?? FindInScene<GameTimer>(scene);
+
+        Debug.Log($"[GameManager] Managers asignados -> UI:{(uiManager != null)} Audio:{(audioManager != null)} Card:{(combatManager != null)} AI:{(aiCardManager != null)} PlayerCard:{(playerCardManager != null)} Timer:{(gameTimerManager != null)}");
+    }
+
+    /// <summary>
+    /// Busca un componente T dentro de la escena proporcionada (solo objetos activos).
+    /// </summary>
+    private T FindInScene<T>(Scene scene) where T : MonoBehaviour
+    {
+        T[] all = FindObjectsOfType<T>();
+        foreach (var item in all)
+        {
+            if (item.gameObject.scene == scene) return item;
+        }
+        return null;
     }
 
     // Navegación a escenas de resultado

@@ -171,6 +171,26 @@ public class AICardHand
 
         return mejorCombo;
     }
+    public CardManager.Card ObtenerCartaDiferenteDe(int valorExcluido)
+    {
+        if (mano.Count == 0) return null;
+
+        // Buscar cartas que NO sean del valor excluido
+        List<CardManager.Card> cartasValidas = new List<CardManager.Card>();
+
+        foreach (var carta in mano)
+        {
+            if (carta.cardValue != valorExcluido)
+            {
+                cartasValidas.Add(carta);
+            }
+        }
+
+        if (cartasValidas.Count == 0) return null;
+
+        // Devolver una al azar
+        return cartasValidas[Random.Range(0, cartasValidas.Count)];
+    }
 
     public ComboAtaque EncontrarMejorComboResta()
     {

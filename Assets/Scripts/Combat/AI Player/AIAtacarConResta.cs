@@ -1,10 +1,5 @@
 ﻿using UnityEngine;
 
-/// <summary>
-/// Acción: Combinar 2 cartas con RESTA para ATACAR
-/// Similar a suma pero con ligera penalización (la resta es menos intuitiva para niños)
-/// Regla: resultado debe ser ≥ 0 y ≤ 5
-/// </summary>
 public class AccionAtacarConResta : AIAction
 {
     private IntelectManager intelectManager;
@@ -33,7 +28,6 @@ public class AccionAtacarConResta : AIAction
 
     public override float CalcularScore()
     {
-        // ===== PASO 1: ENCONTRAR MEJOR COMBO DE RESTA =====
         AICardHand.ComboAtaque mejorCombo = aiHand.EncontrarMejorComboResta();
 
         if (mejorCombo == null)
@@ -44,9 +38,6 @@ public class AccionAtacarConResta : AIAction
 
         int resultado = mejorCombo.resultado;
 
-        // ===== PASO 2: VALIDACIONES =====
-
-        // Validar reglas: resta debe ser ≥ 0 y ≤ 5
         if (resultado < 0 || resultado > 5)
         {
             Debug.LogWarning($"[AccionAtacarResta] Combo inválido: {mejorCombo}");
@@ -54,7 +45,6 @@ public class AccionAtacarConResta : AIAction
             return 0f;
         }
 
-        // Validar intelecto
         int costeIntelecto = resultado;
 
         if (intelectManager.currentIntelect < costeIntelecto)
@@ -67,11 +57,9 @@ public class AccionAtacarConResta : AIAction
         float scorePotencia = Normalizar(resultado, 0, 5);
         scorePotencia = CurvaCuadratica(scorePotencia);
 
-        // CONSIDERACIÓN 2: Disponibilidad de intelecto
         float ratioIntelecto = (float)intelectManager.currentIntelect / intelectManager.maxIntelect;
         float scoreIntelecto = Normalizar(ratioIntelecto, 0.3f, 1f);
 
-        // CONSIDERACIÓN 3: Camino libre
         GameObject[] defendersEnemigos = GameObject.FindGameObjectsWithTag("PlayerTeam");
         int cantidadDefenders = 0;
 
@@ -92,25 +80,40 @@ public class AccionAtacarConResta : AIAction
         int amenazasActivas = threatDetector.ContarAmenazas();
         float scorePresionDefensiva = 1f - Normalizar(amenazasActivas, 0, 3);
 
-
         scoreFinal =
-            (scorePotencia * 0.30f) +           // 30% - Daño del ataque
-            (scoreIntelecto * 0.15f) +          // 15% - Tener intelecto
-            (scoreCaminoLibre * 0.25f) +        // 25% - Camino libre
-            (scoreEconomia * 0.10f) +           // 10% - Economía
-            (scoreEficiencia * 0.15f) +         // 15% - Eficiencia (más importante en resta)
-            (scorePresionDefensiva * 0.05f);    // 5% - Presión
+            (scorePotencia * 0.30f) +
+            (scoreIntelecto * 0.15f) +
+            (scoreCaminoLibre * 0.25f) +
+            (scoreEconomia * 0.10f) +
+            (scoreEficiencia * 0.15f) +
+            (scorePresionDefensiva * 0.05f);
 
+        // === MODIFICADOR POR AGRESIVIDAD (DIFICULTAD) ===
+        if (agresividad <= 0.4f) // FÁCIL
+        {
+            scoreFinal *= Mathf.Lerp(0.3f, 0.5f, agresividad / 0.4f);
+        }
+        else if (agresividad <= 0.7f) // MEDIA
+        {
+            scoreFinal *= Mathf.Lerp(0.7f, 0.9f, (agresividad - 0.4f) / 0.3f);
+        }
+        else // DIFÍCIL
+        {
+            scoreFinal *= Mathf.Lerp(1.0f, 1.5f, (agresividad - 0.7f) / 0.3f);
 
-        scoreFinal *= (0.7f + (agresividad * 0.6f));
+            if (resultado >= 4)
+            {
+                scoreFinal *= 1.2f;
+            }
+        }
 
-        scoreFinal *= 0.9f;
-
+        // Penalización por amenaza crítica
         if (threatDetector.HayAmenazaCritica())
         {
             scoreFinal *= 0.5f;
         }
 
+        // Penalización fuerte si resultado es 0
         if (resultado == 0)
         {
             scoreFinal *= 0.3f;
@@ -132,9 +135,9 @@ public class AccionAtacarConResta : AIAction
             return;
         }
 
-        Vector3 posicionSpawn = spawnPoint.position;
+        // === SPAWN ALEATORIO EN EL ÁREA ===
+        Vector3 posicionSpawn = CalcularPosicionAtaqueAleatoria();
 
-        // ⚡ CAMBIO: Pasar intelectManager como IntelectManager base
         bool exito = cardManager.GenerateCombinedCharacter(
             combo.cartaA,
             combo.cartaB,
@@ -142,12 +145,12 @@ public class AccionAtacarConResta : AIAction
             combo.resultado,
             '-',
             "AITeam",
-            intelectManager  // ⚡ AÑADIDO
+            intelectManager
         );
 
         if (exito)
         {
-            Debug.Log($"[AccionAtacarResta] ✅ Ataqué con {combo}");
+            Debug.Log($"[AccionAtacarResta] ✅ Ataqué con {combo} en posición {posicionSpawn}");
             aiHand.RemoverCarta(combo.cartaA);
             aiHand.RemoverCarta(combo.cartaB);
             aiHand.RobarCarta();
@@ -157,5 +160,33 @@ public class AccionAtacarConResta : AIAction
         {
             Debug.LogError($"[AccionAtacarResta] ❌ Falló al generar ataque {combo}");
         }
+    }
+
+    private Vector3 CalcularPosicionAtaqueAleatoria()
+    {
+        Vector3 posicionBase = spawnPoint.position;
+
+        BoxCollider spawnArea = spawnPoint.GetComponent<BoxCollider>();
+
+        if (spawnArea != null)
+        {
+            Vector3 halfSize = spawnArea.size * 0.5f;
+
+            float randomX = Random.Range(-halfSize.x, halfSize.x);
+            float randomZ = Random.Range(-halfSize.z, halfSize.z);
+
+            posicionBase = spawnPoint.position + spawnPoint.TransformDirection(new Vector3(randomX, 0, randomZ));
+        }
+        else
+        {
+            float randomX = Random.Range(-2.5f, 2.5f);
+            float randomZ = Random.Range(-2.5f, 2.5f);
+
+            posicionBase += new Vector3(randomX, 0, randomZ);
+        }
+
+        posicionBase.y = spawnPoint.position.y;
+
+        return posicionBase;
     }
 }

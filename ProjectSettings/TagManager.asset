@@ -8,6 +8,7 @@ TagManager:
   - Tropa
   - PlayerTeam
   - AITeam
+  - PlayableAreaAI
   layers:
   - Default
   - TransparentFX

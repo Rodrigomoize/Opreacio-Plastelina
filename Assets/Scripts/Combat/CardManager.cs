@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class CardManager : MonoBehaviour
@@ -34,7 +36,7 @@ public class CardManager : MonoBehaviour
         clone.cardValue = original.cardValue;
         clone.cardLife = original.cardLife;
         clone.cardVelocity = original.cardVelocity;
-        clone.intelectCost = original.intelectCost;
+        clone.intelectCost = (original.intelectCost > 0) ? original.intelectCost : original.cardValue;
         clone.fbxCharacter = original.fbxCharacter;
         clone.isSelected = original.isSelected;
         clone.cardSprite = original.cardSprite;
@@ -89,34 +91,37 @@ public class CardManager : MonoBehaviour
         return result;
     }
 
-    public bool GenerateCharacter(Card cardData, Vector3 spawnPosition, string teamTag, IntelectManager customIntelectManager = null)
+    public GameObject GenerateCharacter(Card cardData, Vector3 spawnPosition, string teamTag, IntelectManager customIntelectManager = null)
     {
         if (cardData == null)
         {
             Debug.LogWarning("[CardManager] GenerateCharacter recibió cardData null.");
-            return false;
+            return null;
         }
 
         if (characterManager == null)
         {
             Debug.LogError("[CardManager] CharacterManager no está asignado!");
-            return false;
+            return null;
         }
+
+        // Usar fallback: si intelectCost no está definido (>0) usar cardValue
+        int costToUse = (cardData.intelectCost > 0) ? cardData.intelectCost : cardData.cardValue;
 
         IntelectManager intelectToUse = customIntelectManager ?? intelectManagerPlayer;
 
         if (intelectToUse != null)
         {
-            if (!intelectToUse.CanConsume(cardData.intelectCost))
+            if (!intelectToUse.CanConsume(costToUse))
             {
-                Debug.Log($"[CardManager] No hay intelecto suficiente para {cardData.cardName} (coste {cardData.intelectCost})");
-                return false;
+                Debug.Log($"[CardManager] No hay intelecto suficiente para {cardData.cardName} (coste {costToUse})");
+                return null;
             }
-            bool consumed = intelectToUse.Consume(cardData.intelectCost);
+            bool consumed = intelectToUse.Consume(costToUse);
             if (!consumed)
             {
                 Debug.LogWarning("[CardManager] Consume falló aunque CanConsume devolvió true.");
-                return false;
+                return null;
             }
         }
 
@@ -125,8 +130,8 @@ public class CardManager : MonoBehaviour
 
         if (spawnedCharacter != null)
         {
-            Debug.Log($"[CardManager] ✓ Personaje {cardData.cardName} instanciado en {spawnPosition} con tag {teamTag}");
-            return true;
+            Debug.Log($"[CardManager] ✓ Personaje {cardData.cardName} instanciado en {spawnPosition} con tag {teamTag} (coste={costToUse})");
+            return spawnedCharacter;
         }
         else
         {
@@ -134,9 +139,9 @@ public class CardManager : MonoBehaviour
             // Devolver el intelecto si falló
             if (intelectToUse != null)
             {
-                intelectToUse.AddIntelect(cardData.intelectCost);
+                intelectToUse.AddIntelect(costToUse);
             }
-            return false;
+            return null;
         }
     }
 
@@ -171,7 +176,6 @@ public class CardManager : MonoBehaviour
             }
         }
 
-        // Las velocidades de partA y partB se promedian automáticamente en CharacterManager
         GameObject spawnedCombined = characterManager.InstantiateCombinedCharacter(
             partA, partB, spawnPosition, operationResult, opSymbol, teamTag
         );

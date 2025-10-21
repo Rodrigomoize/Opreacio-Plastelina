@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.AI;
+using System.Collections;
 
 public class Character : MonoBehaviour
 {
@@ -12,10 +13,15 @@ public class Character : MonoBehaviour
     private Transform enemyTower;
     private bool reachedBridge = false;
     private CharacterManager manager;
+    public bool isInCombat = false; 
 
     [Header("UI")]
     public GameObject troopUIPrefab;
     private TroopUI troopUIInstance;
+
+    [Header("Combate")]
+    [Tooltip("Duración de la animación de combate en segundos")]
+    public float combatDuration = 2f;
 
     void Start()
     {
@@ -79,9 +85,6 @@ public class Character : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Actualiza la velocidad del agente aplicando el multiplicador de velocidad de juego
-    /// </summary>
     public void UpdateSpeed()
     {
         if (agent != null && GameSpeedManager.Instance != null)
@@ -90,14 +93,13 @@ public class Character : MonoBehaviour
         }
         else if (agent != null)
         {
-            // Si no hay GameSpeedManager, usar velocidad base
             agent.speed = speed;
         }
     }
 
     void Update()
     {
-        if (agent == null || enemyTower == null) return;
+        if (agent == null || enemyTower == null || isInCombat) return;
 
         if (!reachedBridge && targetBridge != null)
         {
@@ -112,30 +114,18 @@ public class Character : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
+        if (isInCombat) return; // Ya está en combate
+
         Debug.Log($"[Character] {gameObject.name} (tag:{gameObject.tag}, valor:{value}) TRIGGER con {other.gameObject.name} (tag:{other.tag})");
 
         // Verificar si llegó a una torre enemiga
         Tower tower = other.GetComponent<Tower>();
         if (tower != null)
         {
-            // Verificar que es torre enemiga (tag diferente al nuestro)
             bool isTowerEnemy = (gameObject.CompareTag("PlayerTeam") && other.CompareTag("AITeam")) ||
                                 (gameObject.CompareTag("AITeam") && other.CompareTag("PlayerTeam"));
-            
             if (isTowerEnemy)
             {
-                Debug.Log($"[Character] {gameObject.name} llegó a torre enemiga {other.name}, causando {value} de daño!");
-                
-                if (manager != null)
-                {
-                    manager.DamageTower(other.transform, value);
-                }
-                
-                // Destruir la tropa después de atacar
-                if (troopUIInstance != null)
-                {
-                    Destroy(troopUIInstance.gameObject);
-                }
                 Destroy(gameObject);
                 return;
             }
@@ -151,6 +141,10 @@ public class Character : MonoBehaviour
 
             Character otherChar = other.GetComponent<Character>();
             CharacterCombined otherCombined = other.GetComponent<CharacterCombined>();
+
+            // Evitar combate si el otro ya está en combate
+            if (otherChar != null && otherChar.isInCombat) return;
+            if (otherCombined != null && otherCombined.IsInCombat()) return;
 
             int otherValue = 0;
 
@@ -172,26 +166,77 @@ public class Character : MonoBehaviour
 
             if (value == otherValue)
             {
-                Debug.Log($"[Character] ⚔️ COMBATE: {value} == {otherValue} - Ambos se destruyen!");
-                if (manager != null)
-                {
-                    // Pasar el tag del equipo que hizo la operación (este gameObject)
-                    manager.ResolveOperation(gameObject.tag);
-                }
+                Debug.Log($"[Character] ⚔️ COMBATE: {value} == {otherValue} - Iniciando animación!");
 
-                if (troopUIInstance != null)
-                {
-                    Destroy(troopUIInstance.gameObject);
-                }
+                // Marcar ambos como en combate
+                isInCombat = true;
+                if (otherChar != null) otherChar.isInCombat = true;
+                if (otherCombined != null) otherCombined.SetInCombat(true);
 
-                Destroy(other.gameObject);
-                Destroy(gameObject);
+                // Iniciar corrutina de combate
+                StartCoroutine(CombatSequence(other.gameObject));
             }
             else
             {
                 Debug.Log($"[Character] Valores diferentes ({value} vs {otherValue}), continúan su camino");
             }
         }
+    }
+
+    /// <summary>
+    /// Secuencia de combate animada de 2 segundos
+    /// </summary>
+    private IEnumerator CombatSequence(GameObject enemy)
+    {
+        // Detener ambos NavMeshAgents
+        if (agent != null)
+        {
+            agent.isStopped = true;
+            agent.velocity = Vector3.zero;
+        }
+
+        NavMeshAgent enemyAgent = enemy.GetComponent<NavMeshAgent>();
+        if (enemyAgent != null)
+        {
+            enemyAgent.isStopped = true;
+            enemyAgent.velocity = Vector3.zero;
+        }
+
+        // Orientar uno hacia el otro
+        Vector3 directionToEnemy = enemy.transform.position - transform.position;
+        directionToEnemy.y = 0; // Mantener horizontal
+
+        if (directionToEnemy != Vector3.zero)
+        {
+            transform.rotation = Quaternion.LookRotation(directionToEnemy);
+            enemy.transform.rotation = Quaternion.LookRotation(-directionToEnemy);
+        }
+
+        Debug.Log($"[Character] ⚔️ Combate iniciado entre {gameObject.name} y {enemy.name} - 2 segundos de animación");
+
+        // AQUÍ puedes añadir efectos visuales, partículas, etc.
+        // Por ejemplo: Instantiate(combatEffectPrefab, transform.position, Quaternion.identity);
+
+        // Esperar 2 segundos (o el tiempo configurado)
+        yield return new WaitForSeconds(combatDuration);
+
+        Debug.Log($"[Character] ⚔️ Combate finalizado - Destruyendo ambas unidades");
+
+        // Resolver operación (dar intelecto)
+        if (manager != null)
+        {
+            manager.ResolveOperation(gameObject.tag);
+        }
+
+        // Destruir UI
+        if (troopUIInstance != null)
+        {
+            Destroy(troopUIInstance.gameObject);
+        }
+
+        // Destruir ambos personajes
+        Destroy(enemy);
+        Destroy(gameObject);
     }
 
     public int GetValue() => value;

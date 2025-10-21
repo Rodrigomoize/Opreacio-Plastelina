@@ -19,6 +19,8 @@ public class IAController : MonoBehaviour
 
     [Tooltip("Transform donde la IA spawneará sus cartas")]
     public Transform spawnPointIA;
+    public Transform spawnPointIA2;
+
 
     [Tooltip("Transform de la torre de la IA")]
     public Transform torreIA;
@@ -35,6 +37,13 @@ public class IAController : MonoBehaviour
 
     [Tooltip("Mostrar logs detallados de decisiones")]
     public bool debugMode = true;
+
+    public enum AIDificultad
+    {
+        Facil,
+        Media,
+        Dificil
+    }
 
 
     // Componentes internos
@@ -86,9 +95,30 @@ public class IAController : MonoBehaviour
         return valido;
     }
 
+    public void SetDificultad(AIDificultad dificultad)
+    {
+        switch (dificultad)
+        {
+            case AIDificultad.Facil:
+                Debug.Log("[IAController] Dificultad establecida a FÁCIL");
+                agresividad = 0.43f;
+                break;
+            case AIDificultad.Media:
+                Debug.Log("[IAController] Dificultad establecida a MEDIA");
+                agresividad = 0.6f;
+                break;
+            case AIDificultad.Dificil:
+                Debug.Log("[IAController] Dificultad establecida a DIFÍCIL");
+                agresividad = 0.8f;
+                break;
+        }
+
+        // Actualizar agresividad en las acciones
+        InicializarIA();
+    }
+
     private void InicializarIA()
     {
-        // Crear mano de cartas (4 cartas iniciales)
         manoIA = new AICardHand(cardManager);
 
         // Crear detector de amenazas
