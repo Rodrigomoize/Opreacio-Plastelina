@@ -562,4 +562,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyRedEmissiveTint
   emissiveColor: {r: 1, g: 0.1, b: 0.1, a: 1}
   emissionIntensity: 0.2
-  applyEmissive: 1
+  applyEmissive: 0

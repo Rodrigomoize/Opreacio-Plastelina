@@ -166,6 +166,7 @@ public class CharacterManager : MonoBehaviour
             if (tint != null)
             {
                 tint.enabled = true;
+                tint.applyEmissive = true;
             }
         }
         else // Desactivar si es PlayerTeam

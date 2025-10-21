@@ -114,6 +114,33 @@ public class Character : MonoBehaviour
     {
         Debug.Log($"[Character] {gameObject.name} (tag:{gameObject.tag}, valor:{value}) TRIGGER con {other.gameObject.name} (tag:{other.tag})");
 
+        // Verificar si llegó a una torre enemiga
+        Tower tower = other.GetComponent<Tower>();
+        if (tower != null)
+        {
+            // Verificar que es torre enemiga (tag diferente al nuestro)
+            bool isTowerEnemy = (gameObject.CompareTag("PlayerTeam") && other.CompareTag("AITeam")) ||
+                                (gameObject.CompareTag("AITeam") && other.CompareTag("PlayerTeam"));
+            
+            if (isTowerEnemy)
+            {
+                Debug.Log($"[Character] {gameObject.name} llegó a torre enemiga {other.name}, causando {value} de daño!");
+                
+                if (manager != null)
+                {
+                    manager.DamageTower(other.transform, value);
+                }
+                
+                // Destruir la tropa después de atacar
+                if (troopUIInstance != null)
+                {
+                    Destroy(troopUIInstance.gameObject);
+                }
+                Destroy(gameObject);
+                return;
+            }
+        }
+
         if (other.CompareTag("AITeam") || other.CompareTag("PlayerTeam"))
         {
             if (other.tag == gameObject.tag)

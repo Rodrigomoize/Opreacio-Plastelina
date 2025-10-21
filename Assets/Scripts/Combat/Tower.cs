@@ -24,6 +24,22 @@ public class Tower : MonoBehaviour
         // Inicializar salud
         currentHealth = maxHealth;
         
+        // Asegurar que la torre tenga un collider con trigger para detectar tropas
+        Collider col = GetComponent<Collider>();
+        if (col == null)
+        {
+            // Añadir un BoxCollider por defecto
+            BoxCollider box = gameObject.AddComponent<BoxCollider>();
+            box.size = new Vector3(2f, 3f, 2f); // Tamaño razonable para una torre
+            box.isTrigger = true;
+            Debug.Log($"[Tower] Añadido BoxCollider trigger a {gameObject.name}");
+        }
+        else
+        {
+            col.isTrigger = true;
+            Debug.Log($"[Tower] Collider existente configurado como trigger en {gameObject.name}");
+        }
+        
         // Crear la barra de vida si hay prefab asignado
         if (healthBarPrefab != null)
         {

@@ -191,6 +191,33 @@ public class CharacterCombined : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
+        // Verificar si llegó a una torre enemiga
+        Tower tower = other.GetComponent<Tower>();
+        if (tower != null)
+        {
+            // Verificar que es torre enemiga (tag diferente al nuestro)
+            bool isTowerEnemy = (gameObject.CompareTag("PlayerTeam") && other.CompareTag("AITeam")) ||
+                                (gameObject.CompareTag("AITeam") && other.CompareTag("PlayerTeam"));
+            
+            if (isTowerEnemy)
+            {
+                Debug.Log($"[CharacterCombined] {gameObject.name} llegó a torre enemiga {other.name}, causando {combinedValue} de daño!");
+                
+                if (manager != null)
+                {
+                    manager.DamageTower(other.transform, combinedValue);
+                }
+                
+                // Destruir el camión después de atacar
+                if (operationUIInstance != null)
+                {
+                    Destroy(operationUIInstance.gameObject);
+                }
+                Destroy(gameObject);
+                return;
+            }
+        }
+        
         if (other.CompareTag("AITeam") || other.CompareTag("PlayerTeam"))
         {
             if (other.tag == gameObject.tag) return;

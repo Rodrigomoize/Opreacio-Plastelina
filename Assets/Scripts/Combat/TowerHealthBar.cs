@@ -94,6 +94,18 @@ public class TowerHealthBar : MonoBehaviour
         maxHealth = health;
         currentHealth = health;
         
+        // Ajustar el offset según el equipo
+        // PlayerTeam: barra abajo de la torre (offset negativo en Y)
+        // AITeam: barra arriba de la torre (offset positivo en Y)
+        if (teamTag == "PlayerTeam")
+        {
+            offset = new Vector3(0, 0, -1); // Abajo de la torre del jugador
+        }
+        else if (teamTag == "AITeam")
+        {
+            offset = new Vector3(0, 3, 0); // Arriba de la torre enemiga
+        }
+        
         // Configurar el slider con los valores máximos
         if (healthSlider != null)
         {
