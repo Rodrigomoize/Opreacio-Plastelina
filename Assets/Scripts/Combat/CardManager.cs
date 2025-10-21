@@ -10,7 +10,7 @@ public class CardManager : MonoBehaviour
         public string cardName;
         public int cardValue;
         public int cardLife;
-        public int cardVelocity;
+        public float cardVelocity;
         public int intelectCost;
         public bool isSelected;
         public bool isSingle;
@@ -24,7 +24,7 @@ public class CardManager : MonoBehaviour
     public List<Card> availableCards = new List<Card>();
 
     [Header("Managers")]
-    public IntelectManager intelectManagerPlayer; 
+    public IntelectManager intelectManagerPlayer;
     public CharacterManager characterManager;
 
     public Card CloneCard(Card original)
@@ -120,6 +120,7 @@ public class CardManager : MonoBehaviour
             }
         }
 
+        // La velocidad cardVelocity se pasa automáticamente al CharacterManager
         GameObject spawnedCharacter = characterManager.InstantiateSingleCharacter(cardData, spawnPosition, teamTag);
 
         if (spawnedCharacter != null)
@@ -170,6 +171,7 @@ public class CardManager : MonoBehaviour
             }
         }
 
+        // Las velocidades de partA y partB se promedian automáticamente en CharacterManager
         GameObject spawnedCombined = characterManager.InstantiateCombinedCharacter(
             partA, partB, spawnPosition, operationResult, opSymbol, teamTag
         );

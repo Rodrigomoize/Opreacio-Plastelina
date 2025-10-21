@@ -12,13 +12,13 @@ public class CharacterManager : MonoBehaviour
         public int value;
         public NavMeshAgent agent;
         public GameObject characterPrefab;
-        public GameObject instancedObject; 
+        public GameObject instancedObject;
         public bool isDefender;
     }
 
     public List<Characters> CharacterSetting = new List<Characters>();
-    public Transform playerTower; 
-    public Transform enemyTower; 
+    public Transform playerTower;
+    public Transform enemyTower;
     public Transform leftBridge;
     public Transform rightBridge;
 
@@ -63,18 +63,18 @@ public class CharacterManager : MonoBehaviour
             charScript = instance.AddComponent<Character>();
         }
 
-        // Inicializar con los datos de la carta
+        // Inicializar con los datos de la carta (INCLUYE LA VELOCIDAD)
         charScript.InitializeCharacter(cardData.cardValue, cardData.cardLife, cardData.cardVelocity, true);
 
-
         AlignModelBottomToGround(instance, spawnPosition.y);
+
         // Configurar NavMeshAgent
         NavMeshAgent agent = instance.GetComponent<NavMeshAgent>();
         if (agent == null) agent = instance.AddComponent<NavMeshAgent>();
 
-        // intenta colocar sobre NavMesh cercano (rango pequeño)
+        // Intenta colocar sobre NavMesh cercano
         NavMeshHit navHit;
-        float sampleRadius = 2.0f; // ajusta si necesitas buscar más lejos
+        float sampleRadius = 2.0f;
         if (NavMesh.SamplePosition(instance.transform.position, out navHit, sampleRadius, NavMesh.AllAreas))
         {
             instance.transform.position = navHit.position;
@@ -82,24 +82,24 @@ public class CharacterManager : MonoBehaviour
         }
         else
         {
-            // fallback: warp a spawn original (mejor que quedarse fuera)
             agent.Warp(instance.transform.position);
         }
 
-        // Decidir camino según posición (izquierda o derecha)
+        // Decidir camino según posición
         Transform targetBridge = (spawnPosition.x < 0) ? leftBridge : rightBridge;
 
         if (targetBridge == null || enemyTower == null)
         {
             Debug.LogError("[CharacterManager] leftBridge, rightBridge o enemyTower no están asignados en el inspector!");
-            return instance; // Devuelve el personaje pero sin movimiento configurado
+            return instance;
         }
 
         Transform enemyForThisTeam = (teamTag == "AITeam") ? playerTower : enemyTower;
 
+        // SetupMovement ahora aplicará la velocidad al NavMeshAgent
         charScript.SetupMovement(agent, targetBridge, enemyForThisTeam, true);
 
-        Debug.Log($"[CharacterManager] ✓ {cardData.cardName} (valor:{cardData.cardValue}) creado como DEFENDER con tag {teamTag}");
+        Debug.Log($"[CharacterManager] ✓ {cardData.cardName} (valor:{cardData.cardValue}, velocidad:{cardData.cardVelocity}) creado como DEFENDER con tag {teamTag}");
 
         return instance;
     }
@@ -113,7 +113,7 @@ public class CharacterManager : MonoBehaviour
             return null;
         }
 
-        // --- Validaciones de reglas (rango 0..5)
+        // Validaciones de reglas
         int result = 0;
         if (opSymbol == '+')
         {
@@ -129,7 +129,6 @@ public class CharacterManager : MonoBehaviour
             result = partA.cardValue - partB.cardValue;
             if (result < 0)
             {
-                // intentamos swap automático
                 Debug.Log($"[CharacterManager] Resta negativa detectada ({partA.cardValue} - {partB.cardValue}). Intercambiando para intentar corregir.");
                 var tmp = partA; partA = partB; partB = tmp;
                 result = partA.cardValue - partB.cardValue;
@@ -153,37 +152,32 @@ public class CharacterManager : MonoBehaviour
             return null;
         }
 
-        
         GameObject instance = Instantiate(truckPrefab, spawnPosition, Quaternion.identity);
         AssignTag(instance, teamTag);
 
-       
         Transform frontSlot = instance.transform.Find("FrontSlot");
         Transform backSlot = instance.transform.Find("BackSlot");
 
-        
         if (frontSlot == null || backSlot == null)
         {
             foreach (Transform child in instance.transform)
             {
                 string n = child.name.ToLower();
-                if (frontSlot == null && n.Contains("Delante")) frontSlot = child;
-                if (backSlot == null && n.Contains("Atras")) backSlot = child;
+                if (frontSlot == null && n.Contains("delante")) frontSlot = child;
+                if (backSlot == null && n.Contains("atras")) backSlot = child;
             }
         }
 
-        
         if (frontSlot == null || backSlot == null)
         {
             foreach (var col in instance.GetComponentsInChildren<BoxCollider>(true))
             {
                 string n = col.gameObject.name.ToLower();
-                if (frontSlot == null && n.Contains("Delante")) frontSlot = col.transform;
-                if (backSlot == null && n.Contains("Atras")) backSlot = col.transform;
+                if (frontSlot == null && n.Contains("delante")) frontSlot = col.transform;
+                if (backSlot == null && n.Contains("atras")) backSlot = col.transform;
             }
         }
 
-        // fallback: crear transforms vacíos si no hay nada
         if (frontSlot == null)
         {
             GameObject f = new GameObject("FrontSlot");
@@ -206,7 +200,6 @@ public class CharacterManager : MonoBehaviour
             BoxCollider box = slotTransform.GetComponent<BoxCollider>();
             if (box == null)
             {
-               
                 Transform existing = slotTransform.Find(anchorName);
                 if (existing != null) return existing;
                 GameObject a = new GameObject(anchorName);
@@ -217,7 +210,6 @@ public class CharacterManager : MonoBehaviour
             }
             else
             {
-                
                 Transform existing = slotTransform.Find(anchorName);
                 if (existing != null) return existing;
 
@@ -245,11 +237,9 @@ public class CharacterManager : MonoBehaviour
             backAnchor = b.transform;
         }
 
-        
         CardManager.Card frontCard = partA;
         CardManager.Card backCard = partB;
 
-        
         GameObject frontModel;
         if (frontCard.fbxCharacter != null)
         {
@@ -276,11 +266,9 @@ public class CharacterManager : MonoBehaviour
             backModel.transform.position = backAnchor.position;
         }
 
-        
         FitModelToSlot(frontModel, frontAnchor, modelFitPadding);
         FitModelToSlot(backModel, backAnchor, modelFitPadding);
 
-       
         if (frontModel != null)
         {
             foreach (var col in frontModel.GetComponentsInChildren<Collider>(true)) col.enabled = false;
@@ -300,28 +288,34 @@ public class CharacterManager : MonoBehaviour
             }
         }
 
-        // --- Asegurar componente CharacterCombined en el camión
+        // Asegurar componente CharacterCombined
         CharacterCombined cc = instance.GetComponent<CharacterCombined>();
         if (cc == null) cc = instance.AddComponent<CharacterCombined>();
 
-        
         cc.frontPosition = frontAnchor;
         cc.backPosition = backAnchor;
-        cc.InitializeCombined(result, (frontCard.cardVelocity + backCard.cardVelocity) / 2f);
-        
-        // Configurar los valores de la operación para el UI
+        float MapValueToVelocity(int cardValue)
+        {
+            cardValue = Mathf.Clamp(cardValue, 1, 5);
+            float minVel = 2f;
+            float maxVel = 4f;
+            float steps = 4f;
+            return maxVel - (cardValue - 1) * ((maxVel - minVel) / steps);
+        }
+
+        float combinedVelocity = MapValueToVelocity(result);
+        cc.InitializeCombined(result, combinedVelocity);
+
         cc.SetOperationValues(partA.cardValue, partB.cardValue, opSymbol);
 
-
-        // With this corrected line:
         AlignModelBottomToGround(instance, spawnPosition.y);
+
         // Configurar NavMeshAgent
         NavMeshAgent agent = instance.GetComponent<NavMeshAgent>();
         if (agent == null) agent = instance.AddComponent<NavMeshAgent>();
 
-        // intenta colocar sobre NavMesh cercano (rango pequeño)
         NavMeshHit navHit;
-        float sampleRadius = 2.0f; // ajusta si necesitas buscar más lejos
+        float sampleRadius = 2.0f;
         if (NavMesh.SamplePosition(instance.transform.position, out navHit, sampleRadius, NavMesh.AllAreas))
         {
             instance.transform.position = navHit.position;
@@ -329,17 +323,16 @@ public class CharacterManager : MonoBehaviour
         }
         else
         {
-            // fallback: warp a spawn original (mejor que quedarse fuera)
             agent.Warp(instance.transform.position);
         }
 
         // Ruteo
         Transform targetBridge = (spawnPosition.x < 0) ? leftBridge : rightBridge;
-
         Transform enemyForThisTeam = (teamTag == "AITeam") ? playerTower : enemyTower;
 
         if (targetBridge != null && enemyForThisTeam != null)
         {
+            // SetupMovement ahora aplicará la velocidad al NavMeshAgent
             cc.SetupMovement(agent, targetBridge, enemyForThisTeam);
         }
         else
@@ -347,7 +340,7 @@ public class CharacterManager : MonoBehaviour
             Debug.LogWarning("[CharacterManager] leftBridge/rightBridge/playerTower/enemyTower no asignados correctamente, el camión puede no tener ruta.");
         }
 
-
+        Debug.Log($"[CharacterManager] ✓ Camión combinado creado: {partA.cardName}({partA.cardValue}) {opSymbol} {partB.cardName}({partB.cardValue}) = {result}, velocidad promedio={combinedVelocity}");
 
         return instance;
     }
@@ -363,11 +356,9 @@ public class CharacterManager : MonoBehaviour
         model.transform.localRotation = Quaternion.identity;
         model.transform.localScale = Vector3.one;
 
-        // Recolectar renderers para calcular bounds en mundo
         Renderer[] rends = model.GetComponentsInChildren<Renderer>(true);
         if (rends == null || rends.Length == 0)
         {
-            // nada que ajustar (placeholder u objeto vacío)
             return;
         }
 
@@ -378,14 +369,10 @@ public class CharacterManager : MonoBehaviour
         float maxDim = Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
         if (maxDim <= 1e-5f) return;
 
-        
         float target = combinedModelTargetSize;
-
         float scaleFactor = (target * padding) / maxDim;
 
-        // Aplica escala manteniendo uniformidad
         model.transform.localScale = Vector3.one * scaleFactor;
-
     }
 
     public void AssignTag(GameObject obj, string tagName)
@@ -401,14 +388,12 @@ public class CharacterManager : MonoBehaviour
         if (intelectManager != null)
         {
             intelectManager.AddIntelect(1);
+            Debug.Log("Se ha añadido uno de intelecto");
         }
     }
 
-
     public void DamageTower(Transform towerTransform, int damage)
     {
-
-
         Tower towerComp = towerTransform.GetComponent<Tower>();
         if (towerComp != null)
         {
@@ -428,7 +413,6 @@ public class CharacterManager : MonoBehaviour
         Renderer[] rends = model.GetComponentsInChildren<Renderer>(true);
         if (rends == null || rends.Length == 0)
         {
-            // fallback sencillo: colocar root en targetY
             Vector3 p = model.transform.position; p.y = targetY; model.transform.position = p;
             return;
         }

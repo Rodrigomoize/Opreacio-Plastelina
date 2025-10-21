@@ -21,13 +21,13 @@ public class CharacterCombined : MonoBehaviour
 
     private GameObject frontCharacterInstance;
     private GameObject backCharacterInstance;
-    
+
     [Header("UI")]
-    public GameObject operationUIPrefab; // Prefab del UI de la operación
+    public GameObject operationUIPrefab;
     private OperationUI operationUIInstance;
-    private int valueA; // Primer valor de la operación
-    private int valueB; // Segundo valor de la operación
-    private char operatorSymbol; // Símbolo de la operación
+    private int valueA;
+    private int valueB;
+    private char operatorSymbol;
 
     void Start()
     {
@@ -40,7 +40,6 @@ public class CharacterCombined : MonoBehaviour
             if (torreAI != null) AITower = torreAI.transform;
             if (torrePlayer != null) PlayerTower = torrePlayer.transform;
 
-            // NO sobreescribimos enemyTower automáticamente aquí.
             Debug.Log("[CharacterCombined] Start(): fallback towers loaded (no asignadas a enemyTower si ya venían por param).");
         }
     }
@@ -48,26 +47,23 @@ public class CharacterCombined : MonoBehaviour
     public void InitializeCombined(int value, float speed)
     {
         combinedValue = value;
-        velocity = 0.75f;
+        velocity = speed;
+
+        Debug.Log($"[CharacterCombined] Inicializado: valor={combinedValue}, velocidad={velocity}");
     }
-    
-    /// <summary>
-    /// Inicializa la operación con los valores originales para mostrar en el UI
-    /// </summary>
+
     public void SetOperationValues(int valA, int valB, char op)
     {
         valueA = valA;
         valueB = valB;
         operatorSymbol = op;
-        
-        // Crear el UI de la operación si hay prefab asignado
+
         if (operationUIPrefab != null)
         {
             GameObject uiObj = Instantiate(operationUIPrefab);
             operationUIInstance = uiObj.GetComponent<OperationUI>();
             if (operationUIInstance != null)
             {
-                // Pasar el tag del equipo para usar el sprite correcto
                 operationUIInstance.Initialize(transform, valueA, valueB, operatorSymbol, gameObject.tag);
             }
         }
@@ -77,23 +73,29 @@ public class CharacterCombined : MonoBehaviour
     {
         agent = navAgent;
         targetBridge = bridge;
-
         enemyTower = tower;
 
-        Debug.Log($"[CharacterCombined] SetupMovement() llamado en {gameObject.name} (tag:{gameObject.tag}) -> bridge:{targetBridge?.name} enemyTower:{enemyTower?.name}");
-
-        if (agent != null && targetBridge != null)
+        
+        if (agent != null)
         {
-            agent.SetDestination(targetBridge.position);
-            Debug.Log($"[CharacterCombined] Navegando hacia puente: {targetBridge.name}");
+            agent.speed = velocity;
+            Debug.Log($"[CharacterCombined] {gameObject.name} - NavMeshAgent.speed configurado a {agent.speed}");
+
+            if (targetBridge != null)
+            {
+                agent.SetDestination(targetBridge.position);
+                Debug.Log($"[CharacterCombined] Navegando hacia puente: {targetBridge.name}");
+            }
+            else
+            {
+                Debug.LogError($"[CharacterCombined] targetBridge es null en {gameObject.name}!");
+            }
         }
         else
         {
-            Debug.LogError($"[CharacterCombined] Agent o targetBridge son null en {gameObject.name}!");
+            Debug.LogError($"[CharacterCombined] Agent es null en {gameObject.name}!");
         }
     }
-
-
 
     public void SetupCharacterModels(GameObject frontModel, GameObject backModel)
     {
@@ -122,16 +124,15 @@ public class CharacterCombined : MonoBehaviour
 
     void Update()
     {
-        if (agent == null) return; // solo esto
+        if (agent == null) return;
 
-        // FASE 1: Ir al puente
         if (!reachedBridge && targetBridge != null)
         {
             float distanciaPuente = Vector3.Distance(transform.position, targetBridge.position);
             if (distanciaPuente < 2f)
             {
                 reachedBridge = true;
-             
+
                 if (enemyTower != null)
                 {
                     agent.SetDestination(enemyTower.position);
@@ -144,13 +145,11 @@ public class CharacterCombined : MonoBehaviour
             }
         }
 
-        
         if (reachedBridge && enemyTower != null)
         {
             float distanciaTorre = Vector3.Distance(transform.position, enemyTower.position);
             if (distanciaTorre < 2f)
             {
-
                 Tower towerComp = enemyTower.GetComponent<Tower>();
                 if (towerComp != null)
                 {
@@ -159,7 +158,6 @@ public class CharacterCombined : MonoBehaviour
                 }
                 else if (manager != null)
                 {
-                    // fallback: pedir al manager que aplique daño (usa DamageTower)
                     manager.DamageTower(enemyTower, combinedValue);
                     Debug.Log($"[CharacterCombined] Fallback a CharacterManager para dañar {enemyTower.name} por {combinedValue}");
                 }
@@ -168,7 +166,6 @@ public class CharacterCombined : MonoBehaviour
                     Debug.LogWarning("[CharacterCombined] No se pudo aplicar daño: no hay Tower ni CharacterManager.");
                 }
 
-                // Destruir el UI junto con el personaje
                 if (operationUIInstance != null) Destroy(operationUIInstance.gameObject);
 
                 Destroy(gameObject);
@@ -176,12 +173,10 @@ public class CharacterCombined : MonoBehaviour
         }
     }
 
-
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("AITeam") || other.CompareTag("PlayerTeam"))
         {
-            // No colisionar con mi propio equipo
             if (other.tag == gameObject.tag) return;
 
             Character otherChar = other.GetComponent<Character>();
@@ -196,7 +191,7 @@ public class CharacterCombined : MonoBehaviour
             else if (otherCombined != null)
             {
                 otherValue = otherCombined.combinedValue;
-            } 
+            }
             else
             {
                 return;
@@ -209,17 +204,15 @@ public class CharacterCombined : MonoBehaviour
                 {
                     manager.ResolveOperation();
                 }
-                
-                // Destruir el UI junto con el personaje
+
                 if (operationUIInstance != null)
                 {
                     Destroy(operationUIInstance.gameObject);
                 }
-                
+
                 Destroy(other.gameObject);
                 Destroy(gameObject);
             }
-
         }
     }
 
