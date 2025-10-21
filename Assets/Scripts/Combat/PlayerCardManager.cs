@@ -26,6 +26,8 @@ public class PlayerCardManager : MonoBehaviour
     public Color validOperatorColor = Color.white;
     [Tooltip("Color para botones de operación inválidos")]
     public Color invalidOperatorColor = new Color(0.5f, 0.5f, 0.5f, 0.6f);
+    [Tooltip("Color para el operador actualmente seleccionado")]
+    public Color selectedOperatorColor = new Color(1f, 1f, 0.5f, 1f);
 
     // Estado de selección / operación
     private List<CardDisplay> selectedDisplays = new List<CardDisplay>(2);
@@ -286,6 +288,13 @@ public class PlayerCardManager : MonoBehaviour
             return;
         }
 
+        // Si la operación está completa (2 cartas), no permitir cambiar operador
+        if (selectedDisplays.Count >= 2)
+        {
+            Debug.Log("[PlayerCardManager] Operación completa: no se puede cambiar operador");
+            return;
+        }
+
         if (currentOperator == op)
         {
             currentOperator = '\0';
@@ -541,6 +550,9 @@ public class PlayerCardManager : MonoBehaviour
         // Una carta seleccionada, sin operador: todas son válidas (puedes cambiar selección)
         if (selectedDisplays.Count == 1 && currentOperator == '\0') return true;
         
+        // DOS cartas seleccionadas: operación completa, no se pueden seleccionar más
+        if (selectedDisplays.Count >= 2) return false;
+        
         // Una carta seleccionada CON operador
         if (selectedDisplays.Count == 1 && currentOperator != '\0')
         {
@@ -618,8 +630,8 @@ public class PlayerCardManager : MonoBehaviour
             }
         }
         
-        // Con dos cartas: el operador ya está activo
-        return selectedDisplays.Count == 2;
+        // Con dos cartas: operación completa, no se puede cambiar operador
+        return false;
     }
     
     /// <summary>
@@ -627,6 +639,8 @@ public class PlayerCardManager : MonoBehaviour
     /// </summary>
     private void UpdateVisualFeedback()
     {
+        Debug.Log($"[UpdateVisualFeedback] Cartas seleccionadas: {selectedDisplays.Count}, Operador actual: '{currentOperator}'");
+        
         // Actualizar estado visual de cada carta
         foreach (var cardObj in spawnedCards)
         {
@@ -659,24 +673,73 @@ public class PlayerCardManager : MonoBehaviour
         // Actualizar botones de operación
         if (SumaButton != null)
         {
-            bool sumaValid = IsOperatorValid('+');
+            bool sumaSelected = (currentOperator == '+');
+            bool operationComplete = (selectedDisplays.Count >= 2);
+            
+            Debug.Log($"[UpdateVisualFeedback] Botón +: Selected={sumaSelected}, Complete={operationComplete}");
+            
             Image btnImage = SumaButton.GetComponent<Image>();
             if (btnImage != null)
             {
-                btnImage.color = sumaValid ? validOperatorColor : invalidOperatorColor;
+                // Si está seleccionado, siempre usar color de selección
+                if (sumaSelected)
+                {
+                    btnImage.color = selectedOperatorColor;
+                    Debug.Log($"[UpdateVisualFeedback] Botón + usando selectedOperatorColor: {selectedOperatorColor}");
+                }
+                else
+                {
+                    bool sumaValid = IsOperatorValid('+');
+                    btnImage.color = sumaValid ? validOperatorColor : invalidOperatorColor;
+                }
             }
-            SumaButton.interactable = sumaValid;
+            
+            // Cuando la operación está completa, el botón NO debe ser clickeable pero SÍ verse seleccionado
+            // Para evitar que Unity lo oscurezca automáticamente, lo dejamos interactable pero bloqueamos clicks
+            if (operationComplete)
+            {
+                // Mantener interactable para que no se oscurezca, pero no responderá a clicks (la lógica lo previene)
+                SumaButton.interactable = true;
+            }
+            else
+            {
+                bool sumaValid = IsOperatorValid('+');
+                SumaButton.interactable = sumaValid || sumaSelected;
+            }
         }
         
         if (RestaButton != null)
         {
-            bool restaValid = IsOperatorValid('-');
+            bool restaSelected = (currentOperator == '-');
+            bool operationComplete = (selectedDisplays.Count >= 2);
+            
             Image btnImage = RestaButton.GetComponent<Image>();
             if (btnImage != null)
             {
-                btnImage.color = restaValid ? validOperatorColor : invalidOperatorColor;
+                // Si está seleccionado, siempre usar color de selección
+                if (restaSelected)
+                {
+                    btnImage.color = selectedOperatorColor;
+                }
+                else
+                {
+                    bool restaValid = IsOperatorValid('-');
+                    btnImage.color = restaValid ? validOperatorColor : invalidOperatorColor;
+                }
             }
-            RestaButton.interactable = restaValid;
+            
+            // Cuando la operación está completa, el botón NO debe ser clickeable pero SÍ verse seleccionado
+            // Para evitar que Unity lo oscurezca automáticamente, lo dejamos interactable pero bloqueamos clicks
+            if (operationComplete)
+            {
+                // Mantener interactable para que no se oscurezca, pero no responderá a clicks (la lógica lo previene)
+                RestaButton.interactable = true;
+            }
+            else
+            {
+                bool restaValid = IsOperatorValid('-');
+                RestaButton.interactable = restaValid || restaSelected;
+            }
         }
     }
 }
