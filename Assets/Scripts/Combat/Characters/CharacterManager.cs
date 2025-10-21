@@ -10,6 +10,13 @@ public class CharacterManager : MonoBehaviour
     public Transform rightBridge;
 
     private IntelectManager intelectManager;
+    
+    [Header("Referencias de Intelecto")]
+    [Tooltip("IntelectManager del jugador")]
+    public IntelectManager playerIntelectManager;
+    
+    [Tooltip("IntelectManager de la IA")]
+    public IntelectManager aiIntelectManager;
 
     public GameObject combinedPrefabSum;
     public GameObject combinedPrefabSub;
@@ -20,6 +27,12 @@ public class CharacterManager : MonoBehaviour
     void Start()
     {
         intelectManager = FindFirstObjectByType<IntelectManager>();
+        
+        // Si no se asignó manualmente el playerIntelectManager, usar el encontrado
+        if (playerIntelectManager == null)
+        {
+            playerIntelectManager = intelectManager;
+        }
     }
 
     public GameObject InstantiateSingleCharacter(CardManager.Card cardData, Vector3 spawnPosition, string teamTag)
@@ -427,12 +440,35 @@ public class CharacterManager : MonoBehaviour
         }
     }
 
-    public void ResolveOperation()
+    public void ResolveOperation(string teamTag)
     {
-        if (intelectManager != null)
+        // Determinar qué IntelectManager usar según el equipo
+        IntelectManager targetManager = null;
+        
+        if (teamTag == "PlayerTeam")
         {
-            intelectManager.AddIntelect(1);
-            Debug.Log("Se ha añadido uno de intelecto");
+            targetManager = playerIntelectManager;
+        }
+        else if (teamTag == "AITeam")
+        {
+            targetManager = aiIntelectManager;
+        }
+        
+        // Fallback al intelectManager genérico si no hay uno específico asignado
+        if (targetManager == null)
+        {
+            targetManager = intelectManager;
+        }
+        
+        if (targetManager != null)
+        {
+            Debug.Log($"[CharacterManager] ResolveOperation - Equipo: {teamTag} - Dando +1 intelecto. Intelecto actual: {targetManager.currentIntelect}");
+            targetManager.AddIntelect(1);
+            Debug.Log($"[CharacterManager] Después de AddIntelect(1) - Equipo: {teamTag} - Intelecto: {targetManager.currentIntelect}");
+        }
+        else
+        {
+            Debug.LogError($"[CharacterManager] ResolveOperation - No se encontró IntelectManager para el equipo: {teamTag}");
         }
     }
 

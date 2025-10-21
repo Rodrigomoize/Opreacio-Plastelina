@@ -1616,6 +1616,8 @@ MonoBehaviour:
   enemyTower: {fileID: 1188949408}
   leftBridge: {fileID: 158759333}
   rightBridge: {fileID: 1860888794}
+  playerIntelectManager: {fileID: 1639695185}
+  aiIntelectManager: {fileID: 1587260387}
   combinedPrefabSum: {fileID: 4485164346710184342, guid: b3351e2176a211e4685edbcf170820a6, type: 3}
   combinedPrefabSub: {fileID: 3326580399756746706, guid: 87a5d165c5337104b84005d1fe578854, type: 3}
 --- !u!4 &611915977
@@ -4313,7 +4315,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::IntelectManager
   maxIntelect: 10
   minIntelect: 0
-  currentIntelect: 4
+  currentIntelect: 1
   regenDelay: 0
   regenInterval: 2.8
   regenAmount: 1
@@ -4397,7 +4399,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::IntelectManager
   maxIntelect: 10
   minIntelect: 0
-  currentIntelect: 4
+  currentIntelect: 1
   regenDelay: 0
   regenInterval: 2.8
   regenAmount: 1

@@ -218,7 +218,8 @@ public class CharacterCombined : MonoBehaviour
                 Debug.Log($"[CharacterCombined] {combinedValue} == {otherValue} - Ambos se destruyen");
                 if (manager != null)
                 {
-                    manager.ResolveOperation();
+                    // Pasar el tag del equipo que hizo la operación (este gameObject)
+                    manager.ResolveOperation(gameObject.tag);
                 }
 
                 if (operationUIInstance != null)

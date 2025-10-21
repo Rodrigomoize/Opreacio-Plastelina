@@ -56,22 +56,16 @@ public class IntelectManager : MonoBehaviour
         yield return new WaitForSeconds(regenDelay);
 
         // Luego regenera hasta llegar al máximo
-        while (currentIntelect < maxIntelect)
+        while (currentIntelectFloat < maxIntelect)
         {
-            // El valor float empieza desde el valor actual
-            currentIntelectFloat = currentIntelect;
-            
-            // Calcular el siguiente valor
-            int nextIntelect = Mathf.Min(maxIntelect, currentIntelect + regenAmount);
-            
-            // El objetivo visual es el siguiente valor
-            targetIntelectFloat = nextIntelect;
+            // Incrementar el objetivo en +1 desde donde esté actualmente
+            targetIntelectFloat = Mathf.Min(maxIntelect, targetIntelectFloat + regenAmount);
             
             // Esperar el intervalo de regeneración
             yield return new WaitForSeconds(regenInterval);
             
-            // DESPUÉS del tiempo, actualizar el valor real
-            currentIntelect = nextIntelect;
+            // DESPUÉS del tiempo, actualizar el valor entero basado en el floor del float actual
+            currentIntelect = Mathf.FloorToInt(currentIntelectFloat);
         }
 
         regenCoroutine = null; 
@@ -114,13 +108,17 @@ public class IntelectManager : MonoBehaviour
 
     public void AddIntelect(int amount)
     {
-        currentIntelect = Mathf.Min(maxIntelect, currentIntelect + amount);
+        // Incrementar directamente ambos valores (actual y objetivo) para bonus instantáneo
+        currentIntelectFloat = Mathf.Min(maxIntelect, currentIntelectFloat + amount);
+        targetIntelectFloat = Mathf.Min(maxIntelect, targetIntelectFloat + amount);
         
-        // Actualizar valores de interpolación instantáneamente
-        currentIntelectFloat = currentIntelect;
-        targetIntelectFloat = currentIntelect;
+        // Actualizar el valor entero al floor del float
+        currentIntelect = Mathf.FloorToInt(currentIntelectFloat);
         
         UpdateUI();
+        
+        // NO reiniciar la corrutina - dejarla continuar su ciclo natural
+        // La regeneración seguirá funcionando normalmente en segundo plano
     }
 
     void UpdateUI()

@@ -148,7 +148,8 @@ public class Character : MonoBehaviour
                 Debug.Log($"[Character] ⚔️ COMBATE: {value} == {otherValue} - Ambos se destruyen!");
                 if (manager != null)
                 {
-                    manager.ResolveOperation();
+                    // Pasar el tag del equipo que hizo la operación (este gameObject)
+                    manager.ResolveOperation(gameObject.tag);
                 }
 
                 if (troopUIInstance != null)
