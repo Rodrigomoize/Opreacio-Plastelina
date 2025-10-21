@@ -4,19 +4,6 @@ using System.Collections.Generic;
 
 public class CharacterManager : MonoBehaviour
 {
-    [System.Serializable]
-    public class Characters
-    {
-        public float velocity;
-        public int life;
-        public int value;
-        public NavMeshAgent agent;
-        public GameObject characterPrefab;
-        public GameObject instancedObject;
-        public bool isDefender;
-    }
-
-    public List<Characters> CharacterSetting = new List<Characters>();
     public Transform playerTower;
     public Transform enemyTower;
     public Transform leftBridge;
@@ -27,8 +14,6 @@ public class CharacterManager : MonoBehaviour
     public GameObject combinedPrefabSum;
     public GameObject combinedPrefabSub;
 
-    public float combinedModelTargetSize = 1.0f;
-    public float modelFitPadding = 0.9f;
     private float groundSnapPadding = 0.01f;
 
 
@@ -237,20 +222,35 @@ public class CharacterManager : MonoBehaviour
             backAnchor = b.transform;
         }
 
-        CardManager.Card frontCard = partA;
-        CardManager.Card backCard = partB;
+        // Asegurar que la tropa más pequeña siempre vaya en el front slot
+        CardManager.Card frontCard, backCard;
+        if (partA.cardValue <= partB.cardValue)
+        {
+            frontCard = partA;  // La más pequeña al frente
+            backCard = partB;
+        }
+        else
+        {
+            frontCard = partB;  // La más pequeña al frente
+            backCard = partA;
+        }
 
         GameObject frontModel;
         if (frontCard.fbxCharacter != null)
         {
             frontModel = Instantiate(frontCard.fbxCharacter, frontAnchor.position, frontAnchor.rotation);
             frontModel.name = $"FrontModel_{frontCard.cardName}";
+            frontModel.transform.SetParent(frontAnchor, false);
+            frontModel.transform.localPosition = Vector3.zero;
+            frontModel.transform.localRotation = Quaternion.identity;
         }
         else
         {
             frontModel = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             frontModel.name = $"PH_Front_{frontCard.cardName}";
-            frontModel.transform.position = frontAnchor.position;
+            frontModel.transform.SetParent(frontAnchor, false);
+            frontModel.transform.localPosition = Vector3.zero;
+            frontModel.transform.localRotation = Quaternion.identity;
         }
 
         GameObject backModel;
@@ -258,33 +258,83 @@ public class CharacterManager : MonoBehaviour
         {
             backModel = Instantiate(backCard.fbxCharacter, backAnchor.position, backAnchor.rotation);
             backModel.name = $"BackModel_{backCard.cardName}";
+            backModel.transform.SetParent(backAnchor, false);
+            backModel.transform.localPosition = Vector3.zero;
+            backModel.transform.localRotation = Quaternion.identity;
         }
         else
         {
             backModel = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             backModel.name = $"PH_Back_{backCard.cardName}";
-            backModel.transform.position = backAnchor.position;
+            backModel.transform.SetParent(backAnchor, false);
+            backModel.transform.localPosition = Vector3.zero;
+            backModel.transform.localRotation = Quaternion.identity;
         }
 
-        FitModelToSlot(frontModel, frontAnchor, modelFitPadding);
-        FitModelToSlot(backModel, backAnchor, modelFitPadding);
+        // Modelos posicionados en (0,0,0) local respecto a sus anchors
 
+        // Limpiar componentes de los modelos - mantener solo visual y animación
         if (frontModel != null)
         {
-            foreach (var col in frontModel.GetComponentsInChildren<Collider>(true)) col.enabled = false;
-            foreach (var rb in frontModel.GetComponentsInChildren<Rigidbody>(true)) rb.isKinematic = true;
-            foreach (var mb in frontModel.GetComponentsInChildren<MonoBehaviour>(true))
+            // Eliminar todos los Colliders
+            foreach (var col in frontModel.GetComponentsInChildren<Collider>(true))
             {
-                if (mb is Character || mb is CharacterCombined) mb.enabled = false;
+                Destroy(col);
+            }
+            
+            // Eliminar todos los Rigidbodies
+            foreach (var rb in frontModel.GetComponentsInChildren<Rigidbody>(true))
+            {
+                Destroy(rb);
+            }
+            
+            // Eliminar todos los NavMeshAgents
+            foreach (var navAgent in frontModel.GetComponentsInChildren<NavMeshAgent>(true))
+            {
+                Destroy(navAgent);
+            }
+            
+            // Eliminar todos los MonoBehaviour scripts (Character, CharacterCombined, etc.)
+            // Mantener solo Animator
+            MonoBehaviour[] scripts = frontModel.GetComponentsInChildren<MonoBehaviour>(true);
+            foreach (var mb in scripts)
+            {
+                if (mb != null)
+                {
+                    Destroy(mb);
+                }
             }
         }
+        
         if (backModel != null)
         {
-            foreach (var col in backModel.GetComponentsInChildren<Collider>(true)) col.enabled = false;
-            foreach (var rb in backModel.GetComponentsInChildren<Rigidbody>(true)) rb.isKinematic = true;
-            foreach (var mb in backModel.GetComponentsInChildren<MonoBehaviour>(true))
+            // Eliminar todos los Colliders
+            foreach (var col in backModel.GetComponentsInChildren<Collider>(true))
             {
-                if (mb is Character || mb is CharacterCombined) mb.enabled = false;
+                Destroy(col);
+            }
+            
+            // Eliminar todos los Rigidbodies
+            foreach (var rb in backModel.GetComponentsInChildren<Rigidbody>(true))
+            {
+                Destroy(rb);
+            }
+            
+            // Eliminar todos los NavMeshAgents
+            foreach (var navAgent in backModel.GetComponentsInChildren<NavMeshAgent>(true))
+            {
+                Destroy(navAgent);
+            }
+            
+            // Eliminar todos los MonoBehaviour scripts
+            // Mantener solo Animator
+            MonoBehaviour[] scripts = backModel.GetComponentsInChildren<MonoBehaviour>(true);
+            foreach (var mb in scripts)
+            {
+                if (mb != null)
+                {
+                    Destroy(mb);
+                }
             }
         }
 
@@ -308,7 +358,30 @@ public class CharacterManager : MonoBehaviour
 
         cc.SetOperationValues(partA.cardValue, partB.cardValue, opSymbol);
 
+        // Alinear camión pero preservar posiciones locales de los modelos de tropas Y sus anchors
+        Vector3 frontAnchorLocalPos = frontAnchor.localPosition;
+        Quaternion frontAnchorLocalRot = frontAnchor.localRotation;
+        Vector3 backAnchorLocalPos = backAnchor.localPosition;
+        Quaternion backAnchorLocalRot = backAnchor.localRotation;
+        
+        Vector3 frontLocalPos = frontModel.transform.localPosition;
+        Quaternion frontLocalRot = frontModel.transform.localRotation;
+        Vector3 backLocalPos = backModel.transform.localPosition;
+        Quaternion backLocalRot = backModel.transform.localRotation;
+
         AlignModelBottomToGround(instance, spawnPosition.y);
+
+        // Restaurar posiciones locales de anchors
+        frontAnchor.localPosition = frontAnchorLocalPos;
+        frontAnchor.localRotation = frontAnchorLocalRot;
+        backAnchor.localPosition = backAnchorLocalPos;
+        backAnchor.localRotation = backAnchorLocalRot;
+        
+        // Restaurar posiciones locales de modelos
+        frontModel.transform.localPosition = frontLocalPos;
+        frontModel.transform.localRotation = frontLocalRot;
+        backModel.transform.localPosition = backLocalPos;
+        backModel.transform.localRotation = backLocalRot;
 
         // Configurar NavMeshAgent
         NavMeshAgent agent = instance.GetComponent<NavMeshAgent>();
@@ -346,35 +419,6 @@ public class CharacterManager : MonoBehaviour
     }
 
 
-    private void FitModelToSlot(GameObject model, Transform slot, float padding = -1f)
-    {
-        if (model == null || slot == null) return;
-        if (padding <= 0f) padding = modelFitPadding;
-
-        model.transform.SetParent(slot, false);
-        model.transform.localPosition = Vector3.zero;
-        model.transform.localRotation = Quaternion.identity;
-        model.transform.localScale = Vector3.one;
-
-        Renderer[] rends = model.GetComponentsInChildren<Renderer>(true);
-        if (rends == null || rends.Length == 0)
-        {
-            return;
-        }
-
-        Bounds bounds = rends[0].bounds;
-        for (int i = 1; i < rends.Length; i++)
-            bounds.Encapsulate(rends[i].bounds);
-
-        float maxDim = Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
-        if (maxDim <= 1e-5f) return;
-
-        float target = combinedModelTargetSize;
-        float scaleFactor = (target * padding) / maxDim;
-
-        model.transform.localScale = Vector3.one * scaleFactor;
-    }
-
     public void AssignTag(GameObject obj, string tagName)
     {
         if (!string.IsNullOrEmpty(tagName) && obj != null)
@@ -410,15 +454,36 @@ public class CharacterManager : MonoBehaviour
     {
         if (model == null) return;
 
-        Renderer[] rends = model.GetComponentsInChildren<Renderer>(true);
-        if (rends == null || rends.Length == 0)
+        // Obtener solo los renderers del modelo principal, excluyendo modelos de tropas en slots
+        Renderer[] allRends = model.GetComponentsInChildren<Renderer>(true);
+        if (allRends == null || allRends.Length == 0)
         {
             Vector3 p = model.transform.position; p.y = targetY; model.transform.position = p;
             return;
         }
 
-        Bounds b = rends[0].bounds;
-        for (int i = 1; i < rends.Length; i++) b.Encapsulate(rends[i].bounds);
+        // Filtrar renderers que NO sean parte de los modelos de tropas (FrontModel/BackModel)
+        System.Collections.Generic.List<Renderer> validRends = new System.Collections.Generic.List<Renderer>();
+        foreach (Renderer rend in allRends)
+        {
+            // Excluir renderers que estén en objetos que son modelos de tropas
+            if (!rend.gameObject.name.Contains("FrontModel") && 
+                !rend.gameObject.name.Contains("BackModel") &&
+                !rend.gameObject.name.Contains("PH_Front") && 
+                !rend.gameObject.name.Contains("PH_Back"))
+            {
+                validRends.Add(rend);
+            }
+        }
+
+        if (validRends.Count == 0)
+        {
+            Vector3 p = model.transform.position; p.y = targetY; model.transform.position = p;
+            return;
+        }
+
+        Bounds b = validRends[0].bounds;
+        for (int i = 1; i < validRends.Count; i++) b.Encapsulate(validRends[i].bounds);
 
         float bottomY = b.min.y;
         float delta = (targetY + groundSnapPadding) - bottomY;
