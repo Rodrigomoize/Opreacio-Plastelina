@@ -44,10 +44,13 @@ public class WinResultUI : MonoBehaviour
 
     private void Start()
     {
+        Debug.Log("[WinResultUI] Iniciando pantalla de victoria...");
+        
         // Cargar datos del ScoreManager
         if (ScoreManager.Instance != null)
         {
             var sm = ScoreManager.Instance;
+            Debug.Log($"[WinResultUI] ScoreManager encontrado - Score: {sm.CurrentScore}, Ops: {sm.CorrectOperations}, Tiempo: {sm.LastElapsedSeconds}s");
             
             // Operaciones resueltas correctamente
             string operacionesStr = $"Operacions resoltes: {sm.CorrectOperations}";
@@ -63,11 +66,8 @@ public class WinResultUI : MonoBehaviour
 
             // Puntuación total
             string puntuacionStr = $"Puntuació total: {sm.CurrentScore} pts";
-            if (sm.LastTimeBonus > 0)
-            // {
-            //     puntuacionStr += $"\n(Bonus per temps: +{sm.LastTimeBonus})";
-            // }
             SetText(puntuacionText, tmpPuntuacionText, puntuacionStr);
+            Debug.Log($"[WinResultUI] Puntuación establecida: {puntuacionStr}");
             
             // Nota final
             string grade = sm.GetGrade();
@@ -81,7 +81,7 @@ public class WinResultUI : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[WinResultUI] ScoreManager.Instance no encontrado!");
+            Debug.LogError("[WinResultUI] ScoreManager.Instance es NULL! No se pueden mostrar los datos.");
             SetText(operacionesText, tmpOperacionesText, "Operaciones resueltas: -");
             SetText(tiempoText, tmpTiempoText, "Tiempo: -");
             SetText(puntuacionText, tmpPuntuacionText, "Puntuación total: -");

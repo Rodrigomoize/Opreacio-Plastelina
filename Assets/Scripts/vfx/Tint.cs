@@ -16,6 +16,7 @@ public class EnemyRedEmissiveTint : MonoBehaviour
 
     private Renderer[] renderers;
     private MaterialPropertyBlock mpb;
+    private bool materialsInstanced = false; // Flag para saber si ya instanciamos los materiales
 
     void OnEnable()
     {
@@ -53,21 +54,44 @@ public class EnemyRedEmissiveTint : MonoBehaviour
             renderers = GetComponentsInChildren<Renderer>(includeInactive: true);
     }
 
-    private void ApplyEmissiveToAll()
+    public void ApplyEmissiveToAll()
     {
         if (renderers == null) return;
 
+        // Solo instanciar materiales en runtime (play mode), no en editor ni en prefabs
+        bool useInstancedMaterials = Application.isPlaying;
+
+        // Instanciar materiales solo la primera vez en play mode
+        if (useInstancedMaterials && !materialsInstanced)
+        {
+            foreach (Renderer r in renderers)
+            {
+                if (r == null) continue;
+                
+                // Usar .material en vez de .sharedMaterial para crear instancia única
+                // Esto se hace automáticamente al acceder a .material
+                if (r.material != null)
+                {
+                    // Solo accediendo ya crea la instancia
+                }
+            }
+            materialsInstanced = true;
+        }
+
         foreach (Renderer r in renderers)
         {
-            if (r == null || r.sharedMaterial == null)
+            // En editor usamos sharedMaterial, en runtime usamos material instanciado
+            Material mat = useInstancedMaterials ? r.material : r.sharedMaterial;
+            
+            if (r == null || mat == null)
                 continue;
 
             r.GetPropertyBlock(mpb);
 
             if (applyEmissive)
             {
-                // Activa la keyword de emisión (para Built-in y URP)
-                r.sharedMaterial.EnableKeyword("_EMISSION");
+                // Activa la keyword de emisión
+                mat.EnableKeyword("_EMISSION");
 
                 // Calcular color final (gamma corregido)
                 Color finalEmission = emissiveColor * Mathf.LinearToGammaSpace(emissionIntensity);
@@ -75,7 +99,7 @@ public class EnemyRedEmissiveTint : MonoBehaviour
             }
             else
             {
-                r.sharedMaterial.DisableKeyword("_EMISSION");
+                mat.DisableKeyword("_EMISSION");
                 mpb.SetColor("_EmissionColor", Color.black);
             }
 
@@ -87,15 +111,21 @@ public class EnemyRedEmissiveTint : MonoBehaviour
     {
         if (renderers == null) return;
 
+        // En editor usamos sharedMaterial, en runtime usamos material instanciado
+        bool useInstancedMaterials = Application.isPlaying;
+
         foreach (Renderer r in renderers)
         {
-            if (r == null || r.sharedMaterial == null)
+            // En editor usamos sharedMaterial, en runtime usamos material instanciado
+            Material mat = useInstancedMaterials ? r.material : r.sharedMaterial;
+            
+            if (r == null || mat == null)
                 continue;
 
             r.GetPropertyBlock(mpb);
 
             // Apagar emisión completamente
-            r.sharedMaterial.DisableKeyword("_EMISSION");
+            mat.DisableKeyword("_EMISSION");
             mpb.SetColor("_EmissionColor", Color.black);
 
             r.SetPropertyBlock(mpb);

@@ -17,7 +17,7 @@ public class Character : MonoBehaviour
 
     [Header("UI")]
     public GameObject troopUIPrefab;
-    private TroopUI troopUIInstance;
+    public TroopUI troopUIInstance; // Público para acceder desde otros scripts al destruir
 
     [Header("Combate")]
     [Tooltip("Duración de la animación de combate en segundos")]
@@ -83,6 +83,9 @@ public class Character : MonoBehaviour
                 Debug.Log($"[Character] {gameObject.name} navegando hacia puente {targetBridge.name}");
             }
         }
+        
+        // Crear UI de la tropa
+        CreateTroopUI();
     }
 
     public void UpdateSpeed()
@@ -94,6 +97,28 @@ public class Character : MonoBehaviour
         else if (agent != null)
         {
             agent.speed = speed;
+        }
+    }
+    
+    /// <summary>
+    /// Crea la UI flotante de la tropa mostrando su valor
+    /// </summary>
+    private void CreateTroopUI()
+    {
+        if (troopUIPrefab != null)
+        {
+            GameObject uiObj = Instantiate(troopUIPrefab);
+            troopUIInstance = uiObj.GetComponent<TroopUI>();
+            if (troopUIInstance != null)
+            {
+                // Pasar el tag del equipo para que use el sprite correcto
+                troopUIInstance.Initialize(transform, value, gameObject.tag);
+                Debug.Log($"[Character] UI creada para {gameObject.name} con valor {value}, equipo: {gameObject.tag}");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"[Character] troopUIPrefab no asignado para {gameObject.name}");
         }
     }
 
@@ -126,6 +151,11 @@ public class Character : MonoBehaviour
                                 (gameObject.CompareTag("AITeam") && other.CompareTag("PlayerTeam"));
             if (isTowerEnemy)
             {
+                // Destruir UI antes de destruir la tropa
+                if (troopUIInstance != null)
+                {
+                    Destroy(troopUIInstance.gameObject);
+                }
                 Destroy(gameObject);
                 return;
             }
@@ -222,16 +252,32 @@ public class Character : MonoBehaviour
 
         Debug.Log($"[Character] ⚔️ Combate finalizado - Destruyendo ambas unidades");
 
-        // Resolver operación (dar intelecto)
+        // Resolver operación: dar intelecto al DEFENSOR (el otro)
+        // El defensor es quien detuvo la operación enemiga
         if (manager != null)
         {
-            manager.ResolveOperation(gameObject.tag);
+            string defenderTag = enemy.tag; // El enemigo es quien defendió
+            manager.ResolveOperation(defenderTag);
+            Debug.Log($"[Character] Intelecto otorgado al defensor: {defenderTag}");
         }
 
-        // Destruir UI
+        // Destruir UI de ambas tropas
         if (troopUIInstance != null)
         {
             Destroy(troopUIInstance.gameObject);
+        }
+        
+        // Destruir UI del enemigo
+        Character enemyChar = enemy.GetComponent<Character>();
+        if (enemyChar != null && enemyChar.troopUIInstance != null)
+        {
+            Destroy(enemyChar.troopUIInstance.gameObject);
+        }
+        
+        CharacterCombined enemyCombined = enemy.GetComponent<CharacterCombined>();
+        if (enemyCombined != null && enemyCombined.operationUIInstance != null)
+        {
+            Destroy(enemyCombined.operationUIInstance.gameObject);
         }
 
         // Destruir ambos personajes

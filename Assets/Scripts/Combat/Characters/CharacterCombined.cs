@@ -26,7 +26,7 @@ public class CharacterCombined : MonoBehaviour
 
     [Header("UI")]
     public GameObject operationUIPrefab;
-    private OperationUI operationUIInstance;
+    public OperationUI operationUIInstance; // Público para acceder desde Character al destruir
     private int valueA;
     private int valueB;
     private char operatorSymbol;
@@ -298,16 +298,31 @@ public class CharacterCombined : MonoBehaviour
 
         Debug.Log($"[CharacterCombined] ⚔️ Combate finalizado - Destruyendo ambas unidades");
 
-        // Resolver operación
+        // Resolver operación: dar intelecto al DEFENSOR (el otro)
         if (manager != null)
         {
-            manager.ResolveOperation(gameObject.tag);
+            string defenderTag = enemy.tag; // El enemigo es quien defendió
+            manager.ResolveOperation(defenderTag);
+            Debug.Log($"[CharacterCombined] Intelecto otorgado al defensor: {defenderTag}");
         }
 
-        // Destruir UI
+        // Destruir UI de ambas unidades
         if (operationUIInstance != null)
         {
             Destroy(operationUIInstance.gameObject);
+        }
+        
+        // Destruir UI del enemigo
+        Character enemyChar = enemy.GetComponent<Character>();
+        if (enemyChar != null && enemyChar.troopUIInstance != null)
+        {
+            Destroy(enemyChar.troopUIInstance.gameObject);
+        }
+        
+        CharacterCombined enemyCombined = enemy.GetComponent<CharacterCombined>();
+        if (enemyCombined != null && enemyCombined.operationUIInstance != null)
+        {
+            Destroy(enemyCombined.operationUIInstance.gameObject);
         }
 
         // Destruir ambos

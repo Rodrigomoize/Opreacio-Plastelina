@@ -10,7 +10,7 @@ public class TroopUI : MonoBehaviour
     public TextMeshProUGUI valueText;
     
     [Header("Settings")]
-    public Vector3 offset = new Vector3(0, 1f, 0); // Offset sobre la tropa
+    public Vector3 offset = new Vector3(0, 1.5f, 0); // Offset sobre la tropa
     
     [Header("Team Sprites")]
     public Sprite blueTeamIcon; // Icono para equipo azul (PlayerTeam)

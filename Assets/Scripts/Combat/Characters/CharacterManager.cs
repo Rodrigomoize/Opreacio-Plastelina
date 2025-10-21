@@ -22,8 +22,15 @@ public class CharacterManager : MonoBehaviour
     [Tooltip("IntelectManager de la IA")]
     public IntelectManager aiIntelectManager;
 
+    [Header("Prefabs de operaciones combinadas")]
     public GameObject combinedPrefabSum;
     public GameObject combinedPrefabSub;
+    
+    [Header("Prefabs de UI")]
+    [Tooltip("Prefab de UI para tropas individuales")]
+    public GameObject troopUIPrefab;
+    [Tooltip("Prefab de UI para operaciones combinadas")]
+    public GameObject operationUIPrefab;
 
     private float groundSnapPadding = 0.01f;
 
@@ -64,6 +71,9 @@ public class CharacterManager : MonoBehaviour
             Debug.LogWarning($"[CharacterManager] El prefab {cardData.fbxCharacter.name} no tiene Character script, añadiendo...");
             charScript = instance.AddComponent<Character>();
         }
+        
+        // Asignar el prefab de UI
+        charScript.troopUIPrefab = troopUIPrefab;
 
         // Inicializar con los datos de la carta (INCLUYE LA VELOCIDAD)
         charScript.InitializeCharacter(cardData.cardValue, cardData.cardLife, cardData.cardVelocity, true);
@@ -180,6 +190,8 @@ public class CharacterManager : MonoBehaviour
             {
                 tint.enabled = true;
                 tint.applyEmissive = true;
+                // Forzar la aplicación inmediata del tinte
+                tint.ApplyEmissiveToAll();
             }
         }
         else // Desactivar si es PlayerTeam
@@ -398,6 +410,9 @@ public class CharacterManager : MonoBehaviour
         // Asegurar componente CharacterCombined
         CharacterCombined cc = instance.GetComponent<CharacterCombined>();
         if (cc == null) cc = instance.AddComponent<CharacterCombined>();
+        
+        // Asignar el prefab de UI para operaciones
+        cc.operationUIPrefab = operationUIPrefab;
 
         cc.frontPosition = frontAnchor;
         cc.backPosition = backAnchor;

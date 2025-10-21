@@ -145,7 +145,7 @@ public class ScoreManager : MonoBehaviour
     public string GetGrade()
     {
         int s = CurrentScore;
-        if (s >= excelenteThreshold) return "Excelent";
+        if (s >= excelenteThreshold) return "Excel·lent";
         if (s >= notableThreshold) return "Notable";
         if (s >= bienThreshold) return "Bé";
         return "Suspès";
