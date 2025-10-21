@@ -478,6 +478,13 @@ public class CharacterManager : MonoBehaviour
         if (teamTag == "PlayerTeam")
         {
             targetManager = playerIntelectManager;
+            
+            // Registrar operación correcta para el jugador en el ScoreManager
+            if (ScoreManager.Instance != null)
+            {
+                ScoreManager.Instance.RegisterCorrectOperation(1);
+                Debug.Log($"[CharacterManager] Operación correcta registrada. Total: {ScoreManager.Instance.CorrectOperations}");
+            }
         }
         else if (teamTag == "AITeam")
         {

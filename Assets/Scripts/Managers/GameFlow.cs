@@ -55,11 +55,31 @@ public class GameFlow : MonoBehaviour
 
     public void LoadWinScene()
     {
+        // Detener el timer si está corriendo
+        if (timer != null && timer.IsRunning)
+        {
+            timer.StopTimer();
+        }
+        
+        // Finalizar el score con bonus por tiempo
+        if (timer != null && ScoreManager.Instance != null)
+        {
+            float elapsedSeconds = timer.ElapsedSeconds;
+            int timeBonus = ScoreManager.Instance.FinalizeScoreWithTime(elapsedSeconds);
+            Debug.Log($"[GameFlow] Victoria! Tiempo: {elapsedSeconds:F1}s, Bonus: {timeBonus}, Score final: {ScoreManager.Instance.CurrentScore}");
+        }
+        
         SceneManager.LoadScene("WinScene");
     }
 
     public void LoadLoseScene()
     {
+        // Detener el timer si está corriendo
+        if (timer != null && timer.IsRunning)
+        {
+            timer.StopTimer();
+        }
+        
         SceneManager.LoadScene("LoseScene");
     }
 }

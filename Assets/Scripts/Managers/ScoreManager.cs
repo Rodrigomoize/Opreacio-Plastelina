@@ -27,11 +27,11 @@ public class ScoreManager : MonoBehaviour
 
     [Header("Umbrales de nota por puntuación final")]
     [Tooltip("Puntuación mínima para 'Excelente'.")]
-    [SerializeField] private int excelenteThreshold = 2500;
+    [SerializeField] private int excelenteThreshold = 750;
     [Tooltip("Puntuación mínima para 'Notable'.")]
-    [SerializeField] private int notableThreshold = 1800;
+    [SerializeField] private int notableThreshold = 500;
     [Tooltip("Puntuación mínima para 'Bien'.")]
-    [SerializeField] private int bienThreshold = 1000;
+    [SerializeField] private int bienThreshold = 250;
 
     public int CurrentScore { get; private set; }
     public int CorrectOperations { get; private set; }
@@ -145,10 +145,10 @@ public class ScoreManager : MonoBehaviour
     public string GetGrade()
     {
         int s = CurrentScore;
-        if (s >= excelenteThreshold) return "Excelente";
+        if (s >= excelenteThreshold) return "Excelent";
         if (s >= notableThreshold) return "Notable";
-        if (s >= bienThreshold) return "Bien";
-        return "Suspendido";
+        if (s >= bienThreshold) return "Bé";
+        return "Suspès";
     }
 
     #endregion
