@@ -542,7 +542,7 @@ MonoBehaviour:
   tmpTimeText: {fileID: 1957488186}
   useMinutesSeconds: 1
   countdownMode: 0
-  countdownDuration: 200
+  countdownDuration: 181
 --- !u!4 &104346809
 Transform:
   m_ObjectHideFlags: 0
@@ -4316,11 +4316,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::IntelectManager
   maxIntelect: 10
   minIntelect: 0
-  currentIntelect: 0
-  regenDelay: 4
-  regenInterval: 4
+  currentIntelect: 4
+  regenDelay: 0
+  regenInterval: 2.8
   regenAmount: 1
-  intelectSlider: {fileID: 0}
+  intelectSlider: {fileID: 1499451739}
 --- !u!4 &1587260388
 Transform:
   m_ObjectHideFlags: 0

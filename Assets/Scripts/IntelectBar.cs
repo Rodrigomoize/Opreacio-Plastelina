@@ -20,8 +20,12 @@ public class IntelectBar : MonoBehaviour
     {
         maxIntelect = intelectManager.maxIntelect;
         minIntelect = intelectManager.minIntelect;
-        currentIntelect = intelectManager.currentIntelect;
-        intelectSlider.value = currentIntelect;
+        
+        // Usar el valor float interpolado en lugar del int para suavidad
+        float currentValue = intelectManager.GetCurrentIntelectFloat();
+        intelectSlider.maxValue = maxIntelect;
+        intelectSlider.minValue = minIntelect;
+        intelectSlider.value = currentValue;
     }
 
     // Update is called once per frame
