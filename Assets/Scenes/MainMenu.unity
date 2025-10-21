@@ -663,6 +663,7 @@ MonoBehaviour:
   combatManager: {fileID: 0}
   aiCardManager: {fileID: 0}
   playerCardManager: {fileID: 0}
+  gameTimerManager: {fileID: 0}
 --- !u!1 &945486057
 GameObject:
   m_ObjectHideFlags: 0

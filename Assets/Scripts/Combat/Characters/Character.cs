@@ -19,7 +19,7 @@ public class Character : MonoBehaviour
 
     void Start()
     {
-        manager = FindObjectOfType<CharacterManager>();
+        manager = FindFirstObjectByType<CharacterManager>();
         EnsureColliderSetup();
     }
 
@@ -68,7 +68,7 @@ public class Character : MonoBehaviour
 
         if (agent != null)
         {
-            agent.speed = speed;
+            UpdateSpeed();
             Debug.Log($"[Character] {gameObject.name} - NavMeshAgent.speed configurado a {agent.speed}");
 
             if (targetBridge != null)
@@ -76,6 +76,22 @@ public class Character : MonoBehaviour
                 agent.SetDestination(targetBridge.position);
                 Debug.Log($"[Character] {gameObject.name} navegando hacia puente {targetBridge.name}");
             }
+        }
+    }
+
+    /// <summary>
+    /// Actualiza la velocidad del agente aplicando el multiplicador de velocidad de juego
+    /// </summary>
+    public void UpdateSpeed()
+    {
+        if (agent != null && GameSpeedManager.Instance != null)
+        {
+            agent.speed = GameSpeedManager.Instance.GetAdjustedSpeed(speed);
+        }
+        else if (agent != null)
+        {
+            // Si no hay GameSpeedManager, usar velocidad base
+            agent.speed = speed;
         }
     }
 
