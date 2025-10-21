@@ -153,6 +153,36 @@ public class CharacterManager : MonoBehaviour
         GameObject instance = Instantiate(truckPrefab, spawnPosition, Quaternion.identity);
         AssignTag(instance, teamTag);
 
+        // Activar Outline y Tint si es enemigo (AITeam)
+        if (teamTag == "AITeam")
+        {
+            Outline outline = instance.GetComponent<Outline>();
+            if (outline != null)
+            {
+                outline.enabled = true;
+            }
+            
+            EnemyRedEmissiveTint tint = instance.GetComponent<EnemyRedEmissiveTint>();
+            if (tint != null)
+            {
+                tint.enabled = true;
+            }
+        }
+        else // Desactivar si es PlayerTeam
+        {
+            Outline outline = instance.GetComponent<Outline>();
+            if (outline != null)
+            {
+                outline.enabled = false;
+            }
+            
+            EnemyRedEmissiveTint tint = instance.GetComponent<EnemyRedEmissiveTint>();
+            if (tint != null)
+            {
+                tint.enabled = false;
+            }
+        }
+
         Transform frontSlot = instance.transform.Find("FrontSlot");
         Transform backSlot = instance.transform.Find("BackSlot");
 
