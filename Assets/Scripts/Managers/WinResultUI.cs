@@ -50,7 +50,7 @@ public class WinResultUI : MonoBehaviour
             var sm = ScoreManager.Instance;
             
             // Operaciones resueltas correctamente
-            string operacionesStr = $"Operacions resoltes correctament: {sm.CorrectOperations}";
+            string operacionesStr = $"Operacions resoltes: {sm.CorrectOperations}";
             SetText(operacionesText, tmpOperacionesText, operacionesStr);
 
             // Tiempo de juego

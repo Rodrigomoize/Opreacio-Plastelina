@@ -1503,9 +1503,9 @@ MonoBehaviour:
   maxTimeBonus: 1000
   timePenaltyPerSecond: 10
   minTimeBonus: 0
-  excelenteThreshold: 2500
-  notableThreshold: 1800
-  bienThreshold: 1000
+  excelenteThreshold: 750
+  notableThreshold: 500
+  bienThreshold: 250
 --- !u!4 &575289886
 Transform:
   m_ObjectHideFlags: 0
