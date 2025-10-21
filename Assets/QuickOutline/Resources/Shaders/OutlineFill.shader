@@ -4,6 +4,7 @@
 //
 //  Created by Chris Nolet on 2/21/18.
 //  Copyright © 2018 Chris Nolet. All rights reserved.
+//  Modified for WebGL compatibility
 //
 
 Shader "Custom/Outline Fill" {
@@ -32,6 +33,9 @@ Shader "Custom/Outline Fill" {
       Stencil {
         Ref 1
         Comp NotEqual
+        Pass Keep
+        Fail Keep
+        ZFail Keep
       }
 
       CGPROGRAM
@@ -39,6 +43,8 @@ Shader "Custom/Outline Fill" {
 
       #pragma vertex vert
       #pragma fragment frag
+      #pragma target 3.0
+      #pragma multi_compile_fog
 
       struct appdata {
         float4 vertex : POSITION;
@@ -50,6 +56,7 @@ Shader "Custom/Outline Fill" {
       struct v2f {
         float4 position : SV_POSITION;
         fixed4 color : COLOR;
+        UNITY_FOG_COORDS(0)
         UNITY_VERTEX_OUTPUT_STEREO
       };
 
@@ -62,20 +69,31 @@ Shader "Custom/Outline Fill" {
         UNITY_SETUP_INSTANCE_ID(input);
         UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
-        float3 normal = any(input.smoothNormal) ? input.smoothNormal : input.normal;
+        // Use smooth normal if available, otherwise use regular normal
+        float3 normal = length(input.smoothNormal) > 0.5 ? input.smoothNormal : input.normal;
+        
+        // Transform to view space
         float3 viewPosition = UnityObjectToViewPos(input.vertex);
         float3 viewNormal = normalize(mul((float3x3)UNITY_MATRIX_IT_MV, normal));
 
-        output.position = UnityViewToClipPos(viewPosition + viewNormal * -viewPosition.z * _OutlineWidth / 1000.0);
+        // Apply outline width with depth-based scaling
+        float outlineScale = _OutlineWidth / 1000.0;
+        output.position = UnityViewToClipPos(viewPosition + viewNormal * -viewPosition.z * outlineScale);
         output.color = _OutlineColor;
+
+        UNITY_TRANSFER_FOG(output, output.position);
 
         return output;
       }
 
       fixed4 frag(v2f input) : SV_Target {
-        return input.color;
+        fixed4 color = input.color;
+        UNITY_APPLY_FOG(input.fogCoord, color);
+        return color;
       }
       ENDCG
     }
   }
+  
+  Fallback "Diffuse"
 }
