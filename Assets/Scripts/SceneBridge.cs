@@ -7,6 +7,11 @@ public class SceneBridge : MonoBehaviour
         GameManager.GoToMainMenu();
     }
 
+    public static void LoadHistoryScene()
+    {
+        GameManager.GoToHistoryScene();
+    }
+
     public static void LoadInstructionScene()
     {
         GameManager.GoToInstructionScene();

@@ -48,6 +48,14 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public static void GoToHistoryScene()
+    {
+        if (Instance != null)
+        {
+            Instance.LoadHistoryScene();
+        }
+    }
+
     public static void GoToInstructionScene()
     {
         if (Instance != null)
@@ -72,11 +80,16 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // M�TODOS PRIVADOS DE CARGA
+    // METODOS PRIVADOS DE CARGA
 
     private void LoadMainMenu()
     {
         SceneManager.LoadScene("MainMenu");
+    }
+
+    private void LoadHistoryScene()
+    {
+        SceneManager.LoadScene("HistoryScene");
     }
 
     private void LoadInstructionScene()
@@ -180,10 +193,8 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    /// <summary>
     /// Busca e asigna los managers que existan en la escena especificada.
     /// Solo asigna si el campo aún es null (permite preconfiguración por Inspector).
-    /// </summary>
     private void AssignSceneManagers(Scene scene)
     {
         uiManager = uiManager ?? FindInScene<UIManager>(scene);
@@ -196,9 +207,7 @@ public class GameManager : MonoBehaviour
         Debug.Log($"[GameManager] Managers asignados -> UI:{(uiManager != null)} Audio:{(audioManager != null)} Card:{(combatManager != null)} AI:{(aiCardManager != null)} PlayerCard:{(playerCardManager != null)} Timer:{(gameTimerManager != null)}");
     }
 
-    /// <summary>
     /// Busca un componente T dentro de la escena proporcionada (solo objetos activos).
-    /// </summary>
     private T FindInScene<T>(Scene scene) where T : MonoBehaviour
     {
         T[] all = FindObjectsOfType<T>();
