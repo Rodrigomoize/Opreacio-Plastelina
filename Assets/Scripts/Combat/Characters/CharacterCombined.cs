@@ -30,6 +30,14 @@ public class CharacterCombined : MonoBehaviour
     private int valueA;
     private int valueB;
     private char operatorSymbol;
+    
+    [Header("VFX Torre")]
+    [Tooltip("Prefab del VFX cuando el Combined impacta en la torre")]
+    public GameObject towerImpactVFXPrefab;
+    [Tooltip("Velocidad de encogimiento antes de la explosión")]
+    public float shrinkSpeed = 5f;
+    [Tooltip("Offset vertical para el VFX en la torre")]
+    public float towerVFXOffset = 1f;
 
     void Start()
     {
@@ -171,25 +179,8 @@ public class CharacterCombined : MonoBehaviour
             float distanciaTorre = Vector3.Distance(transform.position, enemyTower.position);
             if (distanciaTorre < 2f)
             {
-                Tower towerComp = enemyTower.GetComponent<Tower>();
-                if (towerComp != null)
-                {
-                    towerComp.TakeDamage(combinedValue);
-                    Debug.Log($"[CharacterCombined] Aplicado {combinedValue} de daño directamente a {enemyTower.name}");
-                }
-                else if (manager != null)
-                {
-                    manager.DamageTower(enemyTower, combinedValue);
-                    Debug.Log($"[CharacterCombined] Fallback a CharacterManager para dañar {enemyTower.name} por {combinedValue}");
-                }
-                else
-                {
-                    Debug.LogWarning("[CharacterCombined] No se pudo aplicar daño: no hay Tower ni CharacterManager.");
-                }
-
-                if (operationUIInstance != null) Destroy(operationUIInstance.gameObject);
-
-                Destroy(gameObject);
+                // Iniciar secuencia de impacto en torre
+                StartCoroutine(TowerImpactSequence(enemyTower));
             }
         }
     }
@@ -209,16 +200,8 @@ public class CharacterCombined : MonoBehaviour
             {
                 Debug.Log($"[CharacterCombined] {gameObject.name} llegó a torre enemiga {other.name}, causando {combinedValue} de daño!");
 
-                if (manager != null)
-                {
-                    manager.DamageTower(other.transform, combinedValue);
-                }
-
-                if (operationUIInstance != null)
-                {
-                    Destroy(operationUIInstance.gameObject);
-                }
-                Destroy(gameObject);
+                // Iniciar secuencia de impacto en torre
+                StartCoroutine(TowerImpactSequence(other.transform));
                 return;
             }
         }
@@ -228,4 +211,79 @@ public class CharacterCombined : MonoBehaviour
     // Métodos de acceso para Character
     public int GetValue() => combinedValue;
     public NavMeshAgent GetAgent() => agent;
+
+    /// <summary>
+    /// Secuencia de impacto: Combined se encoge y explota contra la torre
+    /// </summary>
+    private IEnumerator TowerImpactSequence(Transform tower)
+    {
+        // Detener movimiento
+        if (agent != null)
+        {
+            agent.isStopped = true;
+        }
+
+        // Destruir UI antes de la animación
+        if (operationUIInstance != null)
+        {
+            Destroy(operationUIInstance.gameObject);
+        }
+
+        Vector3 originalScale = transform.localScale;
+        Vector3 impactPosition = tower.position + Vector3.up * towerVFXOffset;
+
+        // Fase 1: Estiramiento inicial (anticipación)
+        float stretchTime = 0.1f;
+        float t = 0;
+        while (t < stretchTime)
+        {
+            t += Time.deltaTime;
+            float scale = Mathf.Lerp(1f, 1.2f, t / stretchTime);
+            transform.localScale = originalScale * scale;
+            yield return null;
+        }
+
+        // Fase 2: Encogimiento rápido
+        t = 0;
+        float shrinkDuration = 1f / shrinkSpeed;
+        while (t < 1f)
+        {
+            t += Time.deltaTime * shrinkSpeed;
+            
+            // Encogerse
+            transform.localScale = Vector3.Lerp(originalScale, Vector3.zero, t);
+            
+            // Moverse ligeramente hacia la torre
+            transform.position = Vector3.Lerp(transform.position, impactPosition, t * 0.5f);
+            
+            yield return null;
+        }
+
+        // Aplicar daño a la torre
+        Tower towerComp = tower.GetComponent<Tower>();
+        if (towerComp != null)
+        {
+            towerComp.TakeDamage(combinedValue);
+            Debug.Log($"[CharacterCombined] Aplicado {combinedValue} de daño a {tower.name}");
+        }
+        else if (manager != null)
+        {
+            manager.DamageTower(tower, combinedValue);
+            Debug.Log($"[CharacterCombined] Fallback - Aplicado {combinedValue} de daño a {tower.name}");
+        }
+
+        // Instanciar VFX de impacto en la torre
+        if (towerImpactVFXPrefab != null)
+        {
+            Instantiate(towerImpactVFXPrefab, impactPosition, Quaternion.identity);
+            Debug.Log($"[CharacterCombined] 💥 VFX de impacto en torre instanciado en {impactPosition}");
+        }
+        else
+        {
+            Debug.LogWarning("[CharacterCombined] towerImpactVFXPrefab no asignado!");
+        }
+
+        // Destruir el Combined
+        Destroy(gameObject);
+    }
 }

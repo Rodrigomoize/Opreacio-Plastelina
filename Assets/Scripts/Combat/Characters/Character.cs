@@ -187,11 +187,16 @@ public class Character : MonoBehaviour
                                 (gameObject.CompareTag("AITeam") && other.CompareTag("PlayerTeam"));
             if (isTowerEnemy)
             {
+                // Character llega a torre enemiga y se destruye completamente
+                Debug.Log($"[Character] {gameObject.name} llegó a torre enemiga y se destruye");
+                
                 // Destruir UI antes de destruir la tropa
                 if (troopUIInstance != null)
                 {
                     Destroy(troopUIInstance.gameObject);
                 }
+                
+                // Destruir el Character
                 Destroy(gameObject);
                 return;
             }
@@ -208,27 +213,25 @@ public class Character : MonoBehaviour
             Character otherChar = other.GetComponent<Character>();
             CharacterCombined otherCombined = other.GetComponent<CharacterCombined>();
 
-            // Evitar combate si el otro ya está en combate
-            if (otherChar != null && otherChar.isInCombat) return;
-            if (otherCombined != null && otherCombined.isInCombat) return;
-
-            int otherValue = 0;
-
+            // Character SOLO ataca a Combined, NO a otros Characters
             if (otherChar != null)
             {
-                otherValue = otherChar.value;
-                Debug.Log($"[Character] Detectado otro Character con valor {otherValue}");
-            }
-            else if (otherCombined != null)
-            {
-                otherValue = otherCombined.GetValue();
-                Debug.Log($"[Character] Detectado CharacterCombined con valor {otherValue}");
-            }
-            else
-            {
-                Debug.Log($"[Character] El otro objeto no tiene Character ni CharacterCombined");
+                Debug.Log($"[Character] Detectado otro Character pero Character solo ataca Combined, ignorando");
                 return;
             }
+
+            // Solo procesar si es un Combined
+            if (otherCombined == null)
+            {
+                Debug.Log($"[Character] El otro objeto no es CharacterCombined, ignorando");
+                return;
+            }
+
+            // Evitar combate si el Combined ya está en combate
+            if (otherCombined.isInCombat) return;
+
+            int otherValue = otherCombined.GetValue();
+            Debug.Log($"[Character] Detectado CharacterCombined con valor {otherValue}");
 
             if (value == otherValue)
             {
@@ -236,8 +239,7 @@ public class Character : MonoBehaviour
 
                 // Marcar ambos como en combate
                 isInCombat = true;
-                if (otherChar != null) otherChar.isInCombat = true;
-                if (otherCombined != null) otherCombined.isInCombat = true;
+                otherCombined.isInCombat = true;
 
                 // Iniciar corrutina de combate
                 StartCoroutine(CombatSequence(other.gameObject));
@@ -250,14 +252,19 @@ public class Character : MonoBehaviour
     }
 
     /// <summary>
-    /// Secuencia de combate: Character controla TODO (velocidades, animación, destrucción)
+    /// Secuencia de combate: Character solo combate contra Combined
     /// </summary>
     private IEnumerator CombatSequence(GameObject enemy)
     {
-        // Identificar el tipo de enemigo
-        Character enemyChar = enemy.GetComponent<Character>();
+        // El enemigo siempre es CharacterCombined
         CharacterCombined enemyCombined = enemy.GetComponent<CharacterCombined>();
-
+        
+        if (enemyCombined == null)
+        {
+            Debug.LogError("[Character] CombatSequence llamado sin CharacterCombined!");
+            yield break;
+        }
+        
         // Reducir velocidad propia
         float originalSpeed = 0f;
         if (agent != null)
@@ -267,40 +274,25 @@ public class Character : MonoBehaviour
             Debug.Log($"[Character] {gameObject.name} velocidad reducida: {originalSpeed} → {agent.speed}");
         }
 
-        // Reducir velocidad del enemigo (Character o CharacterCombined)
-        float enemyOriginalSpeed = 0f;
-        NavMeshAgent enemyAgent = null;
-
-        if (enemyChar != null)
-        {
-            enemyAgent = enemyChar.GetComponent<NavMeshAgent>();
-        }
-        else if (enemyCombined != null)
-        {
-            enemyAgent = enemyCombined.GetAgent();
-        }
-
+        // Reducir velocidad del Combined
+        NavMeshAgent enemyAgent = enemyCombined.GetAgent();
+        
         if (enemyAgent != null)
         {
-            enemyOriginalSpeed = enemyAgent.speed;
+            float enemyOriginalSpeed = enemyAgent.speed;
             enemyAgent.speed = enemyOriginalSpeed * combatSpeedMultiplier;
             Debug.Log($"[Character] {enemy.name} velocidad reducida: {enemyOriginalSpeed} → {enemyAgent.speed}");
         }
 
-        // Orientar el Character hacia el enemigo
+        // Orientar el Character hacia el Combined
         Vector3 directionToEnemy = enemy.transform.position - transform.position;
         directionToEnemy.y = 0; // Mantener horizontal
 
         if (directionToEnemy != Vector3.zero)
         {
             transform.rotation = Quaternion.LookRotation(directionToEnemy);
-
-            // Solo rotar al enemigo si es otro Character (no Combined)
-            // Combined mantiene su orientación hacia la torre
-            if (enemyChar != null)
-            {
-                enemy.transform.rotation = Quaternion.LookRotation(-directionToEnemy);
-            }
+            
+            // Combined mantiene su orientación hacia la torre (no rotamos al enemigo)
         }
 
         Debug.Log($"[Character] ⚔️ Combate iniciado entre {gameObject.name} y {enemy.name} - {combatDuration} segundo(s) de animación con velocidad reducida");
@@ -338,24 +330,19 @@ public class Character : MonoBehaviour
             Destroy(troopUIInstance.gameObject);
         }
 
-        if (enemyChar != null && enemyChar.troopUIInstance != null)
-        {
-            Destroy(enemyChar.troopUIInstance.gameObject);
-        }
-
         if (enemyCombined != null && enemyCombined.operationUIInstance != null)
         {
             Destroy(enemyCombined.operationUIInstance.gameObject);
         }
 
         // ===== IMPLOSIÓN Y VFX =====
-        yield return StartCoroutine(ImplodeAndExplode(enemy, enemyChar, enemyCombined, operationResolved));
+        yield return StartCoroutine(ImplodeAndExplode(enemy, enemyCombined, operationResolved));
     }
 
     /// <summary>
-    /// Efecto de implosión: ambas unidades se atraen, encogen y explotan con VFX
+    /// Efecto de implosión: Character y Combined se atraen, encogen y explotan con VFX
     /// </summary>
-    private IEnumerator ImplodeAndExplode(GameObject enemy, Character enemyChar, CharacterCombined enemyCombined, bool operationResolved)
+    private IEnumerator ImplodeAndExplode(GameObject enemy, CharacterCombined enemyCombined, bool operationResolved)
     {
         Vector3 startPos = transform.position;
         Vector3 enemyStartPos = enemy.transform.position;

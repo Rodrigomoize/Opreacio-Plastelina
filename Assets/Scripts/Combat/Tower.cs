@@ -14,11 +14,19 @@ public class Tower : MonoBehaviour
     [Header("Tower Type")]
     public bool isEnemyTower = true; // marcar en inspector
     [Tooltip("Tag que identifica al equipo (ej: 'AITeam' o 'PlayerTeam')")]
-    public string teamTag = "AITeam";
+    public string teamTag = "AITeam";    
+    private Animator animator;
 
     void Start()
     {
         currentHealth = maxHealth;
+        
+        // Obtener el Animator (puede estar en un hijo)
+        animator = GetComponentInChildren<Animator>();
+        if (animator == null)
+        {
+            Debug.LogWarning($"[Tower] {gameObject.name} no tiene Animator component en sus hijos!");
+        }
 
         Collider col = GetComponent<Collider>();
         if (col == null)
@@ -56,6 +64,27 @@ public class Tower : MonoBehaviour
         if (healthBarInstance != null) healthBarInstance.SetHealth(currentHealth);
         Debug.Log($"[Tower] {gameObject.name} recibió {damage}. Vida: {currentHealth}/{maxHealth}");
         if (currentHealth <= 0) OnTowerDestroyed();
+
+        // Activar animación de hit
+        if (animator != null)
+        {
+            animator.SetTrigger("hit");
+            Debug.Log($"[Tower] {gameObject.name} - Trigger 'hit' activado");
+        }
+
+        // Actualizar la barra de vida
+        if (healthBarInstance != null)
+        {
+            healthBarInstance.SetHealth(currentHealth);
+        }
+
+        Debug.Log($"[Tower] {gameObject.name} recibió {damage} de daño. Vida: {currentHealth}/{maxHealth}");
+
+        // Verificar si la torre fue destruida
+        if (currentHealth <= 0)
+        {
+            OnTowerDestroyed();
+        }
     }
 
     public void Heal(int amount)

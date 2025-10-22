@@ -511,13 +511,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e551f0494d389da4e8272b676e25c413, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterCombined
+  isInCombat: 0
   frontPosition: {fileID: 8491410585855544065}
   backPosition: {fileID: 584843750846361261}
   AITower: {fileID: 0}
   PlayerTower: {fileID: 0}
   operationUIPrefab: {fileID: 7733706771787178017, guid: b1c2fd52c17441548a08b3b698f8cc5c, type: 3}
   operationUIInstance: {fileID: 0}
-  combatDuration: 2
+  towerImpactVFXPrefab: {fileID: 7190290771688677997, guid: d8c3203d858339141a7c82fc0fe0d752, type: 3}
+  shrinkSpeed: 5
+  towerVFXOffset: 1
 --- !u!195 &-4487751598518270676
 NavMeshAgent:
   m_ObjectHideFlags: 0
