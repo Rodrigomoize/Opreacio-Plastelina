@@ -1711,6 +1711,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac52c7c46cb19504e9b107415a35f89a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneBridge
+  screenImage: {fileID: 0}
+  nextButton: {fileID: 0}
+  screenSprites: []
+  normalButtonSprite: {fileID: 0}
+  finalButtonSprite: {fileID: 0}
+  nextSceneAfterScreens: 
 --- !u!1 &611915975
 GameObject:
   m_ObjectHideFlags: 0
@@ -2099,51 +2105,6 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.36042, y: -0, z: 10.66665}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &794340371
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 794340373}
-  - component: {fileID: 794340372}
-  m_Layer: 0
-  m_Name: GameFlow
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &794340372
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 794340371}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 86fa2272f45185a4485192785a791e50, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameFlow
-  timer: {fileID: 104346808}
---- !u!4 &794340373
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 794340371}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 742.1913, y: 2230.1042, z: 75.12277}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5418,5 +5379,4 @@ SceneRoots:
   - {fileID: 1556190453}
   - {fileID: 575289886}
   - {fileID: 104346809}
-  - {fileID: 794340373}
   - {fileID: 791899131}

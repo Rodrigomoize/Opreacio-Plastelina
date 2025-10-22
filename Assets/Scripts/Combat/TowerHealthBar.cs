@@ -82,9 +82,7 @@ public class TowerHealthBar : MonoBehaviour
         }
     }
     
-    /// <summary>
     /// Inicializa la barra de vida de la torre
-    /// </summary>
     /// <param name="target">Transform de la torre a seguir</param>
     /// <param name="health">Vida máxima de la torre</param>
     /// <param name="teamTag">Tag del equipo ("PlayerTeam" o "AITeam")</param>
@@ -133,36 +131,28 @@ public class TowerHealthBar : MonoBehaviour
         UpdateHealthBar();
     }
     
-    /// <summary>
     /// Establece la salud actual
-    /// </summary>
     public void SetHealth(int health)
     {
         currentHealth = Mathf.Clamp(health, 0, maxHealth);
         UpdateHealthBar();
     }
     
-    /// <summary>
     /// Reduce la salud
-    /// </summary>
     public void TakeDamage(int damage)
     {
         currentHealth = Mathf.Max(0, currentHealth - damage);
         UpdateHealthBar();
     }
     
-    /// <summary>
     /// Cura la torre
-    /// </summary>
     public void Heal(int amount)
     {
         currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
         UpdateHealthBar();
     }
     
-    /// <summary>
     /// Actualiza la visualización de la barra de vida
-    /// </summary>
     private void UpdateHealthBar()
     {
         if (healthSlider != null)
@@ -191,17 +181,13 @@ public class TowerHealthBar : MonoBehaviour
         }
     }
     
-    /// <summary>
     /// Obtiene la salud actual
-    /// </summary>
     public int GetCurrentHealth()
     {
         return currentHealth;
     }
     
-    /// <summary>
     /// Verifica si la torre está destruida
-    /// </summary>
     public bool IsDead()
     {
         return currentHealth <= 0;

@@ -25,7 +25,7 @@ public class SceneBridge : MonoBehaviour
         {
             isMultiScreenMode = true;
 
-            // IMPORTANTE: Limpiar todos los listeners anteriores del botón
+            // Limpia todos los listeners anteriores del botón
             nextButton.onClick.RemoveAllListeners();
             nextButton.onClick.AddListener(OnNextButtonClicked);
 
@@ -102,6 +102,12 @@ public class SceneBridge : MonoBehaviour
             case "PlayScene":
                 LoadPlayScene();
                 break;
+            case "WinScene":
+                LoadWinScene();
+                break;
+            case "LoseScene":
+                LoadLoseScene();
+                break;
             default:
                 Debug.LogWarning($"[SceneBridge] Escena '{sceneName}' no reconocida");
                 break;
@@ -132,6 +138,16 @@ public class SceneBridge : MonoBehaviour
     public static void LoadPlayScene()
     {
         GameManager.GoToPlayScene();
+    }
+
+    public static void LoadWinScene()
+    {
+        GameManager.GoToWinScene();
+    }
+
+    public static void LoadLoseScene()
+    {
+        GameManager.GoToLoseScene();
     }
 
     private void OnDestroy()

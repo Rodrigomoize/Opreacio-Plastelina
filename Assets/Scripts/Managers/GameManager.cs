@@ -80,6 +80,22 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public static void GoToWinScene()
+    {
+        if (Instance != null)
+        {
+            Instance.LoadWinScene();
+        }
+    }
+
+    public static void GoToLoseScene()
+    {
+        if (Instance != null)
+        {
+            Instance.LoadLoseScene();
+        }
+    }   
+
     // METODOS PRIVADOS DE CARGA
 
     private void LoadMainMenu()
@@ -109,6 +125,36 @@ public class GameManager : MonoBehaviour
 
         SceneManager.LoadScene("PlayScene");
         // La inicialización específica de PlayScene se hace en HandleSceneLoaded
+    }
+
+    private void LoadWinScene()
+    {
+        // Detener el timer si está corriendo
+        if (gameTimerManager != null && gameTimerManager.IsRunning)
+        {
+            gameTimerManager.StopTimer();
+        }
+
+        // Finalizar el score con bonus por tiempo
+        if (gameTimerManager != null && ScoreManager.Instance != null)
+        {
+            float elapsedSeconds = gameTimerManager.ElapsedSeconds;
+            int timeBonus = ScoreManager.Instance.FinalizeScoreWithTime(elapsedSeconds);
+            Debug.Log($"[GameManager] Victoria! Tiempo: {elapsedSeconds:F1}s, Bonus: {timeBonus}, Score final: {ScoreManager.Instance.CurrentScore}");
+        }
+
+        SceneManager.LoadScene("WinScene");
+    }
+
+    private void LoadLoseScene()
+    {
+        // Detener el timer si está corriendo
+        if (gameTimerManager != null && gameTimerManager.IsRunning)
+        {
+            gameTimerManager.StopTimer();
+        }
+
+        SceneManager.LoadScene("LoseScene");
     }
 
     // PAUSE MENU
@@ -164,7 +210,8 @@ public class GameManager : MonoBehaviour
     {
         if (Instance == this)
         {
-            SceneManager.sceneLoaded -= HandleSceneLoaded;
+            SceneManager.sceneLoaded -= HandleSceneLoaded;  
+            UnsubscribeFromTimer();
         }
     }
 
@@ -190,7 +237,35 @@ public class GameManager : MonoBehaviour
             {
                 Debug.LogWarning("[GameManager] IAController no encontrado en PlayScene para asignar dificultad");
             }
+            SubscribeToTimer();
         }
+        else
+        {
+            UnsubscribeFromTimer();
+        }
+    }
+
+    private void SubscribeToTimer()
+    {
+        if (gameTimerManager != null)
+        {
+            gameTimerManager.OnCountdownCompleted += HandleTimeoutLose;
+            Debug.Log("[GameManager] Suscrito al evento OnCountdownCompleted del timer");
+        }
+    }
+
+    private void UnsubscribeFromTimer()
+    {
+        if (gameTimerManager != null)
+        {
+            gameTimerManager.OnCountdownCompleted -= HandleTimeoutLose;
+        }
+    }
+
+    private void HandleTimeoutLose()
+    {
+        Debug.Log("[GameManager] Tiempo agotado. Cargando escena de derrota...");
+        LoadLoseScene();
     }
 
     /// Busca e asigna los managers que existan en la escena especificada.
@@ -216,16 +291,5 @@ public class GameManager : MonoBehaviour
             if (item.gameObject.scene == scene) return item;
         }
         return null;
-    }
-
-    // Navegación a escenas de resultado
-    public void GoToWinScene()
-    {
-        SceneManager.LoadScene("WinScene");
-    }
-
-    public void GoToLoseScene()
-    {
-        SceneManager.LoadScene("LoseScene");
     }
 }
