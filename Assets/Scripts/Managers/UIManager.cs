@@ -100,6 +100,7 @@ public class UIManager : MonoBehaviour
     private void PauseGame()
     {
         isPaused = true;
+
         if (pausePanel != null)
         {
             pausePanel.SetActive(true);
@@ -107,6 +108,11 @@ public class UIManager : MonoBehaviour
         if (pauseButtonImage != null && resumeIcon != null)
         {
             pauseButtonImage.sprite = resumeIcon;
+        }
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PauseMusic();
         }
 
         // Llamar al GameManager para congelar el tiempo
@@ -127,13 +133,26 @@ public class UIManager : MonoBehaviour
     private void ResumeGame()
     {
         isPaused = false;
+
+        // Reproducir sonido
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayPanelClose();
+        }
+
         if (pausePanel != null)
         {
             pausePanel.SetActive(false);
         }
+
         if (pauseButtonImage != null && pauseIcon != null)
         {
             pauseButtonImage.sprite = pauseIcon;
+        }
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.ResumeMusic();
         }
 
         if (GameManager.Instance != null)
@@ -159,6 +178,12 @@ public class UIManager : MonoBehaviour
             return;
         }
 
+        // Reproducir sonido
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayPanelOpen();
+        }
+
         // Resetear al inicio
         currentInstructionIndex = 0;
 
@@ -176,6 +201,12 @@ public class UIManager : MonoBehaviour
 
     public void CloseInstructions()
     {
+        // Reproducir sonido
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayPanelClose();
+        }
+
         if (instructionsPanel != null)
         {
             instructionsPanel.SetActive(false);
@@ -197,6 +228,12 @@ public class UIManager : MonoBehaviour
             return;
         }
 
+        // Reproducir sonido
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayButtonClick();
+        }
+
         currentInstructionIndex++;
         UpdateInstructionDisplay();
         Debug.Log($"[UIManager] Siguiente instrucción: {currentInstructionIndex + 1}/{instructionSprites.Length}");
@@ -207,6 +244,12 @@ public class UIManager : MonoBehaviour
         if (currentInstructionIndex <= 0)
         {
             return;
+        }
+
+        // Reproducir sonido
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayButtonClick();
         }
 
         currentInstructionIndex--;

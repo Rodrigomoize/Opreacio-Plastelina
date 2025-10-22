@@ -114,7 +114,7 @@ public class SceneBridge : MonoBehaviour
         }
     }
 
-    // Métodos estáticos
+    // Métodos estáticos (SIN audio, se añadirá desde Unity)
     public static void LoadMainMenu()
     {
         GameManager.GoToMainMenu();

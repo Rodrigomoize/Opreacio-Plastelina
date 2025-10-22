@@ -100,6 +100,11 @@ public class GameManager : MonoBehaviour
     private void LoadMainMenu()
     {
         SceneManager.LoadScene("MainMenu");
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayMainMenuMusic();
+        }
     }
 
     private void LoadHistoryScene()
@@ -124,6 +129,11 @@ public class GameManager : MonoBehaviour
 
         SceneManager.LoadScene("PlayScene");
         // La inicialización específica de PlayScene se hace en HandleSceneLoaded
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayGameplayMusic();
+        }
     }
 
     private void LoadWinScene()
@@ -143,6 +153,11 @@ public class GameManager : MonoBehaviour
         }
 
         SceneManager.LoadScene("WinScene");
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayVictoryMusic();
+        }
     }
 
     private void LoadLoseScene()
@@ -154,6 +169,11 @@ public class GameManager : MonoBehaviour
         }
 
         SceneManager.LoadScene("LoseScene");
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayDefeatMusic();
+        }
     }
 
     // PAUSE MENU
@@ -196,7 +216,7 @@ public class GameManager : MonoBehaviour
         LoadPlayScene();
     }
 
-    //GETTERS P�BLICOS
+    //GETTERS PBLICOS
 
     public UIManager GetUIManager() => uiManager;
     public AudioManager GetAudioManager() => audioManager;

@@ -21,9 +21,6 @@ EditorBuildSettings:
     path: Assets/Scenes/PlayScene.unity
     guid: 4f7b90c742eba6e4c88a9070c2c92e70
   - enabled: 1
-    path: Assets/Scenes/SettingsMenu.unity
-    guid: 9a18489f9c64c1d4f88665e9b7445c5b
-  - enabled: 1
     path: Assets/Scenes/LoseScene.unity
     guid: b8af5fc4bf45d3c46adaca60dc503769
   - enabled: 1

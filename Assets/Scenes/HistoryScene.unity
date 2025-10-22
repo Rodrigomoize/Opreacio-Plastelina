@@ -269,6 +269,7 @@ GameObject:
   - component: {fileID: 543879373}
   - component: {fileID: 543879372}
   - component: {fileID: 543879376}
+  - component: {fileID: 543879377}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -381,6 +382,18 @@ MonoBehaviour:
   normalButtonSprite: {fileID: 21300000, guid: ca64e9511e8cdf344b55c998e70cf884, type: 3}
   finalButtonSprite: {fileID: 21300000, guid: e49ff21052bd4224b97eb262e7b9449c, type: 3}
   nextSceneAfterScreens: InstructionScene
+--- !u!114 &543879377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 543879371}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b7e36ee98a55624189117c213e60fe1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AudioManagerBridge
 --- !u!1 &748865128
 GameObject:
   m_ObjectHideFlags: 0
@@ -668,7 +681,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1033863066}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 543879377}
+        m_TargetAssemblyTypeName: AudioManagerBridge, Assembly-CSharp
+        m_MethodName: PlayButtonClick
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1033863066
 MonoBehaviour:
   m_ObjectHideFlags: 0
