@@ -25,6 +25,14 @@ public class Character : MonoBehaviour
     public float combatDuration = 1.1f; // Duración del ataque
     [Tooltip("Velocidad reducida durante el combate (multiplicador, 0.1 = 10% velocidad original)")]
     public float combatSpeedMultiplier = 0.1f;
+    
+    [Header("VFX de Impacto")]
+    [Tooltip("Prefab del VFX de impacto/splash que aparece al destruirse")]
+    public GameObject vfxImpactPrefab;
+    [Tooltip("Velocidad de la implosión (tropas acercándose)")]
+    public float implosionSpeed = 3f;
+    [Tooltip("Escala inicial antes de la implosión")]
+    public float preImplosionScale = 1.2f;
 
     void Start()
     {
@@ -265,14 +273,20 @@ public class Character : MonoBehaviour
             Debug.Log($"[Character] {enemy.name} velocidad reducida: {enemyOriginalSpeed} → {enemyAgent.speed}");
         }
 
-        // Orientar uno hacia el otro
+        // Orientar el Character hacia el enemigo
         Vector3 directionToEnemy = enemy.transform.position - transform.position;
         directionToEnemy.y = 0; // Mantener horizontal
 
         if (directionToEnemy != Vector3.zero)
         {
             transform.rotation = Quaternion.LookRotation(directionToEnemy);
-            enemy.transform.rotation = Quaternion.LookRotation(-directionToEnemy);
+            
+            // Solo rotar al enemigo si es otro Character (no Combined)
+            // Combined mantiene su orientación hacia la torre
+            if (enemyChar != null)
+            {
+                enemy.transform.rotation = Quaternion.LookRotation(-directionToEnemy);
+            }
         }
 
         Debug.Log($"[Character] ⚔️ Combate iniciado entre {gameObject.name} y {enemy.name} - {combatDuration} segundo(s) de animación con velocidad reducida");
@@ -288,24 +302,22 @@ public class Character : MonoBehaviour
         // Esperar el tiempo de combate (1.1 segundos para completar la animación de ataque)
         yield return new WaitForSeconds(combatDuration);
 
-        Debug.Log($"[Character] ⚔️ Combate finalizado - Destruyendo ambas unidades");
+        Debug.Log($"[Character] ⚔️ Combate finalizado - Iniciando implosión");
 
         // Resolver operación: dar intelecto al DEFENSOR (el otro)
-        // El defensor es quien detuvo la operación enemiga
         if (manager != null)
         {
-            string defenderTag = enemy.tag; // El enemigo es quien defendió
+            string defenderTag = enemy.tag;
             manager.ResolveOperation(defenderTag);
             Debug.Log($"[Character] Intelecto otorgado al defensor: {defenderTag}");
         }
 
-        // Destruir UI propia
+        // Destruir UIs antes de la implosión
         if (troopUIInstance != null)
         {
             Destroy(troopUIInstance.gameObject);
         }
         
-        // Destruir UI del enemigo (usar variables ya declaradas al inicio)
         if (enemyChar != null && enemyChar.troopUIInstance != null)
         {
             Destroy(enemyChar.troopUIInstance.gameObject);
@@ -316,7 +328,58 @@ public class Character : MonoBehaviour
             Destroy(enemyCombined.operationUIInstance.gameObject);
         }
 
-        // Destruir ambos personajes
+        // ===== IMPLOSIÓN Y VFX =====
+        yield return StartCoroutine(ImplodeAndExplode(enemy, enemyChar, enemyCombined));
+    }
+
+    /// <summary>
+    /// Efecto de implosión: ambas unidades se atraen, encogen y explotan con VFX
+    /// </summary>
+    private IEnumerator ImplodeAndExplode(GameObject enemy, Character enemyChar, CharacterCombined enemyCombined)
+    {
+        Vector3 startPos = transform.position;
+        Vector3 enemyStartPos = enemy.transform.position;
+        Vector3 midPoint = (startPos + enemyStartPos) / 2f;
+
+        Vector3 originalScale = transform.localScale;
+        Vector3 enemyOriginalScale = enemy.transform.localScale;
+
+        // Efecto de estiramiento inicial (anticipación)
+        transform.localScale = originalScale * preImplosionScale;
+        enemy.transform.localScale = enemyOriginalScale * preImplosionScale;
+        yield return new WaitForSeconds(0.05f);
+
+        // Implosión: ambas unidades se acercan al punto medio y se encogen
+        float t = 0;
+        while (t < 1f)
+        {
+            t += Time.deltaTime * implosionSpeed;
+            float easeT = Mathf.SmoothStep(0, 1, t); // Suavizado
+
+            // Ambas se mueven al punto medio
+            transform.position = Vector3.Lerp(startPos, midPoint, easeT);
+            enemy.transform.position = Vector3.Lerp(enemyStartPos, midPoint, easeT);
+
+            // Ambas se encogen
+            float scaleT = t * 1.2f; // Encogimiento ligeramente más rápido
+            transform.localScale = Vector3.Lerp(originalScale, Vector3.zero, scaleT);
+            enemy.transform.localScale = Vector3.Lerp(enemyOriginalScale, Vector3.zero, scaleT);
+
+            yield return null;
+        }
+
+        // Instanciar VFX de impacto en el punto medio
+        if (vfxImpactPrefab != null)
+        {
+            Instantiate(vfxImpactPrefab, midPoint, Quaternion.identity);
+            Debug.Log($"[Character] 💥 VFX de impacto instanciado en {midPoint}");
+        }
+        else
+        {
+            Debug.LogWarning("[Character] vfxImpactPrefab no asignado!");
+        }
+
+        // Destruir ambas unidades
         Destroy(enemy);
         Destroy(gameObject);
     }

@@ -127,8 +127,11 @@ MonoBehaviour:
   isInCombat: 0
   troopUIPrefab: {fileID: 4383262928985605803, guid: e0e5ad72102f29a4abb09024ff254ad7, type: 3}
   troopUIInstance: {fileID: 0}
-  combatDuration: 1.2
+  combatDuration: 1
   combatSpeedMultiplier: 0.1
+  vfxImpactPrefab: {fileID: 7190290771688677997, guid: 0d5fffd37d636a042bfd10411f3c784e, type: 3}
+  implosionSpeed: 4
+  preImplosionScale: 1.2
 --- !u!195 &1866235154918823136
 NavMeshAgent:
   m_ObjectHideFlags: 0
