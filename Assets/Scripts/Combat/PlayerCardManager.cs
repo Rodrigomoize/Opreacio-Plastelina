@@ -22,6 +22,10 @@ public class PlayerCardManager : MonoBehaviour
     public Color invalidCardColor = new Color(0.5f, 0.5f, 0.5f, 0.6f);
     [Tooltip("Color para cartas seleccionadas")]
     public Color selectedCardColor = new Color(1f, 1f, 0.5f, 1f);
+    [Tooltip("Color para carta seleccionada 2 veces (auto-combinación)")]
+    public Color doubleSelectedCardColor = new Color(1f, 0.5f, 1f, 1f); // Rosa/magenta para indicar doble selección
+    [Tooltip("Color para carta seleccionada pero bloqueada (ej: 2 con operador -, no puede seleccionar 2 otra vez)")]
+    public Color selectedButBlockedCardColor = new Color(0.7f, 0.7f, 0.4f, 0.8f); // Amarillo oscuro/grisáceo
     [Tooltip("Color para botones de operación válidos")]
     public Color validOperatorColor = Color.white;
     [Tooltip("Color para botones de operación inválidos")]
@@ -175,14 +179,44 @@ public class PlayerCardManager : MonoBehaviour
                     UpdateVisualFeedback();
                     return;
                 }
-                // Si HAY operador Y permitimos auto-combinación: usar la misma carta dos veces
+                // Si HAY operador Y permitimos auto-combinación: validar si el resultado es válido
                 else if (allowSelfCombination)
                 {
-                    Debug.Log($"[PlayerCardManager] ✓ Auto-combinación: usando la misma carta dos veces con operador '{currentOperator}'");
-                    selectedDisplays.Add(display); // Añadir la misma carta otra vez
-                    // No elevamos más porque ya está elevada
-                    UpdateVisualFeedback();
-                    return;
+                    int cardValue = display.cardData.cardValue;
+                    bool isValidResult = false;
+                    
+                    // Validar según el operador
+                    if (currentOperator == '+')
+                    {
+                        int result = cardValue + cardValue;
+                        isValidResult = (result <= 5);
+                        
+                        if (!isValidResult)
+                        {
+                            Debug.Log($"[PlayerCardManager] ✗ Auto-combinación inválida: {cardValue}+{cardValue}={result} (>5)");
+                        }
+                    }
+                    else if (currentOperator == '-')
+                    {
+                        // Carta consigo misma siempre da 0, que NO es válido (debe ser >0)
+                        isValidResult = false;
+                        Debug.Log($"[PlayerCardManager] ✗ Auto-combinación inválida: {cardValue}-{cardValue}=0 (debe ser >0)");
+                    }
+                    
+                    if (isValidResult)
+                    {
+                        Debug.Log($"[PlayerCardManager] ✓ Auto-combinación válida: usando la misma carta dos veces con operador '{currentOperator}'");
+                        selectedDisplays.Add(display); // Añadir la misma carta otra vez
+                        // No elevamos más porque ya está elevada
+                        UpdateVisualFeedback();
+                        return;
+                    }
+                    else
+                    {
+                        Debug.Log($"[PlayerCardManager] ✗ Auto-combinación bloqueada: resultado inválido");
+                        // No hacer nada, la carta ya está seleccionada y el operador activo
+                        return;
+                    }
                 }
                 // Si HAY operador pero NO permitimos auto-combinación: deseleccionar
                 else
@@ -210,12 +244,47 @@ public class PlayerCardManager : MonoBehaviour
             }
             else
             {
-                // SI hay operador, añadir segunda carta
-                Debug.Log($"[PlayerCardManager] ✓ Segunda carta seleccionada: {display.cardData.cardName} (ID: {display.GetInstanceID()}) con operador '{currentOperator}'");
-                selectedDisplays.Add(display);
-                SetCardElevation(display, true);
-                UpdateVisualFeedback();
-                return;
+                // SI hay operador, validar si la combinación es válida antes de añadir
+                int firstValue = first.cardData.cardValue;
+                int secondValue = display.cardData.cardValue;
+                bool isValidCombination = false;
+                
+                if (currentOperator == '+')
+                {
+                    int result = firstValue + secondValue;
+                    isValidCombination = (result <= 5);
+                    
+                    if (!isValidCombination)
+                    {
+                        Debug.Log($"[PlayerCardManager] ✗ Combinación inválida: {firstValue}+{secondValue}={result} (>5)");
+                    }
+                }
+                else if (currentOperator == '-')
+                {
+                    int result = firstValue - secondValue;
+                    isValidCombination = (result > 0 && result <= 5); // Cambiado: debe ser >0, no >=0
+                    
+                    if (!isValidCombination)
+                    {
+                        Debug.Log($"[PlayerCardManager] ✗ Combinación inválida: {firstValue}-{secondValue}={result} (debe ser >0 y ≤5)");
+                    }
+                }
+                
+                if (isValidCombination)
+                {
+                    // Combinación válida, añadir segunda carta
+                    Debug.Log($"[PlayerCardManager] ✓ Segunda carta seleccionada: {display.cardData.cardName} (ID: {display.GetInstanceID()}) con operador '{currentOperator}'");
+                    selectedDisplays.Add(display);
+                    SetCardElevation(display, true);
+                    UpdateVisualFeedback();
+                    return;
+                }
+                else
+                {
+                    // Combinación inválida, no hacer nada
+                    Debug.Log($"[PlayerCardManager] ✗ Combinación bloqueada");
+                    return;
+                }
             }
         }
 
@@ -416,9 +485,9 @@ public class PlayerCardManager : MonoBehaviour
                 }
 
                 operationResult = a.cardValue - b.cardValue;
-                if (operationResult < 0 || operationResult > 5)
+                if (operationResult <= 0 || operationResult > 5)
                 {
-                    Debug.Log($"[PlayerCardManager] Resta inválida: {a.cardValue} - {b.cardValue} = {operationResult}. Debe estar en [0..5]. Cancela selección.");
+                    Debug.Log($"[PlayerCardManager] Resta inválida: {a.cardValue} - {b.cardValue} = {operationResult}. Debe estar en (0..5]. Cancela selección.");
                     DeselectAll();
                     return;
                 }
@@ -602,13 +671,26 @@ public class PlayerCardManager : MonoBehaviour
             int firstValue = firstCard.cardData.cardValue;
             int currentValue = display.cardData.cardValue;
             
-            // Si es la misma carta, válido solo si permitimos auto-combinación
+            // Si es la misma carta, verificar auto-combinación Y que el resultado sea válido
             if (ReferenceEquals(display, firstCard))
             {
-                return allowSelfCombination;
+                if (!allowSelfCombination) return false;
+                
+                // Validar que el resultado de usar la misma carta sea válido
+                if (currentOperator == '+')
+                {
+                    int result = firstValue + firstValue;
+                    return result <= 5;
+                }
+                else if (currentOperator == '-')
+                {
+                    // Carta consigo misma siempre da 0, que NO es válido (debe ser >0)
+                    return false;
+                }
+                return false;
             }
             
-            // Validar según operador
+            // Validar según operador para cartas diferentes
             if (currentOperator == '+')
             {
                 // Suma: resultado no puede superar 5
@@ -617,9 +699,9 @@ public class PlayerCardManager : MonoBehaviour
             }
             else if (currentOperator == '-')
             {
-                // Resta: resultado no puede ser negativo ni superar 5
+                // Resta: resultado debe ser >0 y ≤5 (no permitir resultado 0)
                 int result = firstValue - currentValue;
-                return result >= 0 && result <= 5;
+                return result > 0 && result <= 5; // Cambiado: >0 en vez de >=0
             }
         }
         
@@ -641,6 +723,7 @@ public class PlayerCardManager : MonoBehaviour
         if (selectedDisplays.Count == 1)
         {
             int firstValue = selectedDisplays[0].cardData.cardValue;
+            var firstDisplay = selectedDisplays[0];
             
             if (op == '+')
             {
@@ -650,6 +733,17 @@ public class PlayerCardManager : MonoBehaviour
                     var display = card.GetComponent<CardDisplay>();
                     if (display != null && display.cardData != null)
                     {
+                        // Si es la misma carta, verificar auto-combinación
+                        if (ReferenceEquals(display, firstDisplay))
+                        {
+                            if (allowSelfCombination)
+                            {
+                                int selfResult = firstValue + firstValue;
+                                if (selfResult <= 5) return true;
+                            }
+                            continue; // Si no permite auto-combo o el resultado es >5, continuar con otras cartas
+                        }
+                        
                         int result = firstValue + display.cardData.cardValue;
                         if (result <= 5) return true; // Hay al menos una opción válida
                     }
@@ -658,14 +752,21 @@ public class PlayerCardManager : MonoBehaviour
             }
             else if (op == '-')
             {
-                // Para resta: ver si hay alguna carta que restada no sea negativa
+                // Para resta: ver si hay alguna carta que restada dé resultado >0 y ≤5
                 foreach (var card in spawnedCards)
                 {
                     var display = card.GetComponent<CardDisplay>();
                     if (display != null && display.cardData != null)
                     {
+                        // Si es la misma carta, verificar auto-combinación (siempre da 0, NO válido)
+                        if (ReferenceEquals(display, firstDisplay))
+                        {
+                            // X - X = 0, que NO es válido (debe ser >0)
+                            continue; // Saltar esta opción
+                        }
+                        
                         int result = firstValue - display.cardData.cardValue;
-                        if (result >= 0 && result <= 5) return true; // Hay al menos una opción válida
+                        if (result > 0 && result <= 5) return true; // Hay al menos una opción válida (>0 y ≤5)
                     }
                 }
                 return false; // No hay opciones válidas
@@ -683,6 +784,13 @@ public class PlayerCardManager : MonoBehaviour
     {
         Debug.Log($"[UpdateVisualFeedback] Cartas seleccionadas: {selectedDisplays.Count}, Operador actual: '{currentOperator}'");
         
+        // Detectar si hay auto-combinación (misma carta seleccionada 2 veces)
+        bool isAutoCombination = false;
+        if (selectedDisplays.Count == 2 && ReferenceEquals(selectedDisplays[0], selectedDisplays[1]))
+        {
+            isAutoCombination = true;
+        }
+        
         // Actualizar estado visual de cada carta
         foreach (var cardObj in spawnedCards)
         {
@@ -697,14 +805,30 @@ public class PlayerCardManager : MonoBehaviour
             Image cardImage = display.GetComponent<Image>();
             if (cardImage != null)
             {
-                if (isSelected)
+                // CASO ESPECIAL: Carta seleccionada 2 veces (auto-combinación)
+                if (isAutoCombination && ReferenceEquals(display, selectedDisplays[0]))
+                {
+                    cardImage.color = doubleSelectedCardColor; // Color especial rosa/magenta
+                    Debug.Log($"[UpdateVisualFeedback] Carta {display.cardData.cardValue} seleccionada 2 veces - color MAGENTA");
+                }
+                // CASO ESPECIAL: Carta seleccionada pero bloqueada (ej: 2- y quieres seleccionar 2 otra vez)
+                else if (isSelected && !isValid && selectedDisplays.Count == 1 && currentOperator != '\0')
+                {
+                    // La carta está seleccionada, hay operador activo, pero no es válida para segunda selección
+                    cardImage.color = selectedButBlockedCardColor; // Color amarillo oscuro/grisáceo
+                    Debug.Log($"[UpdateVisualFeedback] Carta {display.cardData.cardValue} seleccionada pero BLOQUEADA - color GRIS-AMARILLO");
+                }
+                // Caso normal: carta seleccionada
+                else if (isSelected)
                 {
                     cardImage.color = selectedCardColor;
                 }
+                // Carta válida pero no seleccionada
                 else if (isValid)
                 {
                     cardImage.color = validCardColor;
                 }
+                // Carta inválida
                 else
                 {
                     cardImage.color = invalidCardColor;
