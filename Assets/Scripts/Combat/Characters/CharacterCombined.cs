@@ -98,16 +98,24 @@ public class CharacterCombined : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// ACTUALIZACIÓN CLAVE: calcula speed final como baseSpeed * GameSpeedMultiplier * perObjectMultiplier.
+    /// </summary>
     public void UpdateSpeed()
     {
-        if (agent != null && GameSpeedManager.Instance != null)
+        if (agent == null) return;
+
+        float baseSpeed = velocity;
+        float globalMultiplier = 1f;
+        float agentMultiplier = 1f;
+
+        if (GameSpeedManager.Instance != null)
         {
-            agent.speed = GameSpeedManager.Instance.GetAdjustedSpeed(velocity);
+            globalMultiplier = GameSpeedManager.Instance.GameSpeedMultiplier;
+            agentMultiplier = GameSpeedManager.Instance.GetAgentMultiplier(gameObject);
         }
-        else if (agent != null)
-        {
-            agent.speed = velocity;
-        }
+
+        agent.speed = baseSpeed * globalMultiplier * agentMultiplier;
     }
 
     public void SetupCharacterModels(GameObject frontModel, GameObject backModel)
@@ -215,8 +223,6 @@ public class CharacterCombined : MonoBehaviour
             }
         }
 
-        // CharacterCombined NO gestiona combate, solo Character lo hace
-        // Character detecta colisiones con Combined y maneja todo el combate
     }
 
     // Métodos de acceso para Character

@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] IAController aiCardManager;
     [SerializeField] PlayerCardManager playerCardManager;
     [SerializeField] GameTimer gameTimerManager;
+    [SerializeField] ScoreManager scoreManager;
 
     [Header("Defaults")]
     [SerializeField] IAController.AIDificultad defaultAIDifficulty = IAController.AIDificultad.Media;
@@ -278,6 +279,7 @@ public class GameManager : MonoBehaviour
         aiCardManager = aiCardManager ?? FindInScene<IAController>(scene);
         playerCardManager = playerCardManager ?? FindInScene<PlayerCardManager>(scene);
         gameTimerManager = gameTimerManager ?? FindInScene<GameTimer>(scene);
+        scoreManager = scoreManager ?? FindInScene<ScoreManager>(scene);
 
         Debug.Log($"[GameManager] Managers asignados -> UI:{(uiManager != null)} Audio:{(audioManager != null)} Card:{(combatManager != null)} AI:{(aiCardManager != null)} PlayerCard:{(playerCardManager != null)} Timer:{(gameTimerManager != null)}");
     }

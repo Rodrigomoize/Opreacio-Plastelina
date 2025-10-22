@@ -13,7 +13,7 @@ public class Character : MonoBehaviour
     private Transform enemyTower;
     private bool reachedBridge = false;
     private CharacterManager manager;
-    public bool isInCombat = false; 
+    public bool isInCombat = false;
     private Animator animator;
 
     [Header("UI")]
@@ -25,7 +25,7 @@ public class Character : MonoBehaviour
     public float combatDuration = 1.1f; // Duración del ataque
     [Tooltip("Velocidad reducida durante el combate (multiplicador, 0.1 = 10% velocidad original)")]
     public float combatSpeedMultiplier = 0.1f;
-    
+
     [Header("VFX de Impacto")]
     [Tooltip("Prefab del VFX de impacto/splash que aparece al destruirse")]
     public GameObject vfxImpactPrefab;
@@ -101,23 +101,31 @@ public class Character : MonoBehaviour
                 Debug.Log($"[Character] {gameObject.name} navegando hacia puente {targetBridge.name}");
             }
         }
-        
+
         // Crear UI de la tropa
         CreateTroopUI();
     }
 
+    /// <summary>
+    /// ACTUALIZACIÓN CLAVE: calcula speed final como baseSpeed * GameSpeedMultiplier * perObjectMultiplier.
+    /// </summary>
     public void UpdateSpeed()
     {
-        if (agent != null && GameSpeedManager.Instance != null)
+        if (agent == null) return;
+
+        float baseSpeed = speed;
+        float globalMultiplier = 1f;
+        float agentMultiplier = 1f;
+
+        if (GameSpeedManager.Instance != null)
         {
-            agent.speed = GameSpeedManager.Instance.GetAdjustedSpeed(speed);
+            globalMultiplier = GameSpeedManager.Instance.GameSpeedMultiplier;
+            agentMultiplier = GameSpeedManager.Instance.GetAgentMultiplier(gameObject);
         }
-        else if (agent != null)
-        {
-            agent.speed = speed;
-        }
+
+        agent.speed = baseSpeed * globalMultiplier * agentMultiplier;
     }
-    
+
     /// <summary>
     /// Crea la UI flotante de la tropa mostrando su valor
     /// </summary>
@@ -249,7 +257,7 @@ public class Character : MonoBehaviour
         // Identificar el tipo de enemigo
         Character enemyChar = enemy.GetComponent<Character>();
         CharacterCombined enemyCombined = enemy.GetComponent<CharacterCombined>();
-        
+
         // Reducir velocidad propia
         float originalSpeed = 0f;
         if (agent != null)
@@ -262,7 +270,7 @@ public class Character : MonoBehaviour
         // Reducir velocidad del enemigo (Character o CharacterCombined)
         float enemyOriginalSpeed = 0f;
         NavMeshAgent enemyAgent = null;
-        
+
         if (enemyChar != null)
         {
             enemyAgent = enemyChar.GetComponent<NavMeshAgent>();
@@ -271,7 +279,7 @@ public class Character : MonoBehaviour
         {
             enemyAgent = enemyCombined.GetAgent();
         }
-        
+
         if (enemyAgent != null)
         {
             enemyOriginalSpeed = enemyAgent.speed;
@@ -286,7 +294,7 @@ public class Character : MonoBehaviour
         if (directionToEnemy != Vector3.zero)
         {
             transform.rotation = Quaternion.LookRotation(directionToEnemy);
-            
+
             // Solo rotar al enemigo si es otro Character (no Combined)
             // Combined mantiene su orientación hacia la torre
             if (enemyChar != null)
@@ -329,12 +337,12 @@ public class Character : MonoBehaviour
         {
             Destroy(troopUIInstance.gameObject);
         }
-        
+
         if (enemyChar != null && enemyChar.troopUIInstance != null)
         {
             Destroy(enemyChar.troopUIInstance.gameObject);
         }
-        
+
         if (enemyCombined != null && enemyCombined.operationUIInstance != null)
         {
             Destroy(enemyCombined.operationUIInstance.gameObject);
