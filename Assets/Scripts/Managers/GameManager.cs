@@ -1,9 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Unity.VisualScripting;
-using UnityEngine;
 using UnityEngine.InputSystem.XR;
-using UnityEngine.SceneManagement;
 using static IAController;
 
 public class GameManager : MonoBehaviour
@@ -95,7 +93,7 @@ public class GameManager : MonoBehaviour
         {
             Instance.LoadLoseScene();
         }
-    }
+    }   
 
     // METODOS PRIVADOS DE CARGA
 
@@ -198,7 +196,7 @@ public class GameManager : MonoBehaviour
         LoadPlayScene();
     }
 
-    //GETTERS PUBLICOS
+    //GETTERS P�BLICOS
 
     public UIManager GetUIManager() => uiManager;
     public AudioManager GetAudioManager() => audioManager;
@@ -207,18 +205,31 @@ public class GameManager : MonoBehaviour
     public PlayerCardManager GetPlayerCardManager() => playerCardManager;
     public GameTimer GetGameTimer() => gameTimerManager;
 
-    // ===== NUEVO MÉTODO PARA CAMBIAR DIFICULTAD =====
+    // ===== M�TODO PARA CAMBIAR DIFICULTAD =====
     public void SetDificultad(IAController.AIDificultad dificultad)
     {
         defaultAIDifficulty = dificultad;
         Debug.Log($"[GameManager] Dificultad cambiada a: {dificultad}");
+        
+        // Actualizar la velocidad del juego seg�n la dificultad
+        if (GameSpeedManager.Instance != null)
+        {
+            GameSpeedManager.GameDifficulty speedDifficulty = dificultad switch
+            {
+                IAController.AIDificultad.Facil => GameSpeedManager.GameDifficulty.Facil,
+                IAController.AIDificultad.Media => GameSpeedManager.GameDifficulty.Media,
+                IAController.AIDificultad.Dificil => GameSpeedManager.GameDifficulty.Dificil,
+                _ => GameSpeedManager.GameDifficulty.Media
+            };
+            GameSpeedManager.Instance.SetSpeedByDifficulty(speedDifficulty);
+        }
     }
 
     private void OnDestroy()
     {
         if (Instance == this)
         {
-            SceneManager.sceneLoaded -= HandleSceneLoaded;
+            SceneManager.sceneLoaded -= HandleSceneLoaded;  
             UnsubscribeFromTimer();
         }
     }
@@ -234,6 +245,15 @@ public class GameManager : MonoBehaviour
             if (ScoreManager.Instance != null)
             {
                 ScoreManager.Instance.ResetScore();
+                Debug.Log("[GameManager] Score reseteado para nueva partida");
+            }
+
+            // Reiniciar y arrancar el timer
+            if (gameTimerManager != null)
+            {
+                gameTimerManager.ResetTimer();
+                gameTimerManager.StartCountdown(gameTimerManager.CountdownDuration);
+                Debug.Log("[GameManager] Timer reseteado y arrancado para nueva partida");
             }
 
             // Asegurar que la IA reciba la dificultad por defecto una vez esté presente
@@ -245,6 +265,25 @@ public class GameManager : MonoBehaviour
             {
                 Debug.LogWarning("[GameManager] IAController no encontrado en PlayScene para asignar dificultad");
             }
+
+            // Aplicar la velocidad de juego según la dificultad seleccionada
+            if (GameSpeedManager.Instance != null)
+            {
+                GameSpeedManager.GameDifficulty speedDifficulty = defaultAIDifficulty switch
+                {
+                    IAController.AIDificultad.Facil => GameSpeedManager.GameDifficulty.Facil,
+                    IAController.AIDificultad.Media => GameSpeedManager.GameDifficulty.Media,
+                    IAController.AIDificultad.Dificil => GameSpeedManager.GameDifficulty.Dificil,
+                    _ => GameSpeedManager.GameDifficulty.Media
+                };
+                GameSpeedManager.Instance.SetSpeedByDifficulty(speedDifficulty);
+                Debug.Log($"[GameManager] Velocidad de juego aplicada para dificultad: {defaultAIDifficulty}");
+            }
+            else
+            {
+                Debug.LogWarning("[GameManager] GameSpeedManager no encontrado en PlayScene");
+            }
+
             SubscribeToTimer();
         }
         else

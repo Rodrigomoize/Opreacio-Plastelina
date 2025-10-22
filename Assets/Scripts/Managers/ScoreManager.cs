@@ -148,7 +148,7 @@ public class ScoreManager : MonoBehaviour
         if (s >= excelenteThreshold) return "Excel·lent";
         if (s >= notableThreshold) return "Notable";
         if (s >= bienThreshold) return "Bé";
-        return "Suspès";
+        return "Aprovat";
     }
 
     #endregion

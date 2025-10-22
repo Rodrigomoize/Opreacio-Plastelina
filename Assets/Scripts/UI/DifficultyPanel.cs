@@ -2,8 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Panel simple de selección de dificultad
-/// Solo abre/cierra el panel, los botones llaman directamente a métodos públicos
+/// Panel simple de selecciï¿½n de dificultad
+/// Solo abre/cierra el panel, los botones llaman directamente a mï¿½todos pï¿½blicos
 /// </summary>
 public class DifficultyPanel : MonoBehaviour
 {
@@ -11,7 +11,7 @@ public class DifficultyPanel : MonoBehaviour
     [SerializeField] private GameObject panelDificultad;
     [SerializeField] private Button botonAbrirPanel;
 
-    [Header("Botón Cerrar (Opcional)")]
+    [Header("Botï¿½n Cerrar (Opcional)")]
     [SerializeField] private Button botonCerrar;
 
     private void Start()
@@ -54,10 +54,10 @@ public class DifficultyPanel : MonoBehaviour
         }
     }
 
-    // Métodos públicos para llamar desde los botones en Unity Inspector
+    // Mï¿½todos pï¿½blicos para llamar desde los botones en Unity Inspector
     public void IniciarJuegoFacil()
     {
-        Debug.Log("[DifficultyPanel] Iniciando juego FÁCIL");
+        Debug.Log("[DifficultyPanel] Iniciando juego Fï¿½CIL");
         GameManager.Instance.SetDificultad(IAController.AIDificultad.Facil);
         GameManager.GoToPlayScene();
     }
@@ -71,7 +71,7 @@ public class DifficultyPanel : MonoBehaviour
 
     public void IniciarJuegoDificil()
     {
-        Debug.Log("[DifficultyPanel] Iniciando juego DIFÍCIL");
+        Debug.Log("[DifficultyPanel] Iniciando juego DIFï¿½CIL");
         GameManager.Instance.SetDificultad(IAController.AIDificultad.Dificil);
         GameManager.GoToPlayScene();
     }

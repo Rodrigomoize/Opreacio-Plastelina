@@ -3,9 +3,9 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 
 /// <summary>
-/// Gestor de powerups. Soporta configuración desde inspector para cada powerup.
+/// Gestor de powerups. Soporta configuraciï¿½n desde inspector para cada powerup.
 /// - SlowTime: usa GameSpeedManager.ApplyTagSpeedMultiplier / RemoveTagSpeedMultiplier
-/// - Health: busca la torre objetivo vía TowerManager y llama Heal(amount)
+/// - Health: busca la torre objetivo vï¿½a TowerManager y llama Heal(amount)
 /// </summary>
 public class PowerUpManager : MonoBehaviour
 {
@@ -15,14 +15,14 @@ public class PowerUpManager : MonoBehaviour
     public class PowerUpData
     {
         public string powerUpName;      // "SlowTime", "Health", etc.
-        public float duration = 0f;     // 0 = instantáneo
+        public float duration = 0f;     // 0 = instantï¿½neo
         public float cooldownTime = 10f;
         public Button powerUpButton;
         public Image cooldownFillImage;
 
-        // Opciones específicas por powerup:
+        // Opciones especï¿½ficas por powerup:
         [Header("SlowTime settings")]
-        [Tooltip("Tag objetivo que será afectado por SlowTime (ej: 'AITeam')")]
+        [Tooltip("Tag objetivo que serï¿½ afectado por SlowTime (ej: 'AITeam')")]
         public string targetTeam = "AITeam";
         [Tooltip("Multiplicador aplicado durante el SlowTime. 0.3 = 30% de velocidad")]
         public float slowMultiplier = 0.3f;
@@ -30,7 +30,7 @@ public class PowerUpManager : MonoBehaviour
         [Header("Health settings")]
         [Tooltip("Cantidad de vida a restaurar para powerup Health")]
         public int healAmount = 3;
-        [Tooltip("Equipo cuyo TowerHealthBar se curará (ej: 'PlayerTeam' o 'AITeam')")]
+        [Tooltip("Equipo cuyo TowerHealthBar se curarï¿½ (ej: 'PlayerTeam' o 'AITeam')")]
         public string healTargetTeam = "PlayerTeam";
 
         [HideInInspector] public bool isOnCooldown;
@@ -61,6 +61,59 @@ public class PowerUpManager : MonoBehaviour
     private void Update()
     {
         UpdateCooldowns();
+        UpdateHealthPowerUpAvailability();
+    }
+
+    /// <summary>
+    /// Actualiza la disponibilidad del powerup de curaciÃ³n basÃ¡ndose en la vida actual de la torre
+    /// </summary>
+    private void UpdateHealthPowerUpAvailability()
+    {
+        PowerUpData healthPowerUp = powerUps.Find(x => x.powerUpName == "Health");
+        if (healthPowerUp == null || healthPowerUp.powerUpButton == null) return;
+
+        // Si ya estÃ¡ en cooldown o activo, no cambiar nada
+        if (healthPowerUp.isOnCooldown || healthPowerUp.isActive) return;
+
+        // Buscar la torre del jugador
+        TowerHealthBar playerTower = null;
+        if (TowerManager.Instance != null)
+        {
+            playerTower = TowerManager.Instance.GetTowerByTeam(healthPowerUp.healTargetTeam);
+        }
+
+        // Fallback: buscar en escena
+        if (playerTower == null)
+        {
+            TowerHealthBar[] bars = FindObjectsByType<TowerHealthBar>(FindObjectsSortMode.None);
+            foreach (var bar in bars)
+            {
+                if (bar != null && bar.teamTag == healthPowerUp.healTargetTeam)
+                {
+                    playerTower = bar;
+                    break;
+                }
+            }
+        }
+
+        // Si no hay torre, deshabilitar
+        if (playerTower == null)
+        {
+            healthPowerUp.powerUpButton.interactable = false;
+            return;
+        }
+
+        // Deshabilitar si la vida estÃ¡ al mÃ¡ximo
+        bool isAtMaxHealth = playerTower.GetCurrentHealth() >= playerTower.maxHealth;
+        healthPowerUp.powerUpButton.interactable = !isAtMaxHealth;
+
+        // Actualizar color visual solo si no estÃ¡ disponible por vida mÃ¡xima
+        if (isAtMaxHealth && !healthPowerUp.isOnCooldown)
+        {
+            ColorBlock colors = healthPowerUp.powerUpButton.colors;
+            colors.normalColor = cooldownColor;
+            healthPowerUp.powerUpButton.colors = colors;
+        }
     }
 
     private void InitializePowerUps()
@@ -71,6 +124,13 @@ public class PowerUpManager : MonoBehaviour
             {
                 string nameCopy = p.powerUpName;
                 p.powerUpButton.onClick.AddListener(() => ActivatePowerUp(nameCopy));
+
+                // Asegurar que el botÃ³n tenga el componente de hover
+                if (p.powerUpButton.GetComponent<PowerUpButtonHover>() == null)
+                {
+                    p.powerUpButton.gameObject.AddComponent<PowerUpButtonHover>();
+                    Debug.Log($"[PowerUpManager] AÃ±adido PowerUpButtonHover a {p.powerUpName}");
+                }
             }
             UpdatePowerUpUI(p);
         }
@@ -97,13 +157,13 @@ public class PowerUpManager : MonoBehaviour
                 if (p.durationTimer <= 0f)
                 {
                     p.isActive = false;
-                    // Desactivar efectos específicos
+                    // Desactivar efectos especï¿½ficos
                     switch (p.powerUpName)
                     {
                         case "SlowTime":
                             DeactivateSlowTimePowerUp(p);
                             break;
-                            // otros con duración aquí...
+                            // otros con duraciï¿½n aquï¿½...
                     }
                     StartCooldown(p);
                     UpdatePowerUpUI(p);
@@ -127,7 +187,7 @@ public class PowerUpManager : MonoBehaviour
 
         if (p.isOnCooldown || p.isActive)
         {
-            Debug.Log($"PowerUp '{powerUpName}' no está disponible!");
+            Debug.Log($"PowerUp '{powerUpName}' no estï¿½ disponible!");
             return;
         }
 
@@ -145,15 +205,15 @@ public class PowerUpManager : MonoBehaviour
                 return;
         }
 
-        // Marcar activo y temporizador de duración
+        // Marcar activo y temporizador de duraciï¿½n
         p.isActive = true;
         p.durationTimer = p.duration;
 
-        // Si es instantáneo, iniciar cooldown ahora
+        // Si es instantï¿½neo, iniciar cooldown ahora
         if (p.duration <= 0f)
         {
             StartCooldown(p);
-            // si no necesita duración, también marcamos isActive = false (pero puede usarse para VFX temporales)
+            // si no necesita duraciï¿½n, tambiï¿½n marcamos isActive = false (pero puede usarse para VFX temporales)
             // Mantendremos isActive=true hasta que UpdateCooldowns lo desactive si necesitas ver color activo breve.
         }
 
@@ -199,7 +259,7 @@ public class PowerUpManager : MonoBehaviour
         int affected = GameSpeedManager.Instance.ApplyTagSpeedMultiplier(p.targetTeam, p.slowMultiplier);
         Debug.Log($"[PowerUpManager] SlowTime activado para tag '{p.targetTeam}' (objetos afectados: {affected})");
 
-        // Si la duración es 0 (instantáneo), programamos la restauración inmediata
+        // Si la duraciï¿½n es 0 (instantï¿½neo), programamos la restauraciï¿½n inmediata
         if (p.duration <= 0f)
         {
             // Desactivar inmediatamente
@@ -234,7 +294,7 @@ public class PowerUpManager : MonoBehaviour
         // Fallback: buscar la primera TowerHealthBar con ese teamTag en escena
         if (target == null)
         {
-            TowerHealthBar[] bars = FindObjectsOfType<TowerHealthBar>();
+            TowerHealthBar[] bars = FindObjectsByType<TowerHealthBar>(FindObjectsSortMode.None);
             if (bars != null && bars.Length > 0)
             {
                 foreach (var b in bars)
@@ -247,14 +307,14 @@ public class PowerUpManager : MonoBehaviour
 
         if (target == null)
         {
-            Debug.LogWarning($"ActivateHealthPowerUp: No se encontró TowerHealthBar para team '{p.healTargetTeam}'");
+            Debug.LogWarning($"ActivateHealthPowerUp: No se encontrï¿½ TowerHealthBar para team '{p.healTargetTeam}'");
             return;
         }
 
         target.Heal(p.healAmount);
         Debug.Log($"[PowerUpManager] HealthPowerUp: curados {p.healAmount} en {target.gameObject.name}");
 
-        // si duration == 0, lo consideramos instantáneo y lanzamos cooldown
+        // si duration == 0, lo consideramos instantï¿½neo y lanzamos cooldown
         if (p.duration <= 0f)
         {
             StartCooldown(p);
@@ -265,7 +325,7 @@ public class PowerUpManager : MonoBehaviour
 
     #endregion
 
-    // Métodos públicos/útiles
+    // Mï¿½todos pï¿½blicos/ï¿½tiles
     public bool IsPowerUpAvailable(string powerUpName)
     {
         PowerUpData p = powerUps.Find(x => x.powerUpName == powerUpName);

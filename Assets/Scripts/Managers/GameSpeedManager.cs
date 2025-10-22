@@ -3,6 +3,13 @@ using UnityEngine;
 
 public class GameSpeedManager : MonoBehaviour
 {
+    public enum GameDifficulty
+    {
+        Facil,
+        Media,
+        Dificil
+    }
+
     public static GameSpeedManager Instance { get; private set; }
 
     [Header("Configuración de Velocidad")]
@@ -13,6 +20,14 @@ public class GameSpeedManager : MonoBehaviour
         get => gameSpeedMultiplier;
         set { gameSpeedMultiplier = Mathf.Clamp(value, 0.1f, 3f); OnGameSpeedChanged(); }
     }
+
+    [Header("Velocidades por Dificultad")]
+    [SerializeField, Range(0.1f, 1.5f)]
+    private float easySpeed = 0.4f; // Fácil: 40% velocidad
+    [SerializeField, Range(0.1f, 1.5f)]
+    private float mediumSpeed = 0.7f; // Media: 70% velocidad
+    [SerializeField, Range(0.1f, 1.5f)]
+    private float hardSpeed = 1.0f; // Difícil: 100% velocidad
 
     // Multiplicadores temporales por objeto (p.ej. slow powerup)
     private readonly Dictionary<GameObject, float> perObjectMultipliers = new();
@@ -32,10 +47,10 @@ public class GameSpeedManager : MonoBehaviour
 
     private void UpdateAllCharacterSpeeds()
     {
-        Character[] characters = FindObjectsOfType<Character>();
+        Character[] characters = FindObjectsByType<Character>(FindObjectsSortMode.None);
         foreach (var c in characters) c.UpdateSpeed();
 
-        CharacterCombined[] combined = FindObjectsOfType<CharacterCombined>();
+        CharacterCombined[] combined = FindObjectsByType<CharacterCombined>(FindObjectsSortMode.None);
         foreach (var cc in combined) cc.UpdateSpeed();
 
         Debug.Log($"[GameSpeedManager] Recalculadas velocidades. chars:{characters.Length} combined:{combined.Length}");
@@ -80,6 +95,42 @@ public class GameSpeedManager : MonoBehaviour
         tagToObjects.Remove(tag);
         if (removed > 0) OnGameSpeedChanged();
         return removed;
+    }
+
+    /// <summary>
+    /// Establece la velocidad del juego según la dificultad
+    /// </summary>
+    public void SetSpeedByDifficulty(GameDifficulty dificultad)
+    {
+        switch (dificultad)
+        {
+            case GameDifficulty.Facil:
+                GameSpeedMultiplier = easySpeed;
+                Debug.Log($"[GameSpeedManager] Velocidad establecida a FÁCIL: {easySpeed}x");
+                break;
+            case GameDifficulty.Media:
+                GameSpeedMultiplier = mediumSpeed;
+                Debug.Log($"[GameSpeedManager] Velocidad establecida a MEDIA: {mediumSpeed}x");
+                break;
+            case GameDifficulty.Dificil:
+                GameSpeedMultiplier = hardSpeed;
+                Debug.Log($"[GameSpeedManager] Velocidad establecida a DIFÍCIL: {hardSpeed}x");
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Obtiene la velocidad correspondiente a una dificultad sin aplicarla
+    /// </summary>
+    public float GetSpeedForDifficulty(GameDifficulty dificultad)
+    {
+        return dificultad switch
+        {
+            GameDifficulty.Facil => easySpeed,
+            GameDifficulty.Media => mediumSpeed,
+            GameDifficulty.Dificil => hardSpeed,
+            _ => mediumSpeed
+        };
     }
 
     private void OnDestroy()
