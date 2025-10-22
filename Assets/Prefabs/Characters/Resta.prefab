@@ -454,7 +454,7 @@ PrefabInstance:
       addedObject: {fileID: -4487751598518270676}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: eaa46aff53702d9469150dbc504d00a6, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 5583291099652722902}
+      addedObject: {fileID: 7383808420185493688}
   m_SourcePrefab: {fileID: 100100000, guid: eaa46aff53702d9469150dbc504d00a6, type: 3}
 --- !u!4 &2693631497142224232 stripped
 Transform:
@@ -516,6 +516,8 @@ MonoBehaviour:
   AITower: {fileID: 0}
   PlayerTower: {fileID: 0}
   operationUIPrefab: {fileID: 7733706771787178017, guid: b1c2fd52c17441548a08b3b698f8cc5c, type: 3}
+  operationUIInstance: {fileID: 0}
+  combatDuration: 2
 --- !u!195 &-4487751598518270676
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -538,8 +540,8 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!135 &5583291099652722902
-SphereCollider:
+--- !u!65 &7383808420185493688
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -557,5 +559,5 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 30
-  m_Center: {x: 0, y: 15.27, z: 0}
+  m_Size: {x: 21.414236, y: 19.028187, z: 41.7171}
+  m_Center: {x: 0.000010893433, y: 10.798961, z: -2.3400924}

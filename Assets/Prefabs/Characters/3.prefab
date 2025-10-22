@@ -71,7 +71,7 @@ PrefabInstance:
     - target: {fileID: 5866666021909216657, guid: 16914de01a30d9d43b2e31491d231f9a, type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: df478db2a36c90849bd789bb7c3953ae, type: 2}
+      objectReference: {fileID: 9100000, guid: cf3675518af3c194d993d09a08607725, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -110,7 +110,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 8.5
+  m_Radius: 7
   m_Center: {x: 0, y: 3.19, z: 0}
 --- !u!114 &2632804743779666404
 MonoBehaviour:
@@ -124,7 +124,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a846b8953d7623440af95d3d552f24c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Character
+  isInCombat: 0
   troopUIPrefab: {fileID: 4383262928985605803, guid: e0e5ad72102f29a4abb09024ff254ad7, type: 3}
+  troopUIInstance: {fileID: 0}
+  combatDuration: 1.2
+  combatSpeedMultiplier: 0.1
 --- !u!195 &7389736457414047569
 NavMeshAgent:
   m_ObjectHideFlags: 0

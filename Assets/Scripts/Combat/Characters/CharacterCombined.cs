@@ -12,7 +12,7 @@ public class CharacterCombined : MonoBehaviour
     private Transform enemyTower;
     private bool reachedBridge = false;
     private CharacterManager manager;
-    private bool isInCombat = false; // Nuevo: evitar múltiples combates
+    public bool isInCombat = false; // Character lo controla durante combate
 
     [Header("Posiciones para personajes combinados")]
     public Transform frontPosition;
@@ -30,10 +30,6 @@ public class CharacterCombined : MonoBehaviour
     private int valueA;
     private int valueB;
     private char operatorSymbol;
-
-    [Header("Combate")]
-    [Tooltip("Duración de la animación de combate en segundos")]
-    public float combatDuration = 2f;
 
     void Start()
     {
@@ -219,118 +215,11 @@ public class CharacterCombined : MonoBehaviour
             }
         }
 
-        if (other.CompareTag("AITeam") || other.CompareTag("PlayerTeam"))
-        {
-            if (other.tag == gameObject.tag) return;
-
-            Character otherChar = other.GetComponent<Character>();
-            CharacterCombined otherCombined = other.GetComponent<CharacterCombined>();
-
-            // Evitar combate si el otro ya está en combate
-            if (otherChar != null && otherChar.isInCombat) return;
-            if (otherCombined != null && otherCombined.isInCombat) return;
-
-            int otherValue = 0;
-
-            if (otherChar != null)
-            {
-                otherValue = otherChar.GetValue();
-            }
-            else if (otherCombined != null)
-            {
-                otherValue = otherCombined.combinedValue;
-            }
-            else
-            {
-                return;
-            }
-
-            if (combinedValue == otherValue)
-            {
-                Debug.Log($"[CharacterCombined] ⚔️ COMBATE: {combinedValue} == {otherValue} - Iniciando animación!");
-
-                // Marcar ambos como en combate
-                isInCombat = true;
-                if (otherChar != null) otherChar.isInCombat = true;
-                if (otherCombined != null) otherCombined.isInCombat = true;
-
-                // Iniciar corrutina de combate
-                StartCoroutine(CombatSequence(other.gameObject));
-            }
-        }
+        // CharacterCombined NO gestiona combate, solo Character lo hace
+        // Character detecta colisiones con Combined y maneja todo el combate
     }
 
-    /// <summary>
-    /// Secuencia de combate animada de 2 segundos
-    /// </summary>
-    private IEnumerator CombatSequence(GameObject enemy)
-    {
-        // Detener ambos NavMeshAgents
-        if (agent != null)
-        {
-            agent.isStopped = true;
-            agent.velocity = Vector3.zero;
-        }
-
-        NavMeshAgent enemyAgent = enemy.GetComponent<NavMeshAgent>();
-        if (enemyAgent != null)
-        {
-            enemyAgent.isStopped = true;
-            enemyAgent.velocity = Vector3.zero;
-        }
-
-        // Orientar uno hacia el otro
-        Vector3 directionToEnemy = enemy.transform.position - transform.position;
-        directionToEnemy.y = 0;
-
-        if (directionToEnemy != Vector3.zero)
-        {
-            transform.rotation = Quaternion.LookRotation(directionToEnemy);
-            enemy.transform.rotation = Quaternion.LookRotation(-directionToEnemy);
-        }
-
-        Debug.Log($"[CharacterCombined] ⚔️ Combate iniciado entre {gameObject.name} y {enemy.name} - 2 segundos de animación");
-
-        // AQUÍ puedes añadir efectos visuales, partículas, etc.
-
-        // Esperar el tiempo configurado
-        yield return new WaitForSeconds(combatDuration);
-
-        Debug.Log($"[CharacterCombined] ⚔️ Combate finalizado - Destruyendo ambas unidades");
-
-        // Resolver operación: dar intelecto al DEFENSOR (el otro)
-        if (manager != null)
-        {
-            string defenderTag = enemy.tag; // El enemigo es quien defendió
-            manager.ResolveOperation(defenderTag);
-            Debug.Log($"[CharacterCombined] Intelecto otorgado al defensor: {defenderTag}");
-        }
-
-        // Destruir UI de ambas unidades
-        if (operationUIInstance != null)
-        {
-            Destroy(operationUIInstance.gameObject);
-        }
-        
-        // Destruir UI del enemigo
-        Character enemyChar = enemy.GetComponent<Character>();
-        if (enemyChar != null && enemyChar.troopUIInstance != null)
-        {
-            Destroy(enemyChar.troopUIInstance.gameObject);
-        }
-        
-        CharacterCombined enemyCombined = enemy.GetComponent<CharacterCombined>();
-        if (enemyCombined != null && enemyCombined.operationUIInstance != null)
-        {
-            Destroy(enemyCombined.operationUIInstance.gameObject);
-        }
-
-        // Destruir ambos
-        Destroy(enemy);
-        Destroy(gameObject);
-    }
-
+    // Métodos de acceso para Character
     public int GetValue() => combinedValue;
-    public bool IsInCombat() => isInCombat;
-    public void SetInCombat(bool value) => isInCombat = value;
+    public NavMeshAgent GetAgent() => agent;
 }

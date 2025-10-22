@@ -14,6 +14,7 @@ public class Character : MonoBehaviour
     private bool reachedBridge = false;
     private CharacterManager manager;
     public bool isInCombat = false; 
+    private Animator animator;
 
     [Header("UI")]
     public GameObject troopUIPrefab;
@@ -21,12 +22,15 @@ public class Character : MonoBehaviour
 
     [Header("Combate")]
     [Tooltip("Duración de la animación de combate en segundos")]
-    public float combatDuration = 2f;
+    public float combatDuration = 1.1f; // Duración del ataque
+    [Tooltip("Velocidad reducida durante el combate (multiplicador, 0.1 = 10% velocidad original)")]
+    public float combatSpeedMultiplier = 0.1f;
 
     void Start()
     {
         manager = FindFirstObjectByType<CharacterManager>();
         EnsureColliderSetup();
+        animator = GetComponent<Animator>();
     }
 
     private void EnsureColliderSetup()
@@ -124,7 +128,17 @@ public class Character : MonoBehaviour
 
     void Update()
     {
-        if (agent == null || enemyTower == null || isInCombat) return;
+        if (agent == null || enemyTower == null) return;
+
+        // Actualizar animación de caminar basándose en la velocidad del agente
+        // SOLO cuando NO está en combate (durante combate, CombatSequence controla las animaciones)
+        if (animator != null && !isInCombat)
+        {
+            bool isMoving = agent.velocity.magnitude > 0.05f;
+            animator.SetBool("isWalking", isMoving);
+        }
+
+        if (isInCombat) return;
 
         if (!reachedBridge && targetBridge != null)
         {
@@ -174,7 +188,7 @@ public class Character : MonoBehaviour
 
             // Evitar combate si el otro ya está en combate
             if (otherChar != null && otherChar.isInCombat) return;
-            if (otherCombined != null && otherCombined.IsInCombat()) return;
+            if (otherCombined != null && otherCombined.isInCombat) return;
 
             int otherValue = 0;
 
@@ -201,7 +215,7 @@ public class Character : MonoBehaviour
                 // Marcar ambos como en combate
                 isInCombat = true;
                 if (otherChar != null) otherChar.isInCombat = true;
-                if (otherCombined != null) otherCombined.SetInCombat(true);
+                if (otherCombined != null) otherCombined.isInCombat = true;
 
                 // Iniciar corrutina de combate
                 StartCoroutine(CombatSequence(other.gameObject));
@@ -214,22 +228,41 @@ public class Character : MonoBehaviour
     }
 
     /// <summary>
-    /// Secuencia de combate animada de 2 segundos
+    /// Secuencia de combate: Character controla TODO (velocidades, animación, destrucción)
     /// </summary>
     private IEnumerator CombatSequence(GameObject enemy)
     {
-        // Detener ambos NavMeshAgents
+        // Identificar el tipo de enemigo
+        Character enemyChar = enemy.GetComponent<Character>();
+        CharacterCombined enemyCombined = enemy.GetComponent<CharacterCombined>();
+        
+        // Reducir velocidad propia
+        float originalSpeed = 0f;
         if (agent != null)
         {
-            agent.isStopped = true;
-            agent.velocity = Vector3.zero;
+            originalSpeed = agent.speed;
+            agent.speed = originalSpeed * combatSpeedMultiplier;
+            Debug.Log($"[Character] {gameObject.name} velocidad reducida: {originalSpeed} → {agent.speed}");
         }
 
-        NavMeshAgent enemyAgent = enemy.GetComponent<NavMeshAgent>();
+        // Reducir velocidad del enemigo (Character o CharacterCombined)
+        float enemyOriginalSpeed = 0f;
+        NavMeshAgent enemyAgent = null;
+        
+        if (enemyChar != null)
+        {
+            enemyAgent = enemyChar.GetComponent<NavMeshAgent>();
+        }
+        else if (enemyCombined != null)
+        {
+            enemyAgent = enemyCombined.GetAgent();
+        }
+        
         if (enemyAgent != null)
         {
-            enemyAgent.isStopped = true;
-            enemyAgent.velocity = Vector3.zero;
+            enemyOriginalSpeed = enemyAgent.speed;
+            enemyAgent.speed = enemyOriginalSpeed * combatSpeedMultiplier;
+            Debug.Log($"[Character] {enemy.name} velocidad reducida: {enemyOriginalSpeed} → {enemyAgent.speed}");
         }
 
         // Orientar uno hacia el otro
@@ -242,12 +275,17 @@ public class Character : MonoBehaviour
             enemy.transform.rotation = Quaternion.LookRotation(-directionToEnemy);
         }
 
-        Debug.Log($"[Character] ⚔️ Combate iniciado entre {gameObject.name} y {enemy.name} - 2 segundos de animación");
+        Debug.Log($"[Character] ⚔️ Combate iniciado entre {gameObject.name} y {enemy.name} - {combatDuration} segundo(s) de animación con velocidad reducida");
 
-        // AQUÍ puedes añadir efectos visuales, partículas, etc.
-        // Por ejemplo: Instantiate(combatEffectPrefab, transform.position, Quaternion.identity);
+        // Reproducir animación de ataque (SOLO LA TROPA ataca, no las operaciones)
+        if (animator != null)
+        {
+            animator.SetTrigger("Attack");
+            animator.SetBool("isWalking", false); // Asegurar que no esté en estado de caminar
+            Debug.Log($"[Character] Trigger 'Attack' activado en {gameObject.name}");
+        }
 
-        // Esperar 2 segundos (o el tiempo configurado)
+        // Esperar el tiempo de combate (1.1 segundos para completar la animación de ataque)
         yield return new WaitForSeconds(combatDuration);
 
         Debug.Log($"[Character] ⚔️ Combate finalizado - Destruyendo ambas unidades");
@@ -261,20 +299,18 @@ public class Character : MonoBehaviour
             Debug.Log($"[Character] Intelecto otorgado al defensor: {defenderTag}");
         }
 
-        // Destruir UI de ambas tropas
+        // Destruir UI propia
         if (troopUIInstance != null)
         {
             Destroy(troopUIInstance.gameObject);
         }
         
-        // Destruir UI del enemigo
-        Character enemyChar = enemy.GetComponent<Character>();
+        // Destruir UI del enemigo (usar variables ya declaradas al inicio)
         if (enemyChar != null && enemyChar.troopUIInstance != null)
         {
             Destroy(enemyChar.troopUIInstance.gameObject);
         }
         
-        CharacterCombined enemyCombined = enemy.GetComponent<CharacterCombined>();
         if (enemyCombined != null && enemyCombined.operationUIInstance != null)
         {
             Destroy(enemyCombined.operationUIInstance.gameObject);

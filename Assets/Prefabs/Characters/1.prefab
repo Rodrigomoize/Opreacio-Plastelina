@@ -124,7 +124,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a846b8953d7623440af95d3d552f24c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Character
+  isInCombat: 0
   troopUIPrefab: {fileID: 4383262928985605803, guid: e0e5ad72102f29a4abb09024ff254ad7, type: 3}
+  troopUIInstance: {fileID: 0}
+  combatDuration: 1.2
+  combatSpeedMultiplier: 0.1
 --- !u!135 &3445451052891327136
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -144,7 +148,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 9
+  m_Radius: 6
   m_Center: {x: 0, y: 2.22, z: 0}
 --- !u!195 &7686724120989925162
 NavMeshAgent:
