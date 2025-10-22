@@ -132,6 +132,8 @@ MonoBehaviour:
   vfxImpactPrefab: {fileID: 7190290771688677997, guid: 0d5fffd37d636a042bfd10411f3c784e, type: 3}
   implosionSpeed: 4
   preImplosionScale: 1.2
+  intellectFeedbackPrefab: {fileID: 8608500109205576431, guid: 043a79a34c9d20746871bc51a10fc117, type: 3}
+  feedbackYOffset: 2
 --- !u!195 &6305057788166434189
 NavMeshAgent:
   m_ObjectHideFlags: 0

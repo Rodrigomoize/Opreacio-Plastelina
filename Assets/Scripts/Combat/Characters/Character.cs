@@ -33,6 +33,12 @@ public class Character : MonoBehaviour
     public float implosionSpeed = 3f;
     [Tooltip("Escala inicial antes de la implosión")]
     public float preImplosionScale = 1.2f;
+    
+    [Header("Feedback de Intelecto")]
+    [Tooltip("Prefab del feedback +1 Intelecto que aparece al resolver una operación correctamente")]
+    public GameObject intellectFeedbackPrefab;
+    [Tooltip("Offset vertical donde aparece el feedback")]
+    public float feedbackYOffset = 2f;
 
     void Start()
     {
@@ -304,12 +310,18 @@ public class Character : MonoBehaviour
 
         Debug.Log($"[Character] ⚔️ Combate finalizado - Iniciando implosión");
 
-        // Resolver operación: dar intelecto al DEFENSOR (el otro)
+        // Detectar si se resolvió correctamente una operación
+        // Si un Character derrota a un Combined enemigo = operación resuelta correctamente
+        bool isPlayerResolving = gameObject.CompareTag("PlayerTeam") && enemyCombined != null && enemyCombined.CompareTag("AITeam");
+        bool isAIResolving = gameObject.CompareTag("AITeam") && enemyCombined != null && enemyCombined.CompareTag("PlayerTeam");
+        bool operationResolved = isPlayerResolving || isAIResolving;
+
+        // Resolver operación: dar intelecto al que ATACÓ (este Character que resolvió la operación)
         if (manager != null)
         {
-            string defenderTag = enemy.tag;
-            manager.ResolveOperation(defenderTag);
-            Debug.Log($"[Character] Intelecto otorgado al defensor: {defenderTag}");
+            string attackerTag = gameObject.tag; // El que atacó es quien gana el intelecto
+            manager.ResolveOperation(attackerTag);
+            Debug.Log($"[Character] Intelecto otorgado al atacante (quien resolvió): {attackerTag}");
         }
 
         // Destruir UIs antes de la implosión
@@ -329,13 +341,13 @@ public class Character : MonoBehaviour
         }
 
         // ===== IMPLOSIÓN Y VFX =====
-        yield return StartCoroutine(ImplodeAndExplode(enemy, enemyChar, enemyCombined));
+        yield return StartCoroutine(ImplodeAndExplode(enemy, enemyChar, enemyCombined, operationResolved));
     }
 
     /// <summary>
     /// Efecto de implosión: ambas unidades se atraen, encogen y explotan con VFX
     /// </summary>
-    private IEnumerator ImplodeAndExplode(GameObject enemy, Character enemyChar, CharacterCombined enemyCombined)
+    private IEnumerator ImplodeAndExplode(GameObject enemy, Character enemyChar, CharacterCombined enemyCombined, bool operationResolved)
     {
         Vector3 startPos = transform.position;
         Vector3 enemyStartPos = enemy.transform.position;
@@ -377,6 +389,14 @@ public class Character : MonoBehaviour
         else
         {
             Debug.LogWarning("[Character] vfxImpactPrefab no asignado!");
+        }
+
+        // Mostrar feedback visual DESPUÉS del VFX si se resolvió una operación correctamente
+        if (operationResolved && intellectFeedbackPrefab != null)
+        {
+            Vector3 feedbackPosition = midPoint + Vector3.up * feedbackYOffset;
+            IntellectFeedback.Create(intellectFeedbackPrefab, feedbackPosition);
+            Debug.Log($"[Character] ✅ ¡Operación resuelta correctamente! Mostrando feedback +1 Intelecto");
         }
 
         // Destruir ambas unidades
