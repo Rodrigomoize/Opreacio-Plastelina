@@ -1,9 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Unity.VisualScripting;
-using UnityEngine;
 using UnityEngine.InputSystem.XR;
-using UnityEngine.SceneManagement;
 using static IAController;
 
 public class GameManager : MonoBehaviour
@@ -19,7 +17,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] IAController aiCardManager;
     [SerializeField] PlayerCardManager playerCardManager;
     [SerializeField] GameTimer gameTimerManager;
-    [SerializeField] ScoreManager scoreManager;
+    // ScoreManager se accede via singleton (ScoreManager.Instance), no necesita ser serializado
 
     [Header("Defaults")]
     [SerializeField] IAController.AIDificultad defaultAIDifficulty = IAController.AIDificultad.Media;
@@ -279,15 +277,15 @@ public class GameManager : MonoBehaviour
         aiCardManager = aiCardManager ?? FindInScene<IAController>(scene);
         playerCardManager = playerCardManager ?? FindInScene<PlayerCardManager>(scene);
         gameTimerManager = gameTimerManager ?? FindInScene<GameTimer>(scene);
-        scoreManager = scoreManager ?? FindInScene<ScoreManager>(scene);
+        // ScoreManager se accede via singleton, no necesita FindInScene
 
-        Debug.Log($"[GameManager] Managers asignados -> UI:{(uiManager != null)} Audio:{(audioManager != null)} Card:{(combatManager != null)} AI:{(aiCardManager != null)} PlayerCard:{(playerCardManager != null)} Timer:{(gameTimerManager != null)}");
+        Debug.Log($"[GameManager] Managers asignados -> UI:{(uiManager != null)} Audio:{(audioManager != null)} Card:{(combatManager != null)} AI:{(aiCardManager != null)} PlayerCard:{(playerCardManager != null)} Timer:{(gameTimerManager != null)} Score:{(ScoreManager.Instance != null)}");
     }
 
     /// Busca un componente T dentro de la escena proporcionada (solo objetos activos).
     private T FindInScene<T>(Scene scene) where T : MonoBehaviour
     {
-        T[] all = FindObjectsOfType<T>();
+        T[] all = FindObjectsByType<T>(FindObjectsSortMode.None);
         foreach (var item in all)
         {
             if (item.gameObject.scene == scene) return item;
