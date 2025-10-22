@@ -95,7 +95,7 @@ public class GameManager : MonoBehaviour
         {
             Instance.LoadLoseScene();
         }
-    }   
+    }
 
     // METODOS PRIVADOS DE CARGA
 
@@ -198,7 +198,7 @@ public class GameManager : MonoBehaviour
         LoadPlayScene();
     }
 
-    //GETTERS P�BLICOS
+    //GETTERS PUBLICOS
 
     public UIManager GetUIManager() => uiManager;
     public AudioManager GetAudioManager() => audioManager;
@@ -207,11 +207,18 @@ public class GameManager : MonoBehaviour
     public PlayerCardManager GetPlayerCardManager() => playerCardManager;
     public GameTimer GetGameTimer() => gameTimerManager;
 
+    // ===== NUEVO MÉTODO PARA CAMBIAR DIFICULTAD =====
+    public void SetDificultad(IAController.AIDificultad dificultad)
+    {
+        defaultAIDifficulty = dificultad;
+        Debug.Log($"[GameManager] Dificultad cambiada a: {dificultad}");
+    }
+
     private void OnDestroy()
     {
         if (Instance == this)
         {
-            SceneManager.sceneLoaded -= HandleSceneLoaded;  
+            SceneManager.sceneLoaded -= HandleSceneLoaded;
             UnsubscribeFromTimer();
         }
     }

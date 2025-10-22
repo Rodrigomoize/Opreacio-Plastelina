@@ -4,10 +4,8 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using static CardManager;
 
-/// <summary>
 /// Controlador principal de la IA
 /// Usa Utility AI + Score-Based System para tomar decisiones inteligentes
-/// </summary>
 public class IAController : MonoBehaviour
 {
     [Header("Referencias Obligatorias")]
@@ -184,10 +182,8 @@ public class IAController : MonoBehaviour
         }
     }
 
-    /// <summary>
     /// Sistema de toma de decisiones - CORAZÓN DE LA IA
     /// Evalúa todas las acciones y ejecuta la mejor
-    /// </summary>
     private void TomarDecision()
     {
         if (debugMode)
@@ -249,29 +245,23 @@ public class IAController : MonoBehaviour
     // MÉTODOS PÚBLICOS PARA DEBUGGING Y AJUSTES EN RUNTIME
     // ===================================================================
 
-    /// <summary>
     /// Cambia la agresividad de la IA en runtime
     /// Útil para dificultades dinámicas
-    /// </summary>
     public void SetAgresividad(float nuevaAgresividad)
     {
         agresividad = Mathf.Clamp01(nuevaAgresividad);
         Debug.Log($"[IAController] Agresividad ajustada a {agresividad:F2}");
     }
 
-    /// <summary>
     /// Fuerza a la IA a tomar una decisión inmediatamente
     /// Útil para testing
-    /// </summary>
     public void ForzarDecision()
     {
         Debug.Log("[IAController] Forzando decisión inmediata...");
         TomarDecision();
     }
 
-    /// <summary>
     /// Devuelve información de estado para UI o debugging
-    /// </summary>
     public string ObtenerEstadoIA()
     {
         string estado = $"IA Status:\n";
