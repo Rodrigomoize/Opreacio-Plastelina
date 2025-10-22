@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.UI;
 
 public class CardManager : MonoBehaviour
@@ -91,8 +89,26 @@ public class CardManager : MonoBehaviour
         return result;
     }
 
+    /// <summary>
+    /// Resultado de intentar generar un personaje
+    /// </summary>
+    public enum GenerateResult
+    {
+        Success,                // Se generó correctamente
+        InsufficientIntellect,  // No hay suficiente intelecto
+        OtherError              // Otro tipo de error
+    }
+
     public GameObject GenerateCharacter(Card cardData, Vector3 spawnPosition, string teamTag, IntelectManager customIntelectManager = null)
     {
+        GenerateResult result;
+        return GenerateCharacter(cardData, spawnPosition, teamTag, out result, customIntelectManager);
+    }
+
+    public GameObject GenerateCharacter(Card cardData, Vector3 spawnPosition, string teamTag, out GenerateResult result, IntelectManager customIntelectManager = null)
+    {
+        result = GenerateResult.OtherError;
+        
         if (cardData == null)
         {
             Debug.LogWarning("[CardManager] GenerateCharacter recibió cardData null.");
@@ -115,12 +131,14 @@ public class CardManager : MonoBehaviour
             if (!intelectToUse.CanConsume(costToUse))
             {
                 Debug.Log($"[CardManager] No hay intelecto suficiente para {cardData.cardName} (coste {costToUse})");
+                result = GenerateResult.InsufficientIntellect;
                 return null;
             }
             bool consumed = intelectToUse.Consume(costToUse);
             if (!consumed)
             {
                 Debug.LogWarning("[CardManager] Consume falló aunque CanConsume devolvió true.");
+                result = GenerateResult.InsufficientIntellect;
                 return null;
             }
         }
@@ -131,6 +149,7 @@ public class CardManager : MonoBehaviour
         if (spawnedCharacter != null)
         {
             Debug.Log($"[CardManager] ✓ Personaje {cardData.cardName} instanciado en {spawnPosition} con tag {teamTag} (coste={costToUse})");
+            result = GenerateResult.Success;
             return spawnedCharacter;
         }
         else
@@ -141,12 +160,21 @@ public class CardManager : MonoBehaviour
             {
                 intelectToUse.AddIntelect(costToUse);
             }
+            result = GenerateResult.OtherError;
             return null;
         }
     }
 
     public bool GenerateCombinedCharacter(Card partA, Card partB, Vector3 spawnPosition, int operationResult, char opSymbol, string teamTag, IntelectManager customIntelectManager = null)
     {
+        GenerateResult result;
+        return GenerateCombinedCharacter(partA, partB, spawnPosition, operationResult, opSymbol, teamTag, out result, customIntelectManager);
+    }
+
+    public bool GenerateCombinedCharacter(Card partA, Card partB, Vector3 spawnPosition, int operationResult, char opSymbol, string teamTag, out GenerateResult result, IntelectManager customIntelectManager = null)
+    {
+        result = GenerateResult.OtherError;
+        
         if (partA == null || partB == null)
         {
             Debug.LogWarning("[CardManager] GenerateCombinedCharacter recibió cartas null");
@@ -167,11 +195,14 @@ public class CardManager : MonoBehaviour
         {
             if (!intelectToUse.CanConsume(totalCost))
             {
+                Debug.Log($"[CardManager] No hay intelecto suficiente para operación (coste {totalCost})");
+                result = GenerateResult.InsufficientIntellect;
                 return false;
             }
             bool consumed = intelectToUse.Consume(totalCost);
             if (!consumed)
             {
+                result = GenerateResult.InsufficientIntellect;
                 return false;
             }
         }
@@ -182,6 +213,7 @@ public class CardManager : MonoBehaviour
 
         if (spawnedCombined != null)
         {
+            result = GenerateResult.Success;
             return true;
         }
         else
@@ -190,6 +222,7 @@ public class CardManager : MonoBehaviour
             {
                 intelectToUse.AddIntelect(totalCost);
             }
+            result = GenerateResult.OtherError;
             return false;
         }
     }

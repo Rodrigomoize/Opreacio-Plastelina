@@ -325,7 +325,39 @@ public class PlayerCardManager : MonoBehaviour
         if (selectedDisplays.Count == 1)
         {
             CardManager.Card c = selectedDisplays[0].GetCardData();
-            bool ok = RequestGenerateCharacter(c, spawnPosition, selectedDisplays[0].gameObject);
+            CardManager.GenerateResult result;
+            GameObject character = cardManager.GenerateCharacter(c, spawnPosition, "PlayerTeam", out result, null);
+            
+            // Si falló por falta de intelecto, mostrar feedback negativo
+            if (result == CardManager.GenerateResult.InsufficientIntellect)
+            {
+                ShowInsufficientIntellectFeedback();
+                DeselectAll();
+                currentOperator = '\0';
+                return;
+            }
+            
+            // Si tuvo éxito, procesar normalmente
+            if (character != null)
+            {
+                // Resto del código de éxito (remover carta, etc)
+                int cardValuePlayed = c.cardValue;
+                Transform slotOfCard = selectedDisplays[0].transform.parent;
+                
+                RemoveCardUI(selectedDisplays[0]);
+                selectedDisplays.Clear();
+                
+                if (slotOfCard != null)
+                {
+                    int indexToGet = cardValuePlayed - 1;
+                    CardManager.Card newCard = cardManager.GetCardByIndex(indexToGet);
+                    if (newCard != null)
+                    {
+                        CreateCard(cardManager.CloneCard(newCard), slotOfCard);
+                    }
+                }
+            }
+            
             DeselectAll();
             currentOperator = '\0';
             return;
@@ -398,7 +430,17 @@ public class PlayerCardManager : MonoBehaviour
                 return;
             }
 
-            bool played = cardManager.GenerateCombinedCharacter(a, b, spawnPosition, operationResult, currentOperator, "PlayerTeam");
+            CardManager.GenerateResult result;
+            bool played = cardManager.GenerateCombinedCharacter(a, b, spawnPosition, operationResult, currentOperator, "PlayerTeam", out result, null);
+
+            // Si falló por falta de intelecto, mostrar feedback negativo
+            if (result == CardManager.GenerateResult.InsufficientIntellect)
+            {
+                ShowInsufficientIntellectFeedback();
+                DeselectAll();
+                currentOperator = '\0';
+                return;
+            }
 
             if (played)
             {
@@ -741,5 +783,33 @@ public class PlayerCardManager : MonoBehaviour
                 RestaButton.interactable = restaValid || restaSelected;
             }
         }
+    }
+    
+    /// <summary>
+    /// Muestra feedback visual negativo cuando no hay suficiente intelecto
+    /// </summary>
+    private void ShowInsufficientIntellectFeedback()
+    {
+        // Activar camera shake si está disponible
+        if (CameraShake.Instance != null)
+        {
+            CameraShake.Instance.Shake();
+        }
+        else
+        {
+            Debug.LogWarning("[PlayerCardManager] CameraShake.Instance no encontrado");
+        }
+        
+        // Activar flash rojo de pantalla si está disponible
+        if (ScreenFlashEffect.Instance != null)
+        {
+            ScreenFlashEffect.Instance.Flash();
+        }
+        else
+        {
+            Debug.LogWarning("[PlayerCardManager] ScreenFlashEffect.Instance no encontrado");
+        }
+        
+        Debug.Log("[PlayerCardManager] ⚠ Intelecto insuficiente - Feedback visual mostrado");
     }
 }

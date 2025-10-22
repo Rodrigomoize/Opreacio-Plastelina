@@ -1165,6 +1165,12 @@ MonoBehaviour:
   RestaButton: {fileID: 1353759601}
   spawnPoint: {fileID: 174509996}
   elevationAmount: 500
+  validCardColor: {r: 1, g: 1, b: 1, a: 1}
+  invalidCardColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.6}
+  selectedCardColor: {r: 1, g: 1, b: 0.5, a: 1}
+  validOperatorColor: {r: 1, g: 1, b: 1, a: 1}
+  invalidOperatorColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.6}
+  selectedOperatorColor: {r: 1, g: 1, b: 0.5, a: 1}
   allowSelfCombination: 1
 --- !u!4 &468729725
 Transform:
@@ -2379,6 +2385,7 @@ GameObject:
   - component: {fileID: 962538954}
   - component: {fileID: 962538953}
   - component: {fileID: 962538951}
+  - component: {fileID: 962538955}
   m_Layer: 0
   m_Name: RenderCamera
   m_TagString: Untagged
@@ -2496,6 +2503,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 45, y: 0, z: 0}
+--- !u!114 &962538955
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 962538950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ff2870ff6d04774f8b9489e91f80058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraShake
+  shakeDuration: 0.3
+  shakeMagnitude: 0.2
+  dampingSpeed: 1
 --- !u!1 &986712401
 GameObject:
   m_ObjectHideFlags: 0
@@ -3021,6 +3043,97 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!1 &1152030554
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1152030555}
+  - component: {fileID: 1152030558}
+  - component: {fileID: 1152030557}
+  - component: {fileID: 1152030556}
+  m_Layer: 5
+  m_Name: FeedbackNegativo
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1152030555
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1152030554}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 2.4995248, y: 5.4227195, z: 2.4995248}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2111984699}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1152030556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1152030554}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78612282d907e884dae5e6c1cb20c2f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScreenFlashEffect
+  flashColor: {r: 1, g: 0, b: 0, a: 0.5}
+  flashDuration: 0.3
+  flashImage: {fileID: 1152030557}
+--- !u!114 &1152030557
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1152030554}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1152030558
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1152030554}
+  m_CullTransparentMesh: 1
 --- !u!1 &1166981178
 GameObject:
   m_ObjectHideFlags: 0
@@ -5237,6 +5350,7 @@ RectTransform:
   - {fileID: 534182687}
   - {fileID: 657603135}
   - {fileID: 1957488185}
+  - {fileID: 1152030555}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
