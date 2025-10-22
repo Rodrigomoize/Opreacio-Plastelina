@@ -1168,6 +1168,8 @@ MonoBehaviour:
   validCardColor: {r: 1, g: 1, b: 1, a: 1}
   invalidCardColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.6}
   selectedCardColor: {r: 1, g: 1, b: 0.5, a: 1}
+  doubleSelectedCardColor: {r: 1, g: 0.5, b: 1, a: 1}
+  selectedButBlockedCardColor: {r: 0.7, g: 0.7, b: 0.4, a: 0.8}
   validOperatorColor: {r: 1, g: 1, b: 1, a: 1}
   invalidOperatorColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.6}
   selectedOperatorColor: {r: 1, g: 1, b: 0.5, a: 1}
@@ -3993,6 +3995,7 @@ GameObject:
   - component: {fileID: 1276959911}
   - component: {fileID: 1276959910}
   - component: {fileID: 1276959909}
+  - component: {fileID: 1276959912}
   m_Layer: 5
   m_Name: +
   m_TagString: Untagged
@@ -4113,6 +4116,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1276959907}
   m_CullTransparentMesh: 1
+--- !u!114 &1276959912
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1276959907}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93b497450f9fae840a38cbfd2ca129fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonPressEffect
+  hoverScale: 1.1
+  pressScale: 0.9
+  scaleAnimationSpeed: 12
+  hoverRotation: 5
 --- !u!1 &1300285170
 GameObject:
   m_ObjectHideFlags: 0
@@ -4204,6 +4223,7 @@ GameObject:
   - component: {fileID: 1353759603}
   - component: {fileID: 1353759602}
   - component: {fileID: 1353759601}
+  - component: {fileID: 1353759604}
   m_Layer: 5
   m_Name: '-'
   m_TagString: Untagged
@@ -4324,6 +4344,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1353759599}
   m_CullTransparentMesh: 1
+--- !u!114 &1353759604
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1353759599}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93b497450f9fae840a38cbfd2ca129fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonPressEffect
+  hoverScale: 1.1
+  pressScale: 0.9
+  scaleAnimationSpeed: 12
+  hoverRotation: 5
 --- !u!1 &1460963754
 GameObject:
   m_ObjectHideFlags: 0

@@ -311,16 +311,19 @@ public class PlayerCardManager : MonoBehaviour
         RectTransform rt = display.GetComponent<RectTransform>();
         if (rt != null)
         {
-            Vector2 offset = rt.anchoredPosition;
+            // Usar offsetMin/offsetMax en lugar de anchoredPosition para no interferir con hover
             if (elevated)
             {
-                offset.y = elevationAmount;
+                // Mover el top hacia arriba (offsetMax.y positivo sube la carta)
+                rt.offsetMin = new Vector2(rt.offsetMin.x, elevationAmount);
+                rt.offsetMax = new Vector2(rt.offsetMax.x, elevationAmount);
             }
             else
             {
-                offset.y = 0f;
+                // Resetear a posición original (stretch fill en el slot)
+                rt.offsetMin = Vector2.zero;
+                rt.offsetMax = Vector2.zero;
             }
-            rt.anchoredPosition = offset;
         }
 
         // Mantener el visual de selección también

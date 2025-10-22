@@ -31,7 +31,7 @@ RectTransform:
   m_GameObject: {fileID: 1339059252819176335}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 333.95596, y: 448.9762, z: 39.119812}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -134,12 +134,16 @@ MonoBehaviour:
     isSingle: 0
     isCombined: 0
     isUsed: 0
-    cardImage: {fileID: 0}
+    cardSprite: {fileID: 0}
     fbxCharacter: {fileID: 0}
-  artworkImage: {fileID: 8563554855671735290}
-  highlightImage: {fileID: 8563554855671735290}
-  desaturateOverlay: {fileID: 7066983772469813683, guid: 238ec7e318c3370499a8ba522dd77324, type: 3}
   ownerManager: {fileID: 0}
+  isSelected: 0
+  artworkImage: {fileID: 8563554855671735290}
+  selectionHighlight: {fileID: 0}
+  hoverScale: 1.1
+  pressScale: 0.95
+  scaleAnimationSpeed: 10
+  hoverElevation: 20
 --- !u!222 &4114250135371751518
 CanvasRenderer:
   m_ObjectHideFlags: 0
