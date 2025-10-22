@@ -646,6 +646,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac52c7c46cb19504e9b107415a35f89a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneBridge
+  screenImage: {fileID: 0}
+  nextButton: {fileID: 0}
+  screenSprites: []
+  normalButtonSprite: {fileID: 0}
+  finalButtonSprite: {fileID: 0}
+  nextSceneAfterScreens: 
 --- !u!1 &748865128
 GameObject:
   m_ObjectHideFlags: 0
