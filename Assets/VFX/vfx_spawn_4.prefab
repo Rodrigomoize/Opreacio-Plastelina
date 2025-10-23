@@ -9891,7 +9891,7 @@ MonoBehaviour:
   dirtParticles: {fileID: 8228452630537430570}
   clayParticles: {fileID: 3062076929054648106}
   splatSphere: {fileID: 808882428857258044}
-  splatInitialScale: 20
+  splatInitialScale: 1
   splatFinalScale: 0.1
   splatDuration: 0.8
   lifetime: 1

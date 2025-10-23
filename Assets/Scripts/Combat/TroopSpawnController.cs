@@ -26,11 +26,12 @@ public class TroopSpawnController : MonoBehaviour
     private bool isSpawning = true;
     private float spawnTimeRemaining;
     private Vector3 targetScale;
-    private GameObject spawnVFXInstance;      // Referencias
+    private GameObject spawnVFXInstance;    // Referencias
     private Character characterScript;
     private CharacterCombined characterCombined;
     private Collider characterCollider;
     private TroopUI troopUI;
+    private OperationUI operationUI; // UI para CharacterCombined
     private UnityEngine.AI.NavMeshAgent navAgent;
     
     public bool IsSpawning => isSpawning;
@@ -63,6 +64,12 @@ public class TroopSpawnController : MonoBehaviour
         if (characterScript != null && characterScript.troopUIInstance != null)
         {
             troopUI = characterScript.troopUIInstance;
+        }
+        
+        // Obtener referencia al OperationUI (se crea en CharacterCombined.SetOperationValues)
+        if (characterCombined != null && characterCombined.operationUIInstance != null)
+        {
+            operationUI = characterCombined.operationUIInstance;
         }
         
         // Deshabilitar NavMeshAgent durante spawn para que no se mueva
@@ -100,11 +107,16 @@ public class TroopSpawnController : MonoBehaviour
         {
             transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * growthSpeed);
         }
-        
-        // Actualizar UI con tiempo restante
+          // Actualizar UI con tiempo restante
         if (troopUI != null)
         {
             troopUI.UpdateSpawnTimer(spawnTimeRemaining);
+        }
+        
+        // Actualizar OperationUI si existe (para CharacterCombined)
+        if (operationUI != null)
+        {
+            operationUI.UpdateSpawnTimer(spawnTimeRemaining);
         }
     }
     
@@ -162,6 +174,12 @@ public class TroopSpawnController : MonoBehaviour
         if (troopUI != null)
         {
             troopUI.HideSpawnTimer();
+        }
+        
+        // Ocultar temporizador en OperationUI si existe
+        if (operationUI != null)
+        {
+            operationUI.HideSpawnTimer();
         }
         
         Debug.Log($"[TroopSpawn] {gameObject.name} spawn completado, ahora está activo");

@@ -115,78 +115,61 @@ Este sistema añade un **tiempo de spawn** a las tropas (Character y CharacterCo
 
 ---
 
-### 3. **Configurar TroopUI**
+### 3. **Configurar TroopUI y OperationUI**
 
-El sistema de UI tiene **dos estados**: UI de Spawn (durante spawneo) y UI Normal (después del spawn).
+El sistema de spawn funciona con **dos tipos de UI**:
+- **TroopUI**: Para tropas individuales (Character)
+- **OperationUI**: Para operaciones combinadas (CharacterCombined)
 
-#### Estructura de UI Requerida:
+Ambas UIs soportan el sistema de spawn timer.
+
+#### Configuración de TroopUI (para Character):
 
 1. **Crear el Prefab TroopUI** (si no existe):
    - GameObject principal: `TroopUI`
    - Canvas (World Space) como componente
 
-2. **UI Normal Container** (se muestra DESPUÉS del spawn):
-   - Crea un GameObject hijo: `NormalUIContainer`
-   - Dentro añade:
-     - **Image**: `IconImage` - Icono de la tropa
-     - **TextMeshPro**: `ValueText` - Número de la tropa (1-5)
-   
-3. **UI de Spawn Container** (se muestra DURANTE el spawn):
-   - Crea un GameObject hijo: `SpawnUIContainer`
-   - Dentro añade:
-     - **Image**: `SpawnIconImage` - Icono (mismo que el normal)
-       - Sprite: Icono del equipo
-     - **Image**: `SpawnFillImage` - Barra de progreso radial
-       - Image Type: **Filled**
-       - Fill Method: **Radial 360**
-       - Fill Origin: **Top**
-       - Clockwise: ✓
-       - Fill Amount: 0 (se anima de 0 a 1)
-       - Color: Verde brillante o color del equipo con transparencia
-       - Posición: Superpuesta sobre el icono
+2. **Añadir Temporizador de Spawn:**
+   - Crea un GameObject hijo: `SpawnTimerContainer`
+   - Añade un **Panel** con fondo semi-transparente
+   - Dentro del panel añade:
+     - **TextMeshPro**: Para mostrar el tiempo (ej: "1.5s")
+     - **Image** (opcional): Barra de progreso con Type: Filled
 
-#### Configuración del Componente TroopUI:
+3. **Configurar el componente TroopUI:**
+   - **Spawn Timer Container**: Arrastra el panel creado
+   - **Spawn Timer Text**: Arrastra el TextMeshPro
+   - **Spawn Progress Bar**: Arrastra la Image (si la creaste)
 
-En el Inspector del prefab TroopUI:
+4. **Estilo recomendado:**
+   - Posición: Encima del icono principal
+   - Tamaño: Pequeño (50x20 aprox)
+   - Color fondo: Semi-transparente (negro 50% alpha)
+   - Color texto: Blanco brillante
+   - Font Size: 12-14
 
-**UI Elements:**
-- `World Canvas` → Arrastra el Canvas
-- `Icon Image` → Imagen del icono en Normal UI
-- `Value Text` → TextMeshPro del valor en Normal UI
+#### Configuración de OperationUI (para CharacterCombined):
 
-**Normal Troop UI:**
-- `Normal UI Container` → Arrastra el container completo
+1. **Abrir el Prefab OperationUI** existente
 
-**Spawn UI:**
-- `Spawn UI Container` → Arrastra el container de spawn
-- `Spawn Icon Image` → Imagen del icono en Spawn UI
-- `Spawn Fill Image` → Imagen con fill radial
+2. **Añadir Temporizador de Spawn:**
+   - Crea un GameObject hijo: `SpawnTimerContainer`
+   - Añade un **Panel** con fondo semi-transparente
+   - Dentro del panel añade:
+     - **TextMeshPro**: Para mostrar el tiempo (ej: "1.5s")
+     - **Image** (opcional): Barra de progreso con Type: Filled
 
-**Team Sprites:**
-- `Blue Team Icon` → Sprite del equipo azul
-- `Red Team Icon` → Sprite del equipo rojo
-- `Default Icon` → Sprite por defecto
+3. **Configurar el componente OperationUI:**
+   - **Spawn Timer Container**: Arrastra el panel creado
+   - **Spawn Timer Text**: Arrastra el TextMeshPro
+   - **Spawn Progress Bar**: Arrastra la Image (si la creaste)
 
-**Settings:**
-- `Offset` → (0, 1.5, 0) - Altura sobre la tropa
-
-#### Estilo Visual Recomendado:
-
-**Spawn UI:**
-- Tamaño: 64x64 píxeles
-- Icono de fondo: Semi-opaco (50% alpha)
-- Fill radial:
-  - Color: Verde brillante (#00FF00) o color del equipo
-  - Alpha: 70-80%
-  - Grosor: Borde de ~8 píxeles alrededor del icono
-- Posición: Centrada sobre la tropa
-
-**Normal UI:**
-- Tamaño icono: 48x48 píxeles
-- Valor numérico:
-  - Font Size: 24-28
-  - Color: Blanco con outline negro
-  - Posición: Esquina inferior derecha del icono o centrado debajo
+4. **Estilo recomendado:**
+   - Posición: Encima de la operación (ej: "3+2")
+   - Tamaño: Pequeño (60x25 aprox)
+   - Color fondo: Semi-transparente (negro 50% alpha)
+   - Color texto: Blanco brillante
+   - Font Size: 14-16
 
 ---
 
@@ -210,7 +193,13 @@ lifetime: 2.5f              // Tiempo antes de auto-destruirse
 ### TroopUI:
 ```
 offset: (0, 1.5, 0)         // Altura sobre la tropa
-spawnFillImage.fillAmount   // Se anima de 0 a 1 durante el spawn
+spawnProgressBar.fillAmount // Se anima de 0 a 1 durante el spawn
+```
+
+### OperationUI:
+```
+offset: (0, 3.0, 0)         // Altura sobre la operación combinada
+spawnProgressBar.fillAmount // Se anima de 0 a 1 durante el spawn
 ```
 
 ---
@@ -223,21 +212,22 @@ spawnFillImage.fillAmount   // Se anima de 0 a 1 durante el spawn
    - Tropa aparece con escala 0 (invisible)
    - Collider deshabilitado
    - VFX de spawn se instancia
-   - **UI de Spawn visible** (icono + fill radial en 0%)
+   - **Spawn timer visible** en TroopUI o OperationUI (muestra tiempo restante)
 
 2. **Durante Spawn (t=0s - 2s):**
    - Tropa crece gradualmente desde escala 0 a escala completa
    - Partículas de tierra/plastelina emergen del suelo
    - Splat sphere se contrae (grande → pequeño)
-   - **Fill radial se llena** progresivamente (0% → 100%)
+   - **Timer cuenta regresiva** (2.0s → 0.0s)
+   - **Barra de progreso se llena** si está configurada (0% → 100%)
    - **No puede atacar ni ser atacada**
 
 3. **Finalización (t=2s):**
    - Escala completa alcanzada
    - Collider habilitado
    - VFX destruido
-   - **UI cambia de Spawn UI a Normal UI** (icono + valor numérico)
-   - **Tropa completamente activa**
+   - **Spawn timer se oculta**
+   - **Tropa completamente activa** (puede atacar y moverse)
 
 ---
 

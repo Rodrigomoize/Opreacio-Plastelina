@@ -41,17 +41,23 @@ public class TroopSpawnVFX : MonoBehaviour
     /// </summary>
     private IEnumerator AnimateSplatSphere()
     {
+        // IMPORTANTE: Desparentar el splat sphere temporalmente para que no herede la escala del padre
+        // Esto evita que cuando la tropa crece de 0 a 1, el splat también crezca
+        Transform originalParent = splatSphere.transform.parent;
+        Vector3 worldPosition = splatSphere.transform.position;
+        splatSphere.transform.SetParent(null, true); // Desparentar pero mantener posición mundial
+        
         // Configurar escala inicial (grande y aplastada) y final (pequeña)
         Vector3 initialScale = new Vector3(splatInitialScale, splatInitialScale * 0.2f, splatInitialScale);
         Vector3 finalScale = new Vector3(splatFinalScale, splatFinalScale * 0.2f, splatFinalScale);
         
-        // Elevar el splat para que se vea sobre el suelo
-        Vector3 originalPos = splatSphere.transform.localPosition;
-        splatSphere.transform.localPosition = new Vector3(originalPos.x, 0.1f, originalPos.z);
+        // Elevar el splat para que se vea sobre el suelo (posición mundial ahora)
+        splatSphere.transform.position = new Vector3(worldPosition.x, worldPosition.y + 0.1f, worldPosition.z);
         
-        // Empezar con escala GRANDE
+        // Empezar con escala GRANDE (ahora es escala mundial, no local)
         splatSphere.transform.localScale = initialScale;
-          float t = 0;
+        
+        float t = 0;
         while (t < splatDuration)
         {
             t += Time.deltaTime;
@@ -60,7 +66,16 @@ public class TroopSpawnVFX : MonoBehaviour
             // Escala: de GRANDE a PEQUEÑO (interpolación lineal directa)
             splatSphere.transform.localScale = Vector3.Lerp(initialScale, finalScale, progress);
             
+            // Mantener la posición fija en el mundo (no seguir al padre que se mueve)
+            splatSphere.transform.position = new Vector3(worldPosition.x, worldPosition.y + 0.1f, worldPosition.z);
+            
             yield return null;
+        }
+        
+        // Re-parentar antes de ocultar
+        if (originalParent != null)
+        {
+            splatSphere.transform.SetParent(originalParent, true);
         }
         
         // Al final, ocultar el splat

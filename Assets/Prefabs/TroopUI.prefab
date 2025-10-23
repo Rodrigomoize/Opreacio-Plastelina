@@ -449,10 +449,9 @@ MonoBehaviour:
   worldCanvas: {fileID: 6698106156952782628}
   iconImage: {fileID: 4807941247187017421}
   valueText: {fileID: 3848031871764729554}
-  normalUIContainer: {fileID: 0}
-  spawnUIContainer: {fileID: 0}
-  spawnIconImage: {fileID: 0}
-  spawnFillImage: {fileID: 0}
+  spawnTimerContainer: {fileID: 5916735592594002812}
+  spawnTimerText: {fileID: 4237917976165235749}
+  spawnProgressBar: {fileID: 0}
   offset: {x: 0, y: 2, z: 0}
   blueTeamIcon: {fileID: 21300000, guid: 66e376dfd0469274caa9c25b556af929, type: 3}
   redTeamIcon: {fileID: 21300000, guid: 79bf70f7fe31fd7428a0749695e78d88, type: 3}
