@@ -25,17 +25,18 @@ public class PowerUpDurationUI : MonoBehaviour
             timerText = GetComponentInChildren<TextMeshProUGUI>();
         }
         
-        // Configurar el texto
+        // Configurar el texto si existe
         if (timerText != null)
         {
             timerText.color = timerColor;
             timerText.fontSize = fontSize;
             timerText.alignment = TextAlignmentOptions.Center;
-            timerText.text = "";
+            timerText.raycastTarget = false; // No bloquear clics del botón
+            timerText.gameObject.SetActive(false); // Empezar oculto
         }
         else
         {
-            Debug.LogWarning($"[PowerUpDurationUI] No se encontró TextMeshProUGUI en {gameObject.name}");
+            Debug.LogWarning($"[PowerUpDurationUI] No se encontró TextMeshProUGUI en {gameObject.name}. Asigna uno manualmente.");
         }
     }
     
