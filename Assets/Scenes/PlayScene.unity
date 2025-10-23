@@ -2114,8 +2114,8 @@ MonoBehaviour:
   playableAreaAI: {fileID: 1753038883}
   playerIntelectManager: {fileID: 1639695185}
   aiIntelectManager: {fileID: 1587260387}
-  combinedPrefabSum: {fileID: 4485164346710184342, guid: b3351e2176a211e4685edbcf170820a6, type: 3}
-  combinedPrefabSub: {fileID: 3326580399756746706, guid: 87a5d165c5337104b84005d1fe578854, type: 3}
+  combinedPrefabSum: {fileID: 1703208620519177130, guid: b3351e2176a211e4685edbcf170820a6, type: 3}
+  combinedPrefabSub: {fileID: 947906142550811159, guid: 87a5d165c5337104b84005d1fe578854, type: 3}
   troopUIPrefab: {fileID: 4383262928985605803, guid: e0e5ad72102f29a4abb09024ff254ad7, type: 3}
   operationUIPrefab: {fileID: 7733706771787178017, guid: b1c2fd52c17441548a08b3b698f8cc5c, type: 3}
 --- !u!4 &611915977

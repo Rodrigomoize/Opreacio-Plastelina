@@ -197,19 +197,31 @@ public class CharacterManager : MonoBehaviour
             }
         }
 
-        Transform frontSlot = instance.transform.Find("FrontSlot");
-        Transform backSlot = instance.transform.Find("BackSlot");
+        // Buscar slots recursivamente en toda la jerarquía (no solo hijos directos)
+        Transform frontSlot = null;
+        Transform backSlot = null;
+        
+        // Buscar por nombre exacto primero
+        foreach (Transform child in instance.GetComponentsInChildren<Transform>(true))
+        {
+            if (child.name == "FrontSlot") frontSlot = child;
+            if (child.name == "BackSlot") backSlot = child;
+            if (frontSlot != null && backSlot != null) break;
+        }
 
+        // Si no se encuentran, buscar por nombres alternativos
         if (frontSlot == null || backSlot == null)
         {
-            foreach (Transform child in instance.transform)
+            foreach (Transform child in instance.GetComponentsInChildren<Transform>(true))
             {
                 string n = child.name.ToLower();
                 if (frontSlot == null && n.Contains("delante")) frontSlot = child;
                 if (backSlot == null && n.Contains("atras")) backSlot = child;
+                if (frontSlot != null && backSlot != null) break;
             }
         }
 
+        // Si aún no se encuentran, buscar por BoxColliders
         if (frontSlot == null || backSlot == null)
         {
             foreach (var col in instance.GetComponentsInChildren<BoxCollider>(true))
@@ -217,11 +229,14 @@ public class CharacterManager : MonoBehaviour
                 string n = col.gameObject.name.ToLower();
                 if (frontSlot == null && n.Contains("delante")) frontSlot = col.transform;
                 if (backSlot == null && n.Contains("atras")) backSlot = col.transform;
+                if (frontSlot != null && backSlot != null) break;
             }
         }
 
+        // Solo crear slots nuevos si definitivamente no existen
         if (frontSlot == null)
         {
+            Debug.LogWarning($"[CharacterManager] No se encontró FrontSlot en {instance.name}, creando uno nuevo");
             GameObject f = new GameObject("FrontSlot");
             f.transform.SetParent(instance.transform);
             f.transform.localPosition = new Vector3(0, 0.3f, 0.3f);
@@ -229,11 +244,15 @@ public class CharacterManager : MonoBehaviour
         }
         if (backSlot == null)
         {
+            Debug.LogWarning($"[CharacterManager] No se encontró BackSlot en {instance.name}, creando uno nuevo");
             GameObject b = new GameObject("BackSlot");
             b.transform.SetParent(instance.transform);
             b.transform.localPosition = new Vector3(0, 0.3f, -0.3f);
             backSlot = b.transform;
         }
+        
+        Debug.Log($"[CharacterManager] Slots encontrados - Front: {frontSlot.name}, Back: {backSlot.name}");
+
 
         Transform GetSlotAnchor(Transform slotTransform, string anchorName)
         {
