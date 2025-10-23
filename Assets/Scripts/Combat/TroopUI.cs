@@ -3,8 +3,7 @@ using TMPro;
 using UnityEngine.UI;
 
 public class TroopUI : MonoBehaviour
-{
-    [Header("UI Elements")]
+{    [Header("UI Elements")]
     public Canvas worldCanvas;
     public Image iconImage;
     public TextMeshProUGUI valueText;
@@ -50,9 +49,7 @@ public class TroopUI : MonoBehaviour
                                  mainCamera.transform.rotation * Vector3.up);
             }
         }
-    }
-    
-    /// <summary>
+    }    /// <summary>
     /// Inicializa el UI de la tropa
     /// </summary>
     /// <param name="target">Transform de la tropa a seguir</param>
@@ -94,9 +91,7 @@ public class TroopUI : MonoBehaviour
                 }
             }
         }
-    }
-    
-    /// <summary>
+    }    /// <summary>
     /// Actualiza el valor mostrado
     /// </summary>
     public void UpdateValue(int newValue)

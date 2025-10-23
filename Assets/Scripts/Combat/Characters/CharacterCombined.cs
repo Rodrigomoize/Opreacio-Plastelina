@@ -107,6 +107,18 @@ public class CharacterCombined : MonoBehaviour
     }
 
     /// <summary>
+    /// Reanuda el movimiento después del spawn
+    /// </summary>
+    public void ResumeMovement()
+    {
+        if (agent != null && agent.enabled && targetBridge != null)
+        {
+            agent.SetDestination(targetBridge.position);
+            Debug.Log($"[CharacterCombined] {gameObject.name} - Movimiento reanudado hacia {targetBridge.name}");
+        }
+    }
+
+    /// <summary>
     /// ACTUALIZACIÓN CLAVE: calcula speed final como baseSpeed * GameSpeedMultiplier * perObjectMultiplier.
     /// </summary>
     public void UpdateSpeed()
@@ -149,10 +161,11 @@ public class CharacterCombined : MonoBehaviour
         {
             Debug.LogWarning("[CharacterCombined] backPosition o backModel es null");
         }
-    }
-
-    void Update()
+    }    void Update()
     {
+        // Si está en spawn, no actualizar movimiento
+        if (spawnController != null && spawnController.IsSpawning) return;
+        
         if (agent == null || isInCombat) return;
 
         if (!reachedBridge && targetBridge != null)

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.AI;
 using System.Collections;
 
 /// <summary>
@@ -25,12 +26,12 @@ public class TroopSpawnController : MonoBehaviour
     private bool isSpawning = true;
     private float spawnTimeRemaining;
     private Vector3 targetScale;
-    private GameObject spawnVFXInstance;
-    
-    // Referencias
+    private GameObject spawnVFXInstance;      // Referencias
     private Character characterScript;
+    private CharacterCombined characterCombined;
     private Collider characterCollider;
     private TroopUI troopUI;
+    private UnityEngine.AI.NavMeshAgent navAgent;
     
     public bool IsSpawning => isSpawning;
     public float SpawnTimeRemaining => spawnTimeRemaining;
@@ -39,7 +40,9 @@ public class TroopSpawnController : MonoBehaviour
     void Awake()
     {
         characterScript = GetComponent<Character>();
+        characterCombined = GetComponent<CharacterCombined>();
         characterCollider = GetComponent<Collider>();
+        navAgent = GetComponent<UnityEngine.AI.NavMeshAgent>();
         
         // Guardar la escala objetivo
         targetScale = transform.localScale;
@@ -54,9 +57,7 @@ public class TroopSpawnController : MonoBehaviour
         }
         
         spawnTimeRemaining = spawnDuration;
-    }
-    
-    void Start()
+    }    void Start()
     {
         // Obtener referencia al TroopUI (se crea en Character.Start)
         if (characterScript != null && characterScript.troopUIInstance != null)
@@ -64,11 +65,21 @@ public class TroopSpawnController : MonoBehaviour
             troopUI = characterScript.troopUIInstance;
         }
         
-        // Instanciar VFX de spawn
+        // Deshabilitar NavMeshAgent durante spawn para que no se mueva
+        if (navAgent != null)
+        {
+            navAgent.enabled = false;
+            Debug.Log($"[TroopSpawn] NavMeshAgent deshabilitado durante spawn para {gameObject.name}");
+        }
+          // Instanciar VFX de spawn
         if (spawnVFXPrefab != null)
         {
             spawnVFXInstance = Instantiate(spawnVFXPrefab, transform.position, Quaternion.identity);
             spawnVFXInstance.transform.SetParent(transform); // Hacer hijo para que siga a la tropa
+            
+            // IMPORTANTE: Resetear la escala local a 1 para que no herede la escala 0 de la tropa
+            spawnVFXInstance.transform.localScale = Vector3.one;
+            
             Debug.Log($"[TroopSpawn] VFX de spawn instanciado para {gameObject.name}");
         }
         else
@@ -77,9 +88,7 @@ public class TroopSpawnController : MonoBehaviour
         }
         
         StartCoroutine(SpawnSequence());
-    }
-    
-    void Update()
+    }    void Update()
     {
         if (!isSpawning) return;
         
@@ -111,9 +120,7 @@ public class TroopSpawnController : MonoBehaviour
         
         // Finalizar spawn
         CompleteSpawn();
-    }
-    
-    /// <summary>
+    }      /// <summary>
     /// Completa el spawn y activa la tropa
     /// </summary>
     private void CompleteSpawn()
@@ -130,7 +137,22 @@ public class TroopSpawnController : MonoBehaviour
             characterCollider.enabled = true;
         }
         
-        // Destruir VFX de spawn
+        // Habilitar NavMeshAgent para que pueda moverse
+        if (navAgent != null)
+        {
+            navAgent.enabled = true;
+            Debug.Log($"[TroopSpawn] NavMeshAgent habilitado, {gameObject.name} puede moverse ahora");
+        }
+        
+        // Reanudar el movimiento llamando al método correspondiente
+        if (characterScript != null)
+        {
+            characterScript.ResumeMovement();
+        }
+        else if (characterCombined != null)
+        {
+            characterCombined.ResumeMovement();
+        }        // Destruir VFX de spawn
         if (spawnVFXInstance != null)
         {
             Destroy(spawnVFXInstance);

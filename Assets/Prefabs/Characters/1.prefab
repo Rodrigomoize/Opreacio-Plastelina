@@ -131,7 +131,7 @@ MonoBehaviour:
   troopUIPrefab: {fileID: 4383262928985605803, guid: e0e5ad72102f29a4abb09024ff254ad7, type: 3}
   troopUIInstance: {fileID: 0}
   combatDuration: 1
-  combatSpeedMultiplier: 0.1
+  combatSpeedMultiplier: 0
   vfxImpactPrefab: {fileID: 7190290771688677997, guid: 0d5fffd37d636a042bfd10411f3c784e, type: 3}
   implosionSpeed: 4
   preImplosionScale: 1.2
@@ -193,6 +193,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spawnDuration: 1
-  spawnVFXPrefab: {fileID: 0}
+  spawnVFXPrefab: {fileID: 7190290771688677997, guid: b944594f521470a4db840fbeba0f9d8f, type: 3}
   initialScale: 0
-  growthSpeed: 1
+  growthSpeed: 3

@@ -106,6 +106,18 @@ public class Character : MonoBehaviour
     }
 
     /// <summary>
+    /// Reanuda el movimiento después del spawn
+    /// </summary>
+    public void ResumeMovement()
+    {
+        if (agent != null && agent.enabled && targetBridge != null)
+        {
+            agent.SetDestination(targetBridge.position);
+            Debug.Log($"[Character] {gameObject.name} - Movimiento reanudado hacia {targetBridge.name}");
+        }
+    }
+
+    /// <summary>
     /// ACTUALIZACIÓN CLAVE: calcula speed final como baseSpeed * GameSpeedMultiplier * perObjectMultiplier.
     /// </summary>
     public void UpdateSpeed()
@@ -145,10 +157,11 @@ public class Character : MonoBehaviour
         {
             Debug.LogWarning($"[Character] troopUIPrefab no asignado para {gameObject.name}");
         }
-    }
-
-    void Update()
+    }    void Update()
     {
+        // Si está en spawn, no actualizar movimiento ni animaciones
+        if (spawnController != null && spawnController.IsSpawning) return;
+        
         if (agent == null || enemyTower == null) return;
 
         // Actualizar animación de caminar basándose en la velocidad del agente
