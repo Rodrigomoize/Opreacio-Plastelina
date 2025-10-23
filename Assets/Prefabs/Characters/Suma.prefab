@@ -452,9 +452,6 @@ PrefabInstance:
       addedObject: {fileID: -6880165813617650426}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a1e8f8c0e0f247b4fbbc7ba19df98a3f, type: 3}
       insertIndex: -1
-      addedObject: {fileID: -4418858115432103740}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a1e8f8c0e0f247b4fbbc7ba19df98a3f, type: 3}
-      insertIndex: -1
       addedObject: {fileID: -205927201957796201}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a1e8f8c0e0f247b4fbbc7ba19df98a3f, type: 3}
       insertIndex: -1
@@ -486,6 +483,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterCombined
   isInCombat: 0
+  isAttackingTower: 0
   frontPosition: {fileID: 903611391520478844}
   backPosition: {fileID: 7803305253280253181}
   AITower: {fileID: 0}
@@ -517,24 +515,6 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &-4418858115432103740
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4485164346710184342}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Outline
-  outlineMode: 0
-  outlineColor: {r: 1, g: 0.10196079, b: 0.10196079, a: 1}
-  outlineWidth: 2
-  precomputeOutline: 0
-  bakeKeys: []
-  bakeValues: []
 --- !u!114 &-205927201957796201
 MonoBehaviour:
   m_ObjectHideFlags: 0
