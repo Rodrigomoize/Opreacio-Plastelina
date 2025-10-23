@@ -20,8 +20,7 @@ public class AudioManager : MonoBehaviour
     [Header("UI Sound Effects")]
     [SerializeField] private AudioClip buttonClickSFX;
     [SerializeField] private AudioClip buttonClaySFX;
-    [SerializeField] private AudioClip panelOpenSFX;
-    [SerializeField] private AudioClip panelCloseSFX;
+    [SerializeField] private AudioClip turnThePageSFX;
 
     [Header("Gameplay Sound Effects")]
     [SerializeField] private AudioClip cardPlacedSFX;
@@ -179,6 +178,23 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    /// Detiene la música actual y la resetea completamente para que empiece desde 0 la próxima vez
+    public void StopAndResetMusic()
+    {
+        if (musicFadeCoroutine != null)
+        {
+            StopCoroutine(musicFadeCoroutine);
+            musicFadeCoroutine = null;
+        }
+
+        musicSource.Stop();
+        musicSource.time = 0f; // Resetea el tiempo de reproducción a 0
+        musicSource.clip = null; // Limpia el clip actual
+        musicSource.volume = musicVolume; // Restaura el volumen
+
+        Debug.Log("[AudioManager] Música detenida y reseteada completamente");
+    }
+
     public void PauseMusic()
     {
         musicSource.Pause();
@@ -232,14 +248,9 @@ public class AudioManager : MonoBehaviour
         PlaySFXWithCooldown(buttonClaySFX, "buttonClay", 0.05f);
     }
 
-    public void PlayPanelOpen()
+    public void PlayTurnThePage()
     {
-        PlaySFX(panelOpenSFX);
-    }
-
-    public void PlayPanelClose()
-    {
-        PlaySFX(panelCloseSFX);
+        PlaySFX(turnThePageSFX);
     }
 
     // ===== EFECTOS DE GAMEPLAY =====

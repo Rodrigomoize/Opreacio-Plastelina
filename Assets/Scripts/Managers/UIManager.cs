@@ -135,11 +135,6 @@ public class UIManager : MonoBehaviour
         isPaused = false;
 
         // Reproducir sonido
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlayPanelClose();
-        }
-
         if (pausePanel != null)
         {
             pausePanel.SetActive(false);
@@ -181,7 +176,7 @@ public class UIManager : MonoBehaviour
         // Reproducir sonido
         if (AudioManager.Instance != null)
         {
-            AudioManager.Instance.PlayPanelOpen();
+            AudioManager.Instance.PlayTurnThePage();
         }
 
         // Resetear al inicio
@@ -201,12 +196,6 @@ public class UIManager : MonoBehaviour
 
     public void CloseInstructions()
     {
-        // Reproducir sonido
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlayPanelClose();
-        }
-
         if (instructionsPanel != null)
         {
             instructionsPanel.SetActive(false);

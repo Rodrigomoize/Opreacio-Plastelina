@@ -93,7 +93,7 @@ public class GameManager : MonoBehaviour
         {
             Instance.LoadLoseScene();
         }
-    }   
+    }
 
     // METODOS PRIVADOS DE CARGA
 
@@ -120,6 +120,8 @@ public class GameManager : MonoBehaviour
     private void LoadLevelScene()
     {
         SceneManager.LoadScene("LevelScene");
+
+        // Mantener la música del MainMenu (no cambiar)
     }
 
     private void LoadPlayScene()
@@ -128,16 +130,17 @@ public class GameManager : MonoBehaviour
         isPaused = false;
 
         SceneManager.LoadScene("PlayScene");
-        // La inicialización específica de PlayScene se hace en HandleSceneLoaded
-
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlayGameplayMusic();
-        }
+        // La música se iniciará en HandleSceneLoaded para asegurar que empiece desde 0
     }
 
     private void LoadWinScene()
     {
+        // DETENER Y RESETEAR completamente la música de gameplay antes de cambiar de escena
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopAndResetMusic();
+        }
+
         // Detener el timer si está corriendo
         if (gameTimerManager != null && gameTimerManager.IsRunning)
         {
@@ -162,6 +165,12 @@ public class GameManager : MonoBehaviour
 
     private void LoadLoseScene()
     {
+        // DETENER completamente la música de gameplay antes de cambiar de escena
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopMusic(fadeOut: false);
+        }
+
         // Detener el timer si está corriendo
         if (gameTimerManager != null && gameTimerManager.IsRunning)
         {
@@ -208,11 +217,23 @@ public class GameManager : MonoBehaviour
 
     public void BackToMainMenu()
     {
+        // DETENER completamente la música de gameplay antes de volver al menú
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopMusic(fadeOut: false);
+        }
+
         LoadMainMenu();
     }
 
     public void RestartCurrentLevel()
     {
+        // DETENER completamente la música de gameplay antes de reiniciar
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopMusic(fadeOut: false);
+        }
+
         LoadPlayScene();
     }
 
@@ -225,13 +246,13 @@ public class GameManager : MonoBehaviour
     public PlayerCardManager GetPlayerCardManager() => playerCardManager;
     public GameTimer GetGameTimer() => gameTimerManager;
 
-    // ===== M�TODO PARA CAMBIAR DIFICULTAD =====
+    // ===== MÉTODO PARA CAMBIAR DIFICULTAD =====
     public void SetDificultad(IAController.AIDificultad dificultad)
     {
         defaultAIDifficulty = dificultad;
         Debug.Log($"[GameManager] Dificultad cambiada a: {dificultad}");
-        
-        // Actualizar la velocidad del juego seg�n la dificultad
+
+        // Actualizar la velocidad del juego según la dificultad
         if (GameSpeedManager.Instance != null)
         {
             GameSpeedManager.GameDifficulty speedDifficulty = dificultad switch
@@ -249,7 +270,7 @@ public class GameManager : MonoBehaviour
     {
         if (Instance == this)
         {
-            SceneManager.sceneLoaded -= HandleSceneLoaded;  
+            SceneManager.sceneLoaded -= HandleSceneLoaded;
             UnsubscribeFromTimer();
         }
     }
@@ -274,6 +295,13 @@ public class GameManager : MonoBehaviour
                 gameTimerManager.ResetTimer();
                 gameTimerManager.StartCountdown(gameTimerManager.CountdownDuration);
                 Debug.Log("[GameManager] Timer reseteado y arrancado para nueva partida");
+            }
+
+            // IMPORTANTE: Iniciar la música de gameplay desde 0
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayGameplayMusic();
+                Debug.Log("[GameManager] Música de gameplay iniciada desde el principio");
             }
 
             // Asegurar que la IA reciba la dificultad por defecto una vez esté presente

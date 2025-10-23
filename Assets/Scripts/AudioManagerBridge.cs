@@ -20,16 +20,10 @@ public class AudioManagerBridge : MonoBehaviour
             AudioManager.Instance.PlayButtonClay();
     }
 
-    public void PlayPanelOpen()
+    public void PlayTurnThePage()
     {
         if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayPanelOpen();
-    }
-
-    public void PlayPanelClose()
-    {
-        if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayPanelClose();
+            AudioManager.Instance.PlayTurnThePage();
     }
 
     // ===== MÉTODOS PARA GAMEPLAY =====
