@@ -12,6 +12,7 @@ public class CharacterCombined : MonoBehaviour
     private bool reachedBridge = false;
     private CharacterManager manager;
     public bool isInCombat = false; // Character lo controla durante combate
+    public bool isAttackingTower = false; // TRUE cuando está atacando la torre (no se puede atacar)
     private TroopSpawnController spawnController;
 
     [Header("Posiciones para personajes combinados")]
@@ -145,6 +146,7 @@ public class CharacterCombined : MonoBehaviour
             frontCharacterInstance = Instantiate(frontModel, frontPosition.position, frontPosition.rotation, frontPosition);
             frontCharacterInstance.transform.localPosition = Vector3.zero;
             frontCharacterInstance.transform.localRotation = Quaternion.identity;
+            // Preservar la escala original del modelo (ya viene con la escala correcta del prefab)
         }
         else
         {
@@ -156,6 +158,7 @@ public class CharacterCombined : MonoBehaviour
             backCharacterInstance = Instantiate(backModel, backPosition.position, backPosition.rotation, backPosition);
             backCharacterInstance.transform.localPosition = Vector3.zero;
             backCharacterInstance.transform.localRotation = Quaternion.identity;
+            // Preservar la escala original del modelo (ya viene con la escala correcta del prefab)
         }
         else
         {
@@ -192,6 +195,9 @@ public class CharacterCombined : MonoBehaviour
             float distanciaTorre = Vector3.Distance(transform.position, enemyTower.position);
             if (distanciaTorre < 2f)
             {
+                // Marcar que está atacando la torre (no puede ser atacado durante esto)
+                isAttackingTower = true;
+                
                 // Iniciar secuencia de impacto en torre
                 StartCoroutine(TowerImpactSequence(enemyTower));
             }
@@ -214,6 +220,9 @@ public class CharacterCombined : MonoBehaviour
             {
                 Debug.Log($"[CharacterCombined] {gameObject.name} llegó a torre enemiga {other.name}, causando {combinedValue} de daño!");
 
+                // Marcar que está atacando la torre (no puede ser atacado durante esto)
+                isAttackingTower = true;
+                
                 // Iniciar secuencia de impacto en torre
                 StartCoroutine(TowerImpactSequence(other.transform));
                 return;
@@ -231,6 +240,9 @@ public class CharacterCombined : MonoBehaviour
     /// </summary>
     private IEnumerator TowerImpactSequence(Transform tower)
     {
+        // Marcar que está atacando la torre (prevenir ataques durante la secuencia)
+        isAttackingTower = true;
+        
         // Detener movimiento
         if (agent != null)
         {

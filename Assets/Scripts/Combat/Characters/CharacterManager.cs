@@ -290,6 +290,10 @@ public class CharacterManager : MonoBehaviour
             b.transform.SetParent(instance.transform, false);
             backAnchor = b.transform;
         }
+        
+        // IMPORTANTE: Forzar escala 1 en los anchors para que no hereden la escala 0 del spawn
+        frontAnchor.localScale = Vector3.one;
+        backAnchor.localScale = Vector3.one;
 
         // Asegurar que la tropa más pequeña siempre vaya en el front slot
         CardManager.Card frontCard, backCard;
@@ -305,13 +309,18 @@ public class CharacterManager : MonoBehaviour
         }
 
         GameObject frontModel;
+        Vector3 frontOriginalScale = Vector3.one; // Guardar escala original
         if (frontCard.fbxCharacter != null)
         {
+            // Guardar la escala del prefab ANTES de instanciar
+            frontOriginalScale = frontCard.fbxCharacter.transform.localScale;
+            
             frontModel = Instantiate(frontCard.fbxCharacter, frontAnchor.position, frontAnchor.rotation);
             frontModel.name = $"FrontModel_{frontCard.cardName}";
             frontModel.transform.SetParent(frontAnchor, false);
             frontModel.transform.localPosition = Vector3.zero;
             frontModel.transform.localRotation = Quaternion.identity;
+            frontModel.transform.localScale = frontOriginalScale; // Restaurar escala original del prefab
         }
         else
         {
@@ -320,16 +329,22 @@ public class CharacterManager : MonoBehaviour
             frontModel.transform.SetParent(frontAnchor, false);
             frontModel.transform.localPosition = Vector3.zero;
             frontModel.transform.localRotation = Quaternion.identity;
+            frontModel.transform.localScale = Vector3.one; // Primitivos usan escala 1
         }
 
         GameObject backModel;
+        Vector3 backOriginalScale = Vector3.one; // Guardar escala original
         if (backCard.fbxCharacter != null)
         {
+            // Guardar la escala del prefab ANTES de instanciar
+            backOriginalScale = backCard.fbxCharacter.transform.localScale;
+            
             backModel = Instantiate(backCard.fbxCharacter, backAnchor.position, backAnchor.rotation);
             backModel.name = $"BackModel_{backCard.cardName}";
             backModel.transform.SetParent(backAnchor, false);
             backModel.transform.localPosition = Vector3.zero;
             backModel.transform.localRotation = Quaternion.identity;
+            backModel.transform.localScale = backOriginalScale; // Restaurar escala original del prefab
         }
         else
         {
@@ -338,6 +353,7 @@ public class CharacterManager : MonoBehaviour
             backModel.transform.SetParent(backAnchor, false);
             backModel.transform.localPosition = Vector3.zero;
             backModel.transform.localRotation = Quaternion.identity;
+            backModel.transform.localScale = Vector3.one; // Primitivos usan escala 1
         }
 
         // Modelos posicionados en (0,0,0) local respecto a sus anchors

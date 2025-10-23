@@ -246,6 +246,13 @@ public class Character : MonoBehaviour
                 return;
             }
 
+            // Verificar si el Combined está atacando la torre
+            if (otherCombined.isAttackingTower)
+            {
+                Debug.Log($"[Character] El Combined está atacando la torre, no se puede atacar");
+                return;
+            }
+
             // Evitar combate si el Combined ya está en combate
             if (otherCombined.isInCombat) return;
 
