@@ -46,6 +46,14 @@ public class PowerUpManager : MonoBehaviour
     [SerializeField] private Color availableColor = Color.white;
     [SerializeField] private Color cooldownColor = Color.gray;
     [SerializeField] private Color activeColor = Color.green;
+    
+    [Header("Screen Flash Effects")]
+    [Tooltip("Color del flash para healing (verde)")]
+    [SerializeField] private Color healingFlashColor = new Color(0f, 1f, 0f, 0.4f);
+    [Tooltip("Color del flash para slow time (azul)")]
+    [SerializeField] private Color slowTimeFlashColor = new Color(0f, 0.5f, 1f, 0.3f);
+    [Tooltip("Duración del flash en segundos")]
+    [SerializeField] private float flashDuration = 0.5f;
 
     private void Awake()
     {
@@ -61,58 +69,37 @@ public class PowerUpManager : MonoBehaviour
     private void Update()
     {
         UpdateCooldowns();
-        UpdateHealthPowerUpAvailability();
+        UpdateActiveDurationTimers();
     }
-
+    
     /// <summary>
-    /// Actualiza la disponibilidad del powerup de curación basándose en la vida actual de la torre
+    /// Actualiza los temporizadores de duración de powerups activos y muestra UI
     /// </summary>
-    private void UpdateHealthPowerUpAvailability()
+    private void UpdateActiveDurationTimers()
     {
-        PowerUpData healthPowerUp = powerUps.Find(x => x.powerUpName == "Health");
-        if (healthPowerUp == null || healthPowerUp.powerUpButton == null) return;
-
-        // Si ya está en cooldown o activo, no cambiar nada
-        if (healthPowerUp.isOnCooldown || healthPowerUp.isActive) return;
-
-        // Buscar la torre del jugador
-        TowerHealthBar playerTower = null;
-        if (TowerManager.Instance != null)
+        foreach (var p in powerUps)
         {
-            playerTower = TowerManager.Instance.GetTowerByTeam(healthPowerUp.healTargetTeam);
-        }
-
-        // Fallback: buscar en escena
-        if (playerTower == null)
-        {
-            TowerHealthBar[] bars = FindObjectsByType<TowerHealthBar>(FindObjectsSortMode.None);
-            foreach (var bar in bars)
+            if (p.isActive && p.duration > 0f && p.powerUpButton != null)
             {
-                if (bar != null && bar.teamTag == healthPowerUp.healTargetTeam)
+                // Buscar o crear el componente PowerUpDurationUI
+                PowerUpDurationUI durationUI = p.powerUpButton.GetComponent<PowerUpDurationUI>();
+                if (durationUI == null)
                 {
-                    playerTower = bar;
-                    break;
+                    durationUI = p.powerUpButton.gameObject.AddComponent<PowerUpDurationUI>();
+                }
+                
+                // Actualizar el temporizador
+                durationUI.UpdateTimer(p.durationTimer);
+            }
+            else if (p.powerUpButton != null)
+            {
+                // Ocultar el temporizador cuando no está activo
+                PowerUpDurationUI durationUI = p.powerUpButton.GetComponent<PowerUpDurationUI>();
+                if (durationUI != null)
+                {
+                    durationUI.HideTimer();
                 }
             }
-        }
-
-        // Si no hay torre, deshabilitar
-        if (playerTower == null)
-        {
-            healthPowerUp.powerUpButton.interactable = false;
-            return;
-        }
-
-        // Deshabilitar si la vida está al máximo
-        bool isAtMaxHealth = playerTower.GetCurrentHealth() >= playerTower.maxHealth;
-        healthPowerUp.powerUpButton.interactable = !isAtMaxHealth;
-
-        // Actualizar color visual solo si no está disponible por vida máxima
-        if (isAtMaxHealth && !healthPowerUp.isOnCooldown)
-        {
-            ColorBlock colors = healthPowerUp.powerUpButton.colors;
-            colors.normalColor = cooldownColor;
-            healthPowerUp.powerUpButton.colors = colors;
         }
     }
 
@@ -259,7 +246,18 @@ public class PowerUpManager : MonoBehaviour
         int affected = GameSpeedManager.Instance.ApplyTagSpeedMultiplier(p.targetTeam, p.slowMultiplier);
         Debug.Log($"[PowerUpManager] SlowTime activado para tag '{p.targetTeam}' (objetos afectados: {affected})");
 
-        // Si la duraci�n es 0 (instant�neo), programamos la restauraci�n inmediata
+        // Flash azul continuo durante toda la duración del powerup
+        if (ScreenFlashEffect.Instance != null && p.duration > 0f)
+        {
+            StartCoroutine(ContinuousFlashCoroutine(slowTimeFlashColor, p.duration));
+        }
+        else if (ScreenFlashEffect.Instance != null)
+        {
+            // Si es instantáneo, un solo flash
+            ScreenFlashEffect.Instance.Flash(slowTimeFlashColor, flashDuration);
+        }
+
+        // Si la duración es 0 (instantáneo), programamos la restauración inmediata
         if (p.duration <= 0f)
         {
             // Desactivar inmediatamente
@@ -267,6 +265,27 @@ public class PowerUpManager : MonoBehaviour
             StartCooldown(p);
             p.isActive = false;
             UpdatePowerUpUI(p);
+        }
+    }
+    
+    /// <summary>
+    /// Corrutina para mantener un flash visual durante toda la duración del powerup
+    /// </summary>
+    private System.Collections.IEnumerator ContinuousFlashCoroutine(Color flashColor, float duration)
+    {
+        if (ScreenFlashEffect.Instance == null) yield break;
+        
+        float elapsed = 0f;
+        
+        // Mantener el flash visible durante toda la duración
+        while (elapsed < duration)
+        {
+            // Aplicar el flash con una duración que se solape
+            ScreenFlashEffect.Instance.Flash(flashColor, Mathf.Min(0.5f, duration - elapsed));
+            
+            // Esperar un poco antes del siguiente flash (pero menos que la duración para mantener continuidad)
+            yield return new WaitForSeconds(0.3f);
+            elapsed += 0.3f;
         }
     }
 
@@ -314,7 +333,13 @@ public class PowerUpManager : MonoBehaviour
         target.Heal(p.healAmount);
         Debug.Log($"[PowerUpManager] HealthPowerUp: curados {p.healAmount} en {target.gameObject.name}");
 
-        // si duration == 0, lo consideramos instant�neo y lanzamos cooldown
+        // Flash verde para healing
+        if (ScreenFlashEffect.Instance != null)
+        {
+            ScreenFlashEffect.Instance.Flash(healingFlashColor, flashDuration);
+        }
+
+        // si duration == 0, lo consideramos instantáneo y lanzamos cooldown
         if (p.duration <= 0f)
         {
             StartCooldown(p);

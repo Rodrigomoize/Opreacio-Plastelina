@@ -85,7 +85,7 @@ public class TowerHealthBar : MonoBehaviour
 
         // Ajustes por equipo (opcional)
         if (team == "PlayerTeam")
-            offset = new Vector3(0, -1f, 0); // ejemplo
+            offset = new Vector3(0, 2f, -3f); // ejemplo
         else if (team == "AITeam")
             offset = new Vector3(0, 3f, 0);
 

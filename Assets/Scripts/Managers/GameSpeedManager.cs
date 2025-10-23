@@ -32,6 +32,9 @@ public class GameSpeedManager : MonoBehaviour
     // Multiplicadores temporales por objeto (p.ej. slow powerup)
     private readonly Dictionary<GameObject, float> perObjectMultipliers = new();
     private readonly Dictionary<string, List<GameObject>> tagToObjects = new();
+    
+    // Estado activo de slow por tag (para afectar a nuevas tropas)
+    private readonly Dictionary<string, float> activeTagMultipliers = new();
 
     void Awake()
     {
@@ -59,14 +62,42 @@ public class GameSpeedManager : MonoBehaviour
     public float GetAgentMultiplier(GameObject obj)
     {
         if (obj == null) return 1f;
-        return perObjectMultipliers.TryGetValue(obj, out float m) ? m : 1f;
+        
+        // Primero verificar si hay un multiplicador específico del objeto
+        if (perObjectMultipliers.TryGetValue(obj, out float m)) return m;
+        
+        // Si no, verificar si su tag tiene un multiplicador activo
+        if (!string.IsNullOrEmpty(obj.tag) && activeTagMultipliers.TryGetValue(obj.tag, out float tagM))
+        {
+            // Aplicar el multiplicador a este objeto también (para futuras consultas)
+            perObjectMultipliers[obj] = tagM;
+            
+            // Añadir a la lista de objetos del tag si existe
+            if (tagToObjects.TryGetValue(obj.tag, out var list) && !list.Contains(obj))
+            {
+                list.Add(obj);
+            }
+            
+            return tagM;
+        }
+        
+        return 1f;
     }
 
     public int ApplyTagSpeedMultiplier(string tag, float multiplier)
     {
         if (string.IsNullOrEmpty(tag)) return 0;
+        
+        // Guardar el multiplicador activo para este tag (afectará a nuevas tropas)
+        activeTagMultipliers[tag] = multiplier;
+        Debug.Log($"[GameSpeedManager] Multiplicador {multiplier} activado para tag '{tag}' (afectará nuevas tropas)");
+        
         GameObject[] objs = GameObject.FindGameObjectsWithTag(tag);
-        if (objs == null || objs.Length == 0) { Debug.Log($"[GameSpeedManager] No objects with tag {tag}"); return 0; }
+        if (objs == null || objs.Length == 0) 
+        { 
+            Debug.Log($"[GameSpeedManager] No hay objetos activos con tag {tag} ahora, pero afectará a futuros"); 
+            return 0; 
+        }
 
         if (!tagToObjects.ContainsKey(tag)) tagToObjects[tag] = new List<GameObject>();
         int applied = 0;
@@ -84,6 +115,11 @@ public class GameSpeedManager : MonoBehaviour
     public int RemoveTagSpeedMultiplier(string tag)
     {
         if (string.IsNullOrEmpty(tag)) return 0;
+        
+        // Remover el multiplicador activo del tag
+        activeTagMultipliers.Remove(tag);
+        Debug.Log($"[GameSpeedManager] Multiplicador removido para tag '{tag}'");
+        
         if (!tagToObjects.TryGetValue(tag, out var list)) return 0;
         int removed = 0;
         foreach (var o in list)
@@ -137,5 +173,6 @@ public class GameSpeedManager : MonoBehaviour
     {
         perObjectMultipliers.Clear();
         tagToObjects.Clear();
+        activeTagMultipliers.Clear();
     }
 }

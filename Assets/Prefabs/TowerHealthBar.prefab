@@ -375,10 +375,8 @@ MonoBehaviour:
   worldCanvas: {fileID: 1752560076547945117}
   healthSlider: {fileID: 1451236141668259202}
   sliderFillImage: {fileID: 1026819894781666406}
-  offset: {x: 0, y: 3, z: 0}
-  useTeamColors: 1
-  blueTeamColor: {r: 0.2, g: 0.5, b: 1, a: 1}
-  redTeamColor: {r: 1, g: 0.2, b: 0.2, a: 1}
+  offset: {x: 0, y: 0, z: 0}
+  teamTag: 
   fullHealthColor: {r: 0, g: 1, b: 0, a: 1}
   halfHealthColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   lowHealthColor: {r: 1, g: 0, b: 0, a: 1}
