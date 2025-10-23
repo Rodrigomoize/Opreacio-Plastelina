@@ -165,10 +165,10 @@ public class GameManager : MonoBehaviour
 
     private void LoadLoseScene()
     {
-        // DETENER completamente la música de gameplay antes de cambiar de escena
+        // DETENER Y RESETEAR completamente la música de gameplay antes de cambiar de escena
         if (AudioManager.Instance != null)
         {
-            AudioManager.Instance.StopMusic(fadeOut: false);
+            AudioManager.Instance.StopAndResetMusic();
         }
 
         // Detener el timer si está corriendo
@@ -217,10 +217,10 @@ public class GameManager : MonoBehaviour
 
     public void BackToMainMenu()
     {
-        // DETENER completamente la música de gameplay antes de volver al menú
+        // DETENER Y RESETEAR completamente la música de gameplay antes de volver al menú
         if (AudioManager.Instance != null)
         {
-            AudioManager.Instance.StopMusic(fadeOut: false);
+            AudioManager.Instance.StopAndResetMusic();
         }
 
         LoadMainMenu();
@@ -228,10 +228,10 @@ public class GameManager : MonoBehaviour
 
     public void RestartCurrentLevel()
     {
-        // DETENER completamente la música de gameplay antes de reiniciar
+        // DETENER Y RESETEAR completamente la música de gameplay antes de reiniciar
         if (AudioManager.Instance != null)
         {
-            AudioManager.Instance.StopMusic(fadeOut: false);
+            AudioManager.Instance.StopAndResetMusic();
         }
 
         LoadPlayScene();
@@ -252,18 +252,29 @@ public class GameManager : MonoBehaviour
         defaultAIDifficulty = dificultad;
         Debug.Log($"[GameManager] Dificultad cambiada a: {dificultad}");
 
-        // Actualizar la velocidad del juego según la dificultad
-        if (GameSpeedManager.Instance != null)
+        // Aplicar velocidad del juego según la dificultad
+        ApplyDifficultySpeed();
+    }
+
+    /// Aplica la velocidad de juego correspondiente a la dificultad actual
+    private void ApplyDifficultySpeed()
+    {
+        if (GameSpeedManager.Instance == null)
         {
-            GameSpeedManager.GameDifficulty speedDifficulty = dificultad switch
-            {
-                IAController.AIDificultad.Facil => GameSpeedManager.GameDifficulty.Facil,
-                IAController.AIDificultad.Media => GameSpeedManager.GameDifficulty.Media,
-                IAController.AIDificultad.Dificil => GameSpeedManager.GameDifficulty.Dificil,
-                _ => GameSpeedManager.GameDifficulty.Media
-            };
-            GameSpeedManager.Instance.SetSpeedByDifficulty(speedDifficulty);
+            Debug.LogWarning("[GameManager] GameSpeedManager no encontrado");
+            return;
         }
+
+        GameSpeedManager.GameDifficulty speedDifficulty = defaultAIDifficulty switch
+        {
+            IAController.AIDificultad.Facil => GameSpeedManager.GameDifficulty.Facil,
+            IAController.AIDificultad.Media => GameSpeedManager.GameDifficulty.Media,
+            IAController.AIDificultad.Dificil => GameSpeedManager.GameDifficulty.Dificil,
+            _ => GameSpeedManager.GameDifficulty.Media
+        };
+
+        GameSpeedManager.Instance.SetSpeedByDifficulty(speedDifficulty);
+        Debug.Log($"[GameManager] Velocidad de juego aplicada para dificultad: {defaultAIDifficulty}");
     }
 
     private void OnDestroy()
@@ -297,7 +308,7 @@ public class GameManager : MonoBehaviour
                 Debug.Log("[GameManager] Timer reseteado y arrancado para nueva partida");
             }
 
-            // IMPORTANTE: Iniciar la música de gameplay desde 0
+            // Iniciar la música de gameplay desde 0
             if (AudioManager.Instance != null)
             {
                 AudioManager.Instance.PlayGameplayMusic();
@@ -315,22 +326,7 @@ public class GameManager : MonoBehaviour
             }
 
             // Aplicar la velocidad de juego según la dificultad seleccionada
-            if (GameSpeedManager.Instance != null)
-            {
-                GameSpeedManager.GameDifficulty speedDifficulty = defaultAIDifficulty switch
-                {
-                    IAController.AIDificultad.Facil => GameSpeedManager.GameDifficulty.Facil,
-                    IAController.AIDificultad.Media => GameSpeedManager.GameDifficulty.Media,
-                    IAController.AIDificultad.Dificil => GameSpeedManager.GameDifficulty.Dificil,
-                    _ => GameSpeedManager.GameDifficulty.Media
-                };
-                GameSpeedManager.Instance.SetSpeedByDifficulty(speedDifficulty);
-                Debug.Log($"[GameManager] Velocidad de juego aplicada para dificultad: {defaultAIDifficulty}");
-            }
-            else
-            {
-                Debug.LogWarning("[GameManager] GameSpeedManager no encontrado en PlayScene");
-            }
+            ApplyDifficultySpeed();
 
             SubscribeToTimer();
         }

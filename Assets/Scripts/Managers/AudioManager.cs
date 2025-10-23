@@ -138,6 +138,7 @@ public class AudioManager : MonoBehaviour
         else
         {
             musicSource.clip = clip;
+            musicSource.time = 0f; // Asegura que empiece desde el principio
             musicSource.Play();
         }
     }
@@ -178,7 +179,9 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    /// <summary>
     /// Detiene la música actual y la resetea completamente para que empiece desde 0 la próxima vez
+    /// </summary>
     public void StopAndResetMusic()
     {
         if (musicFadeCoroutine != null)
@@ -317,8 +320,9 @@ public class AudioManager : MonoBehaviour
             yield return null;
         }
 
-        // Cambiar clip
+        // Cambiar clip y resetear tiempo
         musicSource.clip = newClip;
+        musicSource.time = 0f; // Asegura que empiece desde el principio
         musicSource.Play();
 
         // Fade in

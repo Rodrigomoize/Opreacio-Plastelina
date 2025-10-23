@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class SceneBridge : MonoBehaviour
 {
@@ -11,6 +12,12 @@ public class SceneBridge : MonoBehaviour
     [Header("Button Sprites (Optional)")]
     [SerializeField] private Sprite normalButtonSprite;
     [SerializeField] private Sprite finalButtonSprite;
+
+    [Header("Button Audio Events (Optional)")]
+    [Tooltip("Evento que se ejecuta cuando se presiona el botón en pantallas intermedias")]
+    [SerializeField] private UnityEvent onNormalButtonClick;
+    [Tooltip("Evento que se ejecuta cuando se presiona el botón en la última pantalla")]
+    [SerializeField] private UnityEvent onFinalButtonClick;
 
     [Header("Next Scene After Screens")]
     [SerializeField] private string nextSceneAfterScreens;
@@ -69,6 +76,9 @@ public class SceneBridge : MonoBehaviour
     {
         Debug.Log($"[SceneBridge] Botón clickeado. Pantalla actual: {currentScreenIndex + 1}/{screenSprites.Length}");
 
+        // Reproducir el evento de audio apropiado según si es la última pantalla o no
+        PlayAppropriateAudioEvent();
+
         if (currentScreenIndex < screenSprites.Length - 1)
         {
             // No estamos en la última pantalla, avanzar
@@ -80,6 +90,31 @@ public class SceneBridge : MonoBehaviour
             // En la última pantalla, cargar la siguiente escena
             Debug.Log($"[SceneBridge] Última pantalla alcanzada. Cargando escena: {nextSceneAfterScreens}");
             LoadSceneByName(nextSceneAfterScreens);
+        }
+    }
+
+    /// <summary>
+    /// Invoca el UnityEvent apropiado según si estamos en la última pantalla o no
+    /// </summary>
+    private void PlayAppropriateAudioEvent()
+    {
+        if (currentScreenIndex == screenSprites.Length - 1)
+        {
+            // Última pantalla: invocar evento final
+            if (onFinalButtonClick != null && onFinalButtonClick.GetPersistentEventCount() > 0)
+            {
+                onFinalButtonClick.Invoke();
+                Debug.Log("[SceneBridge] Invocado evento de audio final");
+            }
+        }
+        else
+        {
+            // Pantallas intermedias: invocar evento normal
+            if (onNormalButtonClick != null && onNormalButtonClick.GetPersistentEventCount() > 0)
+            {
+                onNormalButtonClick.Invoke();
+                Debug.Log("[SceneBridge] Invocado evento de audio normal");
+            }
         }
     }
 
