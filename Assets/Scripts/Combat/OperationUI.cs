@@ -6,6 +6,7 @@ public class OperationUI : MonoBehaviour
 {
     [Header("UI Elements")]
     public Canvas worldCanvas;
+    public GameObject operationContainer; // Container con el icono y operación (se oculta durante spawn)
     public Image iconImage;
     public TextMeshProUGUI operationText;
     
@@ -97,6 +98,18 @@ public class OperationUI : MonoBehaviour
                 }
             }
         }
+        
+        // Inicialmente ocultar la operación y mostrar solo el spawn timer
+        // (el spawn controller se encargará de mostrarlo cuando termine)
+        if (operationContainer != null)
+        {
+            operationContainer.SetActive(false);
+        }
+        
+        if (spawnTimerContainer != null)
+        {
+            spawnTimerContainer.SetActive(true);
+        }
     }
     
     /// <summary>
@@ -140,13 +153,19 @@ public class OperationUI : MonoBehaviour
     }
     
     /// <summary>
-    /// Oculta el temporizador de spawn
+    /// Oculta el temporizador de spawn y muestra la operación normal
     /// </summary>
     public void HideSpawnTimer()
     {
         if (spawnTimerContainer != null)
         {
             spawnTimerContainer.SetActive(false);
+        }
+        
+        // Mostrar el container con la operación
+        if (operationContainer != null)
+        {
+            operationContainer.SetActive(true);
         }
     }
 }

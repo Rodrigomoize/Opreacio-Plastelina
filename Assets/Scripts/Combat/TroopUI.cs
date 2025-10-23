@@ -5,6 +5,7 @@ using UnityEngine.UI;
 public class TroopUI : MonoBehaviour
 {    [Header("UI Elements")]
     public Canvas worldCanvas;
+    public GameObject valueContainer; // Container con el icono y valor (se oculta durante spawn)
     public Image iconImage;
     public TextMeshProUGUI valueText;
     
@@ -91,6 +92,18 @@ public class TroopUI : MonoBehaviour
                 }
             }
         }
+        
+        // Inicialmente ocultar el valor y mostrar solo el spawn timer
+        // (el spawn controller se encargará de mostrarlo cuando termine)
+        if (valueContainer != null)
+        {
+            valueContainer.SetActive(false);
+        }
+        
+        if (spawnTimerContainer != null)
+        {
+            spawnTimerContainer.SetActive(true);
+        }
     }    /// <summary>
     /// Actualiza el valor mostrado
     /// </summary>
@@ -131,13 +144,19 @@ public class TroopUI : MonoBehaviour
     }
     
     /// <summary>
-    /// Oculta el temporizador de spawn
+    /// Oculta el temporizador de spawn y muestra el valor normal
     /// </summary>
     public void HideSpawnTimer()
     {
         if (spawnTimerContainer != null)
         {
             spawnTimerContainer.SetActive(false);
+        }
+        
+        // Mostrar el container con el valor
+        if (valueContainer != null)
+        {
+            valueContainer.SetActive(true);
         }
     }
 }
