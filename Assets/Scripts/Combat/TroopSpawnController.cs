@@ -162,7 +162,11 @@ public class TroopSpawnController : MonoBehaviour
         else if (characterCombined != null)
         {
             characterCombined.ResumeMovement();
-        } // Destruir VFX de spawn
+        } 
+        
+        AudioManager.Instance?.PlayOperationCreated();
+
+        // Destruir VFX de spawn
         if (spawnVFXInstance != null)
         {
             Destroy(spawnVFXInstance);

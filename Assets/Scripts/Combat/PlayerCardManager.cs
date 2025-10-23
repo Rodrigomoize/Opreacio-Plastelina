@@ -154,6 +154,9 @@ public class PlayerCardManager : MonoBehaviour
         {
             selectedDisplays.Add(display);
             SetCardElevation(display, true);
+
+            AudioManager.Instance?.PlayCardSelected();
+
             Debug.Log($"[PlayerCardManager] ✓ Primera carta seleccionada: {display.cardData.cardName} (ID: {display.GetInstanceID()})");
             UpdateVisualFeedback(); // Actualizar feedback visual
             return;
@@ -240,6 +243,9 @@ public class PlayerCardManager : MonoBehaviour
                 selectedDisplays.Add(display);
                 SetCardElevation(display, true);
                 UpdateVisualFeedback();
+
+                AudioManager.Instance?.PlayCardSelected();
+
                 return;
             }
             else
@@ -276,6 +282,9 @@ public class PlayerCardManager : MonoBehaviour
                     Debug.Log($"[PlayerCardManager] ✓ Segunda carta seleccionada: {display.cardData.cardName} (ID: {display.GetInstanceID()}) con operador '{currentOperator}'");
                     selectedDisplays.Add(display);
                     SetCardElevation(display, true);
+
+                    AudioManager.Instance?.PlayCardSelected();
+
                     UpdateVisualFeedback();
                     return;
                 }
@@ -298,6 +307,9 @@ public class PlayerCardManager : MonoBehaviour
 
             selectedDisplays.Add(display);
             SetCardElevation(display, true);
+
+            AudioManager.Instance?.PlayCardSelected();
+
             UpdateVisualFeedback();
             return;
         }
@@ -382,6 +394,7 @@ public class PlayerCardManager : MonoBehaviour
         else
         {
             currentOperator = op;
+            AudioManager.Instance?.PlayOperatorSelected();
             UpdateVisualFeedback();
         }
     }

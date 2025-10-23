@@ -105,9 +105,7 @@ public class Character : MonoBehaviour
         CreateTroopUI();
     }
 
-    /// <summary>
     /// Reanuda el movimiento después del spawn
-    /// </summary>
     public void ResumeMovement()
     {
         if (agent != null && agent.enabled && targetBridge != null)
@@ -117,9 +115,7 @@ public class Character : MonoBehaviour
         }
     }
 
-    /// <summary>
     /// ACTUALIZACIÓN CLAVE: calcula speed final como baseSpeed * GameSpeedMultiplier * perObjectMultiplier.
-    /// </summary>
     public void UpdateSpeed()
     {
         if (agent == null) return;
@@ -137,9 +133,7 @@ public class Character : MonoBehaviour
         agent.speed = baseSpeed * globalMultiplier * agentMultiplier;
     }
 
-    /// <summary>
     /// Crea la UI flotante de la tropa mostrando su valor
-    /// </summary>
     private void CreateTroopUI()
     {
         if (troopUIPrefab != null)
@@ -277,9 +271,7 @@ public class Character : MonoBehaviour
         }
     }
 
-    /// <summary>
     /// Secuencia de combate: Character solo combate contra Combined
-    /// </summary>
     private IEnumerator CombatSequence(GameObject enemy)
     {
         // El enemigo siempre es CharacterCombined
@@ -365,9 +357,7 @@ public class Character : MonoBehaviour
         yield return StartCoroutine(ImplodeAndExplode(enemy, enemyCombined, operationResolved));
     }
 
-    /// <summary>
     /// Efecto de implosión: Character y Combined se atraen, encogen y explotan con VFX
-    /// </summary>
     private IEnumerator ImplodeAndExplode(GameObject enemy, CharacterCombined enemyCombined, bool operationResolved)
     {
         Vector3 startPos = transform.position;
@@ -400,6 +390,8 @@ public class Character : MonoBehaviour
 
             yield return null;
         }
+
+        AudioManager.Instance?.PlayAttackDefenseCollision();
 
         // Instanciar VFX de impacto en el punto medio
         if (vfxImpactPrefab != null)

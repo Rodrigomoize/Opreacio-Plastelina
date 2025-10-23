@@ -1,10 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// Panel simple de selecci�n de dificultad
-/// Solo abre/cierra el panel, los botones llaman directamente a m�todos p�blicos
-/// </summary>
+/// Panel simple de seleccion de dificultad
+/// Solo abre/cierra el panel, los botones llaman directamente a metodos publicos
 public class DifficultyPanel : MonoBehaviour
 {
     [Header("Referencias del Panel")]

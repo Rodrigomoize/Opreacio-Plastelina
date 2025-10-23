@@ -190,9 +190,7 @@ public class AccionDefender : AIAction
         }
     }
 
-    /// <summary>
     /// Calcula una posición aleatoria en el área de spawn, más cerca de la torre
-    /// </summary>
     private Vector3 CalcularPosicionDefensaAleatoria(Vector3 posicionAmenaza)
     {
         Vector3 posicionBase = spawnPoint.position;

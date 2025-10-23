@@ -6,10 +6,8 @@ using TMPro;
 using UnityEditor;
 #endif
 
-/// <summary>
 /// Utilidad para crear prefabs de UI desde el editor de Unity
 /// Menú: Tools/Calcul Fatal/Create UI Prefabs
-/// </summary>
 public class UICreatorUtility : MonoBehaviour
 {
 #if UNITY_EDITOR

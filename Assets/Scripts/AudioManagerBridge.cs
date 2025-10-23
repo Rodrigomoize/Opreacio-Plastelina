@@ -1,9 +1,9 @@
 using UnityEngine;
 
-/// Puente estático para acceder al AudioManager desde los botones en el Inspector.
+/// Puente estatico para acceder al AudioManager desde los botones en el Inspector.
 public class AudioManagerBridge : MonoBehaviour
 {
-    // ===== MÉTODOS PARA BOTONES (UI) =====
+    // ===== METODOS PARA BOTONES (UI) =====
 
     public void PlayButtonClick()
     {
@@ -23,7 +23,7 @@ public class AudioManagerBridge : MonoBehaviour
             AudioManager.Instance.PlayTurnThePage();
     }
 
-    // ===== MÉTODOS PARA GAMEPLAY =====
+    // ===== METODOS PARA GAMEPLAY =====
 
     public void PlayCardSpawnCharacter()
     {
@@ -73,7 +73,7 @@ public class AudioManagerBridge : MonoBehaviour
             AudioManager.Instance.PlayTowerHit();
     }
 
-    // ===== MÉTODOS PARA MÚSICA =====
+    // ===== Mï¿½TODOS PARA Mï¿½SICA =====
 
     public void PlayMainMenuMusic()
     {

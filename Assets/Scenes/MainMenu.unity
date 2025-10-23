@@ -973,16 +973,16 @@ MonoBehaviour:
   gameplayMusic: {fileID: 8300000, guid: ef144e17336ba554ba002e4fea7edee4, type: 3}
   victoryMusic: {fileID: 0}
   defeatMusic: {fileID: 0}
-  buttonClickSFX: {fileID: 8300000, guid: c8fedade8769601448e784a337488fa0, type: 3}
+  buttonClickSFX: {fileID: 8300000, guid: 61ecc9bd547c78e4497dbb40364153ea, type: 3}
   buttonClaySFX: {fileID: 8300000, guid: a661ece449edd194c9e57e47f025830b, type: 3}
   turnThePageSFX: {fileID: 8300000, guid: 1db48f9eb85cb44448c384aa2d4bede1, type: 3}
   cardSpawnCharacterSFX: {fileID: 0}
-  cardSelectedSFX: {fileID: 8300000, guid: 97d07e763276438468c1b302c03cbad5, type: 3}
+  cardSelectedSFX: {fileID: 8300000, guid: c8fedade8769601448e784a337488fa0, type: 3}
   operationCreatedSFX: {fileID: 8300000, guid: c86b3325b5a647344ab57e995e65f106, type: 3}
   towerDestroyedSFX: {fileID: 8300000, guid: 5a94d68238540ae43a11e22e263df27c, type: 3}
   timer5SecondsSFX: {fileID: 0}
   operatorSelectedSFX: {fileID: 8300000, guid: fb2ca457b80d19442a7bcde0e694a1b6, type: 3}
-  attackDefenseCollisionSFX: {fileID: 0}
+  attackDefenseCollisionSFX: {fileID: 8300000, guid: 8a61b9cd738697745aeb3452568d0e70, type: 3}
   towerHitSFX: {fileID: 0}
   musicVolume: 0.3
   sfxVolume: 1
