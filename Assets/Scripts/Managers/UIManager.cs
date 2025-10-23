@@ -134,7 +134,6 @@ public class UIManager : MonoBehaviour
     {
         isPaused = false;
 
-        // Reproducir sonido
         if (pausePanel != null)
         {
             pausePanel.SetActive(false);
@@ -220,7 +219,7 @@ public class UIManager : MonoBehaviour
         // Reproducir sonido
         if (AudioManager.Instance != null)
         {
-            AudioManager.Instance.PlayButtonClick();
+            AudioManager.Instance.PlayTurnThePage();
         }
 
         currentInstructionIndex++;
@@ -238,7 +237,7 @@ public class UIManager : MonoBehaviour
         // Reproducir sonido
         if (AudioManager.Instance != null)
         {
-            AudioManager.Instance.PlayButtonClick();
+            AudioManager.Instance.PlayTurnThePage();
         }
 
         currentInstructionIndex--;

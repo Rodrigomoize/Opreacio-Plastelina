@@ -1,9 +1,6 @@
 using UnityEngine;
 
-/// <summary>
 /// Puente estático para acceder al AudioManager desde los botones en el Inspector.
-/// Este es el ÚNICO script adicional que necesitas.
-/// </summary>
 public class AudioManagerBridge : MonoBehaviour
 {
     // ===== MÉTODOS PARA BOTONES (UI) =====
@@ -28,40 +25,52 @@ public class AudioManagerBridge : MonoBehaviour
 
     // ===== MÉTODOS PARA GAMEPLAY =====
 
-    public void PlayCardPlaced()
+    public void PlayCardSpawnCharacter()
     {
         if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayCardPlaced();
+            AudioManager.Instance.PlayCardSpawnCharacter();
     }
 
-    public void PlayCardAttack()
+    public void PlayCardSelected()
     {
         if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayCardAttack();
+            AudioManager.Instance.PlayCardSelected();
     }
 
-    public void PlayCardDefeat()
+    public void PlayOperationCreated()
     {
         if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayCardDefeat();
+            AudioManager.Instance.PlayOperationCreated();
     }
 
-    public void PlayHealthLost()
+    public void PlayTowerDestroyed()
     {
         if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayHealthLost();
+            AudioManager.Instance.PlayTowerDestroyed();
     }
 
-    public void PlayTimerTick()
+    public void PlayTimer5Seconds()
     {
         if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayTimerTick();
+            AudioManager.Instance.PlayTimer5Seconds();
     }
 
-    public void PlayTimeUp()
+    public void PlayOperatorSelected()
     {
         if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayTimeUp();
+            AudioManager.Instance.PlayOperatorSelected();
+    }
+
+    public void PlayAttackDefenseCollision()
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayAttackDefenseCollision();
+    }
+
+    public void PlayTowerHit()
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayTowerHit();
     }
 
     // ===== MÉTODOS PARA MÚSICA =====

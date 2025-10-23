@@ -86,9 +86,7 @@ public class CardDisplay : MonoBehaviour, IPointerClickHandler, IPointerEnterHan
         UpdateVisualState();
     }
     
-    /// <summary>
     /// Actualiza el estado visual basado en hover y press
-    /// </summary>
     private void UpdateVisualState()
     {
         // Prioridad: Press > Hover > Normal

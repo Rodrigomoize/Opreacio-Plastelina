@@ -89,9 +89,7 @@ public class CardManager : MonoBehaviour
         return result;
     }
 
-    /// <summary>
     /// Resultado de intentar generar un personaje
-    /// </summary>
     public enum GenerateResult
     {
         Success,                // Se generó correctamente

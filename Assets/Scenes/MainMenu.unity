@@ -610,7 +610,6 @@ MonoBehaviour:
   m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
-  m_Version: 2
   m_TaaSettings:
     m_Quality: 3
     m_FrameInfluence: 0.1
@@ -618,6 +617,7 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+  m_Version: 2
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -728,17 +728,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Version: 4
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
-  m_LightLayerMask: 1
-  m_RenderingLayers: 1
   m_CustomShadowLayers: 0
-  m_ShadowLayerMask: 1
-  m_ShadowRenderingLayers: 1
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 1
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -970,12 +976,14 @@ MonoBehaviour:
   buttonClickSFX: {fileID: 8300000, guid: c8fedade8769601448e784a337488fa0, type: 3}
   buttonClaySFX: {fileID: 8300000, guid: a661ece449edd194c9e57e47f025830b, type: 3}
   turnThePageSFX: {fileID: 8300000, guid: 1db48f9eb85cb44448c384aa2d4bede1, type: 3}
-  cardPlacedSFX: {fileID: 0}
-  cardAttackSFX: {fileID: 0}
-  cardDefeatSFX: {fileID: 0}
-  healthLostSFX: {fileID: 0}
-  timerTickSFX: {fileID: 0}
-  timeUpSFX: {fileID: 0}
+  cardSpawnCharacterSFX: {fileID: 0}
+  cardSelectedSFX: {fileID: 8300000, guid: 97d07e763276438468c1b302c03cbad5, type: 3}
+  operationCreatedSFX: {fileID: 8300000, guid: c86b3325b5a647344ab57e995e65f106, type: 3}
+  towerDestroyedSFX: {fileID: 8300000, guid: 5a94d68238540ae43a11e22e263df27c, type: 3}
+  timer5SecondsSFX: {fileID: 0}
+  operatorSelectedSFX: {fileID: 8300000, guid: fb2ca457b80d19442a7bcde0e694a1b6, type: 3}
+  attackDefenseCollisionSFX: {fileID: 0}
+  towerHitSFX: {fileID: 0}
   musicVolume: 0.3
   sfxVolume: 1
   musicFadeDuration: 1

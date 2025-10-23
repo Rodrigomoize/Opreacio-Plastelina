@@ -23,12 +23,14 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip turnThePageSFX;
 
     [Header("Gameplay Sound Effects")]
-    [SerializeField] private AudioClip cardPlacedSFX;
-    [SerializeField] private AudioClip cardAttackSFX;
-    [SerializeField] private AudioClip cardDefeatSFX;
-    [SerializeField] private AudioClip healthLostSFX;
-    [SerializeField] private AudioClip timerTickSFX;
-    [SerializeField] private AudioClip timeUpSFX;
+    [SerializeField] private AudioClip cardSpawnCharacterSFX;      // Sonido cuando una carta aparece en el campo con personaje
+    [SerializeField] private AudioClip cardSelectedSFX;            // Sonido al seleccionar una carta
+    [SerializeField] private AudioClip operationCreatedSFX;        // Sonido al crear operación (camión de ataque)
+    [SerializeField] private AudioClip towerDestroyedSFX;          // Sonido cuando se destruye la torre
+    [SerializeField] private AudioClip timer5SecondsSFX;           // Sonido cuando quedan 5 segundos
+    [SerializeField] private AudioClip operatorSelectedSFX;        // Sonido al seleccionar botón operador (suma/resta)
+    [SerializeField] private AudioClip attackDefenseCollisionSFX;  // Sonido cuando ataque y defensa se encuentran y destruyen
+    [SerializeField] private AudioClip towerHitSFX;                // Sonido al golpear la torre del jugador
 
     [Header("Volume Settings")]
     [Range(0f, 1f)]
@@ -179,9 +181,7 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    /// <summary>
     /// Detiene la música actual y la resetea completamente para que empiece desde 0 la próxima vez
-    /// </summary>
     public void StopAndResetMusic()
     {
         if (musicFadeCoroutine != null)
@@ -258,34 +258,44 @@ public class AudioManager : MonoBehaviour
 
     // ===== EFECTOS DE GAMEPLAY =====
 
-    public void PlayCardPlaced()
+    public void PlayCardSpawnCharacter()
     {
-        PlaySFX(cardPlacedSFX);
+        PlaySFX(cardSpawnCharacterSFX);
     }
 
-    public void PlayCardAttack()
+    public void PlayCardSelected()
     {
-        PlaySFX(cardAttackSFX);
+        PlaySFX(cardSelectedSFX);
     }
 
-    public void PlayCardDefeat()
+    public void PlayOperationCreated()
     {
-        PlaySFX(cardDefeatSFX);
+        PlaySFX(operationCreatedSFX);
     }
 
-    public void PlayHealthLost()
+    public void PlayTowerDestroyed()
     {
-        PlaySFX(healthLostSFX);
+        PlaySFX(towerDestroyedSFX);
     }
 
-    public void PlayTimerTick()
+    public void PlayTimer5Seconds()
     {
-        PlaySFX(timerTickSFX);
+        PlaySFX(timer5SecondsSFX);
     }
 
-    public void PlayTimeUp()
+    public void PlayOperatorSelected()
     {
-        PlaySFX(timeUpSFX);
+        PlaySFX(operatorSelectedSFX);
+    }
+
+    public void PlayAttackDefenseCollision()
+    {
+        PlaySFX(attackDefenseCollisionSFX);
+    }
+
+    public void PlayTowerHit()
+    {
+        PlaySFX(towerHitSFX);
     }
 
     // ===== CONTROL DE VOLUMEN =====

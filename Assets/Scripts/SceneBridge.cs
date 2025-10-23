@@ -93,9 +93,7 @@ public class SceneBridge : MonoBehaviour
         }
     }
 
-    /// <summary>
     /// Invoca el UnityEvent apropiado según si estamos en la última pantalla o no
-    /// </summary>
     private void PlayAppropriateAudioEvent()
     {
         if (currentScreenIndex == screenSprites.Length - 1)

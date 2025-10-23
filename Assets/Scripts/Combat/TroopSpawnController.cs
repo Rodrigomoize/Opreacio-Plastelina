@@ -120,9 +120,7 @@ public class TroopSpawnController : MonoBehaviour
         }
     }
     
-    /// <summary>
     /// Secuencia de spawn: espera el tiempo definido y luego activa la tropa
-    /// </summary>
     private IEnumerator SpawnSequence()
     {
         Debug.Log($"[TroopSpawn] {gameObject.name} iniciando spawn por {spawnDuration} segundos");
@@ -132,9 +130,9 @@ public class TroopSpawnController : MonoBehaviour
         
         // Finalizar spawn
         CompleteSpawn();
-    }      /// <summary>
+    }
+    
     /// Completa el spawn y activa la tropa
-    /// </summary>
     private void CompleteSpawn()
     {
         isSpawning = false;
@@ -164,7 +162,7 @@ public class TroopSpawnController : MonoBehaviour
         else if (characterCombined != null)
         {
             characterCombined.ResumeMovement();
-        }        // Destruir VFX de spawn
+        } // Destruir VFX de spawn
         if (spawnVFXInstance != null)
         {
             Destroy(spawnVFXInstance);
@@ -185,17 +183,13 @@ public class TroopSpawnController : MonoBehaviour
         Debug.Log($"[TroopSpawn] {gameObject.name} spawn completado, ahora está activo");
     }
     
-    /// <summary>
     /// Verifica si la tropa puede atacar (no está en spawn)
-    /// </summary>
     public bool CanAttack()
     {
         return !isSpawning;
     }
-    
-    /// <summary>
+  
     /// Verifica si la tropa puede ser atacada (no está en spawn)
-    /// </summary>
     public bool CanBeAttacked()
     {
         return !isSpawning;
