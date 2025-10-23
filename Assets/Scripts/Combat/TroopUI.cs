@@ -9,6 +9,11 @@ public class TroopUI : MonoBehaviour
     public Image iconImage;
     public TextMeshProUGUI valueText;
     
+    [Header("Spawn Timer UI")]
+    public GameObject spawnTimerContainer; // Container que se muestra durante el spawn
+    public TextMeshProUGUI spawnTimerText;
+    public Image spawnProgressBar; // Barra de progreso opcional
+    
     [Header("Settings")]
     public Vector3 offset = new Vector3(0, 1.5f, 0); // Offset sobre la tropa
     
@@ -99,6 +104,45 @@ public class TroopUI : MonoBehaviour
         if (valueText != null)
         {
             valueText.text = newValue.ToString();
+        }
+    }
+    
+    /// <summary>
+    /// Actualiza el temporizador de spawn
+    /// </summary>
+    public void UpdateSpawnTimer(float timeRemaining)
+    {
+        if (spawnTimerContainer != null && !spawnTimerContainer.activeSelf)
+        {
+            spawnTimerContainer.SetActive(true);
+        }
+        
+        if (spawnTimerText != null)
+        {
+            spawnTimerText.text = $"{timeRemaining:F1}s";
+        }
+        
+        // Actualizar barra de progreso si existe
+        if (spawnProgressBar != null)
+        {
+            // Asumiendo que TroopSpawnController tiene un spawnDuration público
+            TroopSpawnController spawnController = targetTransform?.GetComponent<TroopSpawnController>();
+            if (spawnController != null)
+            {
+                float progress = spawnController.SpawnProgress;
+                spawnProgressBar.fillAmount = progress;
+            }
+        }
+    }
+    
+    /// <summary>
+    /// Oculta el temporizador de spawn
+    /// </summary>
+    public void HideSpawnTimer()
+    {
+        if (spawnTimerContainer != null)
+        {
+            spawnTimerContainer.SetActive(false);
         }
     }
 }

@@ -11,10 +11,10 @@ public class Character : MonoBehaviour
     private NavMeshAgent agent;
     private Transform targetBridge;
     private Transform enemyTower;
-    private bool reachedBridge = false;
-    private CharacterManager manager;
+    private bool reachedBridge = false;    private CharacterManager manager;
     public bool isInCombat = false;
     private Animator animator;
+    private TroopSpawnController spawnController;
 
     [Header("UI")]
     public GameObject troopUIPrefab;
@@ -38,13 +38,12 @@ public class Character : MonoBehaviour
     [Tooltip("Prefab del feedback +1 Intelecto que aparece al resolver una operación correctamente")]
     public GameObject intellectFeedbackPrefab;
     [Tooltip("Offset vertical donde aparece el feedback")]
-    public float feedbackYOffset = 2f;
-
-    void Start()
+    public float feedbackYOffset = 2f;    void Start()
     {
         manager = FindFirstObjectByType<CharacterManager>();
         EnsureColliderSetup();
         animator = GetComponent<Animator>();
+        spawnController = GetComponent<TroopSpawnController>();
     }
 
     private void EnsureColliderSetup()
@@ -171,10 +170,11 @@ public class Character : MonoBehaviour
                 Debug.Log($"[Character] {gameObject.name} cruzó el puente, yendo a torre");
             }
         }
-    }
-
-    void OnTriggerEnter(Collider other)
+    }    void OnTriggerEnter(Collider other)
     {
+        // Verificar si está en spawn - no puede interactuar
+        if (spawnController != null && !spawnController.CanAttack()) return;
+        
         if (isInCombat) return; // Ya está en combate
 
         Debug.Log($"[Character] {gameObject.name} (tag:{gameObject.tag}, valor:{value}) TRIGGER con {other.gameObject.name} (tag:{other.tag})");
@@ -218,12 +218,18 @@ public class Character : MonoBehaviour
             {
                 Debug.Log($"[Character] Detectado otro Character pero Character solo ataca Combined, ignorando");
                 return;
-            }
-
-            // Solo procesar si es un Combined
+            }            // Solo procesar si es un Combined
             if (otherCombined == null)
             {
                 Debug.Log($"[Character] El otro objeto no es CharacterCombined, ignorando");
+                return;
+            }
+
+            // Verificar si el Combined está en spawn
+            TroopSpawnController enemySpawnController = other.GetComponent<TroopSpawnController>();
+            if (enemySpawnController != null && !enemySpawnController.CanBeAttacked())
+            {
+                Debug.Log($"[Character] El Combined está en spawn, no se puede atacar");
                 return;
             }
 

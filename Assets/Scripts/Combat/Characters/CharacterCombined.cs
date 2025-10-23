@@ -8,11 +8,11 @@ public class CharacterCombined : MonoBehaviour
     private float velocity;
 
     private NavMeshAgent agent;
-    private Transform targetBridge;
-    private Transform enemyTower;
+    private Transform targetBridge;    private Transform enemyTower;
     private bool reachedBridge = false;
     private CharacterManager manager;
     public bool isInCombat = false; // Character lo controla durante combate
+    private TroopSpawnController spawnController;
 
     [Header("Posiciones para personajes combinados")]
     public Transform frontPosition;
@@ -37,11 +37,11 @@ public class CharacterCombined : MonoBehaviour
     [Tooltip("Velocidad de encogimiento antes de la explosión")]
     public float shrinkSpeed = 5f;
     [Tooltip("Offset vertical para el VFX en la torre")]
-    public float towerVFXOffset = 1f;
-
-    void Start()
+    public float towerVFXOffset = 1f;    void Start()
     {
         manager = FindFirstObjectByType<CharacterManager>();
+        spawnController = GetComponent<TroopSpawnController>();
+        
         if (enemyTower == null)
         {
             GameObject torreAI = GameObject.Find("TorreEnemiga");
@@ -183,10 +183,11 @@ public class CharacterCombined : MonoBehaviour
                 StartCoroutine(TowerImpactSequence(enemyTower));
             }
         }
-    }
-
-    void OnTriggerEnter(Collider other)
+    }    void OnTriggerEnter(Collider other)
     {
+        // Verificar si está en spawn - no puede interactuar
+        if (spawnController != null && !spawnController.CanAttack()) return;
+        
         if (isInCombat) return; // Ya está en combate
 
         // Verificar si llegó a una torre enemiga
