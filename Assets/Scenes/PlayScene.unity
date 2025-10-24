@@ -5364,12 +5364,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::IAController
   cardManager: {fileID: 88149202}
   intelectManagerIA: {fileID: 1587260387}
+  intelectManagerPlayer: {fileID: 1639695185}
   spawnPointIA: {fileID: 1753038883}
   spawnPointIA2: {fileID: 0}
   torreIA: {fileID: 1188949408}
   intervaloDecision: 1
   agresividad: 1
   debugMode: 0
+  facil:
+    agresividad: 0.43
+    intervaloDecision: 1.5
+    regenInterval: 3.5
+  media:
+    agresividad: 0.6
+    intervaloDecision: 1
+    regenInterval: 2.8
+  dificil:
+    agresividad: 0.8
+    intervaloDecision: 0.6
+    regenInterval: 2.2
 --- !u!4 &1556190453
 Transform:
   m_ObjectHideFlags: 0
@@ -5416,9 +5429,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::IntelectManager
   maxIntelect: 10
   minIntelect: 0
-  currentIntelect: 1
+  currentIntelect: 3
   regenDelay: 0
-  regenInterval: 2.8
+  regenInterval: 2.4
   regenAmount: 1
   intelectSlider: {fileID: 1499451739}
 --- !u!4 &1587260388

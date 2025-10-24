@@ -8,7 +8,6 @@ public class AccionDefender : AIAction
     private AIThreatDetector threatDetector;
     private Transform spawnPoint;
     private Transform miTorre;
-    private float dificultad; // 0=fácil, 0.5=media, 1=difícil
 
     public AccionDefender(
         IntelectManager intelecto,
@@ -16,8 +15,7 @@ public class AccionDefender : AIAction
         AICardHand hand,
         AIThreatDetector detector,
         Transform spawn,
-        Transform torre,
-        float difficulty = 0.5f
+        Transform torre
     ) : base("Defender Ataque")
     {
         intelectManager = intelecto;
@@ -26,7 +24,6 @@ public class AccionDefender : AIAction
         threatDetector = detector;
         spawnPoint = spawn;
         miTorre = torre;
-        dificultad = Mathf.Clamp01(difficulty);
     }
 
     public override float CalcularScore()
@@ -41,41 +38,7 @@ public class AccionDefender : AIAction
 
         int valorNecesario = amenaza.valor;
 
-        // === SISTEMA DE ERRORES SEGÚN DIFICULTAD ===
-        // Fácil (0-0.3): 40% probabilidad de error en la defensa
-        // Media (0.3-0.7): 15% probabilidad de error
-        // Difícil (0.7-1.0): 5% probabilidad de error
-
-        float probabilidadError = 0f;
-        if (dificultad < 0.3f) // Fácil
-        {
-            probabilidadError = 0.4f;
-        }
-        else if (dificultad < 0.7f) // Media
-        {
-            probabilidadError = 0.15f;
-        }
-        else // Difícil
-        {
-            probabilidadError = 0.05f;
-        }
-
-        // Simular error: buscar carta incorrecta a propósito
-        if (Random.value < probabilidadError)
-        {
-            Debug.Log($"[AccionDefender] ❌ ERROR DE IA - Intentando defender {valorNecesario} con carta incorrecta");
-
-            // Buscar una carta diferente al valor necesario
-            CardManager.Card cartaIncorrecta = aiHand.ObtenerCartaDiferenteDe(valorNecesario);
-
-            if (cartaIncorrecta != null)
-            {
-                // Penalizar pero no hacer imposible (la IA "cree" que es buena idea)
-                scoreFinal = 0.3f;
-                return scoreFinal;
-            }
-        }
-
+        // Buscar la carta correcta para defender (SIN errores intencionales)
         CardManager.Card cartaDefensora = aiHand.ObtenerCartaPorValor(valorNecesario);
 
         if (cartaDefensora == null)
@@ -121,14 +84,7 @@ public class AccionDefender : AIAction
             Debug.Log($"[AccionDefender] ¡AMENAZA CRÍTICA! Boosting score a {scoreFinal:F2}");
         }
 
-        // === MODIFICADOR POR DIFICULTAD ===
-        // Fácil: defiende menos (0.6x)
-        // Media: normal (1.0x)
-        // Difícil: defiende más (1.2x)
-        float modificadorDificultad = Mathf.Lerp(0.6f, 1.2f, dificultad);
-        scoreFinal *= modificadorDificultad;
-
-        Debug.Log($"[AccionDefender] Score calculado: {scoreFinal:F2} para amenaza valor {valorNecesario} (dificultad: {dificultad:F2})");
+        Debug.Log($"[AccionDefender] Score calculado: {scoreFinal:F2} para amenaza valor {valorNecesario}");
 
         return scoreFinal;
     }
@@ -145,26 +101,8 @@ public class AccionDefender : AIAction
 
         int valorNecesario = amenaza.valor;
 
-        // Verificar si hay error intencional
-        float probabilidadError = dificultad < 0.3f ? 0.4f : (dificultad < 0.7f ? 0.15f : 0.05f);
-
-        CardManager.Card carta = null;
-
-        if (Random.value < probabilidadError)
-        {
-            // Buscar carta incorrecta
-            carta = aiHand.ObtenerCartaDiferenteDe(valorNecesario);
-            if (carta != null)
-            {
-                Debug.Log($"[AccionDefender] ⚠️ DEFENDIENDO MAL A PROPÓSITO: usando {carta.cardValue} contra ataque {valorNecesario}");
-            }
-        }
-
-        // Si no hay error o no se encontró carta incorrecta, usar la correcta
-        if (carta == null)
-        {
-            carta = aiHand.ObtenerCartaPorValor(valorNecesario);
-        }
+        // Buscar la carta correcta (SIN errores intencionales)
+        CardManager.Card carta = aiHand.ObtenerCartaPorValor(valorNecesario);
 
         if (carta == null)
         {

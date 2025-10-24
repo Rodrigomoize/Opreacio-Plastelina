@@ -15,6 +15,9 @@ public class IAController : MonoBehaviour
     [Tooltip("IntelectManager de la IA (usar AIIntelectManager)")]
     public IntelectManager intelectManagerIA;
 
+    [Tooltip("IntelectManager del jugador")]
+    public IntelectManager intelectManagerPlayer;
+
     [Tooltip("Transform donde la IA spawneará sus cartas")]
     public Transform spawnPointIA;
     public Transform spawnPointIA2;
@@ -42,6 +45,46 @@ public class IAController : MonoBehaviour
         Media,
         Dificil
     }
+
+    [System.Serializable]
+    public class DifficultySettings
+    {
+        [Header("Comportamiento IA")]
+        [Tooltip("Agresividad de la IA (0=defensiva, 1=muy agresiva)")]
+        [Range(0f, 1f)]
+        public float agresividad = 0.5f;
+
+        [Tooltip("Intervalo entre decisiones de la IA (en segundos)")]
+        [Range(0.3f, 3f)]
+        public float intervaloDecision = 1.0f;
+
+        [Header("Recursos")]
+        [Tooltip("Tiempo de regeneración de intelecto para AMBOS jugadores (segundos por punto)")]
+        [Range(1.5f, 5f)]
+        public float regenInterval = 2.8f;
+    }
+
+    [Header("Ajustes de Dificultad")]
+    public DifficultySettings facil = new DifficultySettings
+    {
+        agresividad = 0.43f,
+        intervaloDecision = 1.5f,
+        regenInterval = 3.5f
+    };
+
+    public DifficultySettings media = new DifficultySettings
+    {
+        agresividad = 0.6f,
+        intervaloDecision = 1.0f,
+        regenInterval = 2.8f
+    };
+
+    public DifficultySettings dificil = new DifficultySettings
+    {
+        agresividad = 0.8f,
+        intervaloDecision = 0.6f,
+        regenInterval = 2.2f
+    };
 
 
     // Componentes internos
@@ -95,20 +138,52 @@ public class IAController : MonoBehaviour
 
     public void SetDificultad(AIDificultad dificultad)
     {
+        DifficultySettings settings = null;
+        
         switch (dificultad)
         {
             case AIDificultad.Facil:
                 Debug.Log("[IAController] Dificultad establecida a FÁCIL");
-                agresividad = 0.43f;
+                settings = facil;
                 break;
             case AIDificultad.Media:
                 Debug.Log("[IAController] Dificultad establecida a MEDIA");
-                agresividad = 0.6f;
+                settings = media;
                 break;
             case AIDificultad.Dificil:
                 Debug.Log("[IAController] Dificultad establecida a DIFÍCIL");
-                agresividad = 0.8f;
+                settings = dificil;
                 break;
+        }
+
+        if (settings != null)
+        {
+            // Aplicar configuración de comportamiento IA
+            agresividad = settings.agresividad;
+            intervaloDecision = settings.intervaloDecision;
+
+            // Aplicar velocidad de regeneración de intelecto a la IA
+            if (intelectManagerIA != null)
+            {
+                intelectManagerIA.regenInterval = settings.regenInterval;
+            }
+            else
+            {
+                Debug.LogWarning("[IAController] IntelectManager de IA no asignado.");
+            }
+
+            // Aplicar velocidad de regeneración de intelecto al jugador
+            if (intelectManagerPlayer != null)
+            {
+                intelectManagerPlayer.regenInterval = settings.regenInterval;
+            }
+            else
+            {
+                Debug.LogWarning("[IAController] IntelectManager del jugador no asignado.");
+            }
+
+            Debug.Log($"[IAController] Configuración aplicada - Agresividad: {agresividad:F2}, " +
+                      $"Intervalo: {intervaloDecision:F2}s, RegenInterval: {settings.regenInterval:F2}s");
         }
 
         // Actualizar agresividad en las acciones
@@ -163,7 +238,7 @@ public class IAController : MonoBehaviour
     void Update()
     {
         // ⚡ SISTEMA DE REACCIÓN RÁPIDA
-        // Si hay amenaza crítica, tomar decisión inmediata
+        // Si hay amenaza crítica, tomar decisión inmediata (ignorando intervalo)
         if (detectorAmenazas != null && detectorAmenazas.HayAmenazaCritica())
         {
             Debug.Log("[IAController] ⚠️ AMENAZA CRÍTICA - Reacción inmediata");
@@ -177,7 +252,7 @@ public class IAController : MonoBehaviour
 
         if (tiempoAcumulado >= intervaloDecision)
         {
-            tiempoAcumulado = 0f;
+            tiempoAcumulado = 0f; // IMPORTANTE: Resetear después de tomar decisión
             TomarDecision();
         }
     }
