@@ -207,8 +207,9 @@ public class AICardHand
 
                 int resta = mano[i].cardValue - mano[j].cardValue;
 
-                // Validar reglas: resta >= 0 y <= 5
-                if (resta >= 0 && resta <= 5 && resta > mejorResultado)
+                // Validar reglas: resta >= 1 (NO 0) y <= 5
+                // IMPORTANTE: Evitar operaciones con resultado 0 (ej: 4-4, 3-3)
+                if (resta >= 1 && resta <= 5 && resta > mejorResultado)
                 {
                     mejorResultado = resta;
                     mejorCombo = new ComboAtaque

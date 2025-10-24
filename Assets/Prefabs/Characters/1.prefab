@@ -173,7 +173,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 9206609471809832830}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 3
+  m_Radius: 0.5
   m_Speed: 3.5
   m_Acceleration: 8
   avoidancePriority: 50
@@ -200,6 +200,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spawnDuration: 1
   spawnVFXPrefab: {fileID: 7190290771688677997, guid: b944594f521470a4db840fbeba0f9d8f, type: 3}
+  soundType: 1
   initialScale: 0
   growthSpeed: 3
 --- !u!136 &7322228359823906509

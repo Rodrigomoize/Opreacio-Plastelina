@@ -33,6 +33,22 @@ Controla la velocidad a la que **AMBOS JUGADORES** (jugador y IA) recuperan su i
 ### Archivo Modificado
 `Assets/Scripts/Combat/AI Player/AICardManager.cs`
 
+### Sistema de Intervalo Estricto
+La IA ahora tiene un **intervalo completamente estricto** entre decisiones:
+
+- ✅ **SIEMPRE** respeta el `intervaloDecision` configurado
+- ❌ **NO hay excepciones** por amenazas críticas
+- ❌ **NO hay reacciones rápidas** bajo ninguna circunstancia
+- ❌ **NO hay cooldowns reducidos** por proximidad de enemigos
+
+Ejemplo con `intervaloDecision = 3.0s` (Fácil):
+- Primera decisión: t=3.0s
+- Segunda decisión: t=6.0s
+- Tercera decisión: t=9.0s
+- **Siempre exactamente 3.0s entre cada decisión**
+
+Esto garantiza que la dificultad configurada se respete al 100%.
+
 ### Estructura de Configuración
 ```csharp
 [System.Serializable]

@@ -84,6 +84,11 @@ public class CharacterManager : MonoBehaviour
         NavMeshAgent agent = instance.GetComponent<NavMeshAgent>();
         if (agent == null) agent = instance.AddComponent<NavMeshAgent>();
 
+        // Configurar parámetros de avoidance para evitar que se queden pillados
+        agent.radius = 0.5f;
+        agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
+        agent.avoidancePriority = 50; // Valor medio (0-99, menor = mayor prioridad)
+
         // Intenta colocar sobre NavMesh cercano
         NavMeshHit navHit;
         float sampleRadius = 2.0f;
@@ -481,6 +486,11 @@ public class CharacterManager : MonoBehaviour
         // Configurar NavMeshAgent
         NavMeshAgent agent = instance.GetComponent<NavMeshAgent>();
         if (agent == null) agent = instance.AddComponent<NavMeshAgent>();
+
+        // Configurar parámetros de avoidance para camiones (menos agresivo que tropas individuales)
+        agent.radius = 1.0f; // Camiones son más grandes
+        agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
+        agent.avoidancePriority = 40; // Mayor prioridad que tropas individuales
 
         NavMeshHit navHit;
         float sampleRadius = 2.0f;

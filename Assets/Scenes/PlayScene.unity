@@ -5373,15 +5373,15 @@ MonoBehaviour:
   debugMode: 0
   facil:
     agresividad: 0.43
-    intervaloDecision: 1.5
+    intervaloDecision: 3
     regenInterval: 3.5
   media:
     agresividad: 0.6
-    intervaloDecision: 1
+    intervaloDecision: 2
     regenInterval: 2.8
   dificil:
     agresividad: 0.8
-    intervaloDecision: 0.6
+    intervaloDecision: 1
     regenInterval: 2.2
 --- !u!4 &1556190453
 Transform:

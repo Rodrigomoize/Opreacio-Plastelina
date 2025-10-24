@@ -100,9 +100,14 @@ public class WinResultUI : MonoBehaviour
     
     /// <summary>
     /// Devuelve un color según la nota obtenida
+    /// MODIFICADO: Todas las notas aparecen en verde
     /// </summary>
     private Color GetGradeColor(string grade)
     {
+        // Todas las notas en verde brillante
+        return new Color(0.2f, 1f, 0.2f); // Verde brillante
+        
+        /* Colores originales por nota:
         switch (grade)
         {
             case "Excelente":
@@ -114,6 +119,7 @@ public class WinResultUI : MonoBehaviour
             default: // "Suspendido"
                 return new Color(1f, 0.3f, 0.3f); // Rojo
         }
+        */
     }
 
     private void OnDestroy()

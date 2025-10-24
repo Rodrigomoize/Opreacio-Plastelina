@@ -92,6 +92,7 @@ public class IAController : MonoBehaviour
     private AIThreatDetector detectorAmenazas;
     private List<AIAction> accionesPosibles;
     private float tiempoAcumulado = 0f;
+    private float tiempoUltimaDecision = 0f; // ⚡ Tiempo de la última decisión tomada
 
 
     void Start()
@@ -237,22 +238,18 @@ public class IAController : MonoBehaviour
 
     void Update()
     {
-        // ⚡ SISTEMA DE REACCIÓN RÁPIDA
-        // Si hay amenaza crítica, tomar decisión inmediata (ignorando intervalo)
-        if (detectorAmenazas != null && detectorAmenazas.HayAmenazaCritica())
-        {
-            Debug.Log("[IAController] ⚠️ AMENAZA CRÍTICA - Reacción inmediata");
-            TomarDecision();
-            tiempoAcumulado = 0f; // Resetear contador
-            return;
-        }
-
-        // Contador de tiempo para toma de decisiones normal
+        // ⚡ SISTEMA ESTRICTO - SIEMPRE respetar intervaloDecision
+        // No hay excepciones, no hay reacciones rápidas, no hay cooldowns reducidos
+        
+        // Contador de tiempo para toma de decisiones
         tiempoAcumulado += Time.deltaTime;
 
+        // Solo tomar decisión cuando se cumpla EXACTAMENTE el intervalo configurado
         if (tiempoAcumulado >= intervaloDecision)
         {
-            tiempoAcumulado = 0f; // IMPORTANTE: Resetear después de tomar decisión
+            tiempoAcumulado = 0f; // Resetear después de tomar decisión
+            tiempoUltimaDecision = Time.time; // Registrar momento de la decisión
+            
             TomarDecision();
         }
     }
