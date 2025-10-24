@@ -15,6 +15,10 @@ public class PlayerCardManager : MonoBehaviour
 
     public float elevationAmount = 500f;
     
+    [Header("Deployment Zone Feedback")]
+    [Tooltip("Referencia al PlayableAreaUI para controlar zonas de despliegue")]
+    public PlayableAreaUI playableAreaUI;
+    
     [Header("Visual Feedback")]
     [Tooltip("Color para cartas válidas/seleccionables")]
     public Color validCardColor = Color.white;
@@ -794,11 +798,48 @@ public class PlayerCardManager : MonoBehaviour
     }
     
     /// <summary>
+    /// Actualiza la visibilidad de las zonas de despliegue según el estado de selección
+    /// </summary>
+    private void UpdateDeploymentZoneFeedback()
+    {
+        if (playableAreaUI == null) return;
+        
+        // Determinar si se pueden desplegar tropas:
+        // 1. Una carta seleccionada → puede desplegar carta simple
+        // 2. Dos cartas con operador → puede desplegar operación
+        bool canDeploy = false;
+        
+        if (selectedDisplays.Count == 1)
+        {
+            // Una carta sola → siempre desplegable
+            canDeploy = true;
+        }
+        else if (selectedDisplays.Count == 2 && currentOperator != '\0')
+        {
+            // Operación completa → desplegable
+            canDeploy = true;
+        }
+        
+        // Mostrar u ocultar zonas
+        if (canDeploy)
+        {
+            playableAreaUI.ShowDeploymentZones();
+        }
+        else
+        {
+            playableAreaUI.HideDeploymentZones();
+        }
+    }
+    
+    /// <summary>
     /// Actualiza el estado visual de todas las cartas y botones según el contexto
     /// </summary>
     private void UpdateVisualFeedback()
     {
         Debug.Log($"[UpdateVisualFeedback] Cartas seleccionadas: {selectedDisplays.Count}, Operador actual: '{currentOperator}'");
+        
+        // Actualizar feedback de zonas de despliegue
+        UpdateDeploymentZoneFeedback();
         
         // Detectar si hay auto-combinación (misma carta seleccionada 2 veces)
         bool isAutoCombination = false;

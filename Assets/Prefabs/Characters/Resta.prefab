@@ -357,7 +357,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 947906142550811159}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 5
+  m_Radius: 3
   m_Speed: 1.65
   m_Acceleration: 8
   avoidancePriority: 50
@@ -520,6 +520,11 @@ MonoBehaviour:
   addRotation: 1
   maxRotationX: 3.42
   maxRotationZ: 1
+  preserveScaleChildren:
+  - FrontSlot
+  - BackSlot
+  - FrontAnchor
+  - BackAnchor
 --- !u!1 &3819702335900392559
 GameObject:
   m_ObjectHideFlags: 0

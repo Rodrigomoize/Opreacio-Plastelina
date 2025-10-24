@@ -3,7 +3,7 @@ using UnityEngine.AI;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler
+public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerMoveHandler, IPointerExitHandler
 {
     public PlayerCardManager playerManager;
     public Camera worldCamera;   
@@ -14,6 +14,10 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler
     public float maxSpawnX = 5f;
     public float planeY = 0f; // fallback plane
     public float fallbackRayDistance = 200f;
+    
+    [Header("Deployment Zone Feedback")]
+    [Tooltip("Componente de feedback visual de zonas de despliegue")]
+    public DeploymentZoneFeedback zoneFeedback;
 
     void Awake()
     {
@@ -21,6 +25,95 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler
         if (worldCamera == null) Debug.Log("[PlayableAreaUI] worldCamera no asignada (usa Camera.main si corresponde).");
         if (mapRawImage == null) Debug.Log("[PlayableAreaUI] mapRawImage no asignado: se usar� ScreenPointToRay si es posible.");
         if (worldCamera == null) worldCamera = Camera.main;
+        if (zoneFeedback == null) Debug.LogWarning("[PlayableAreaUI] zoneFeedback no asignado - no habrá feedback visual de zonas.");
+    }
+    
+    /// <summary>
+    /// Muestra las zonas de despliegue (llamado desde PlayerCardManager cuando hay cartas seleccionadas)
+    /// </summary>
+    public void ShowDeploymentZones()
+    {
+        if (zoneFeedback != null)
+        {
+            zoneFeedback.ShowZones();
+        }
+    }
+    
+    /// <summary>
+    /// Oculta las zonas de despliegue (llamado cuando no hay cartas listas para desplegar)
+    /// </summary>
+    public void HideDeploymentZones()
+    {
+        if (zoneFeedback != null)
+        {
+            zoneFeedback.HideZones();
+        }
+    }
+    
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        // Cuando el cursor entra en el área, actualizar feedback
+        UpdateHoverFeedback(eventData);
+    }
+    
+    public void OnPointerMove(PointerEventData eventData)
+    {
+        // Actualizar feedback mientras el cursor se mueve
+        UpdateHoverFeedback(eventData);
+    }
+    
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        // Cuando el cursor sale, resetear feedback
+        if (zoneFeedback != null)
+        {
+            zoneFeedback.ResetHoverFeedback();
+        }
+    }
+    
+    /// <summary>
+    /// Actualiza el feedback de hover según la posición del cursor
+    /// </summary>
+    private void UpdateHoverFeedback(PointerEventData eventData)
+    {
+        if (zoneFeedback == null) return;
+        
+        Vector2 normalized = GetNormalizedPosition(eventData);
+        zoneFeedback.UpdateHoverFeedback(normalized.x);
+    }
+    
+    /// <summary>
+    /// Calcula la posición normalizada (0-1) del cursor dentro del área
+    /// </summary>
+    private Vector2 GetNormalizedPosition(PointerEventData eventData)
+    {
+        if (mapRawImage == null) return new Vector2(0.5f, 0.5f);
+        
+        RectTransform rt = mapRawImage.rectTransform;
+        Vector2 localPoint;
+
+        Canvas canvas = mapRawImage.canvas;
+        Camera camForRect = null;
+        if (canvas != null)
+        {
+            if (canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+                camForRect = null;
+            else
+                camForRect = canvas.worldCamera ?? eventData.pressEventCamera ?? Camera.main;
+        }
+        else
+        {
+            camForRect = eventData.pressEventCamera ?? Camera.main;
+        }
+
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(rt, eventData.position, camForRect, out localPoint))
+        {
+            float nx = (localPoint.x + rt.rect.width * rt.pivot.x) / rt.rect.width;
+            float ny = (localPoint.y + rt.rect.height * rt.pivot.y) / rt.rect.height;
+            return new Vector2(Mathf.Clamp01(nx), Mathf.Clamp01(ny));
+        }
+        
+        return new Vector2(0.5f, 0.5f);
     }
 
     public void OnPointerClick(PointerEventData eventData)
