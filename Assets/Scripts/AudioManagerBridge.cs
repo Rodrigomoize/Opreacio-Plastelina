@@ -1,9 +1,9 @@
 using UnityEngine;
 
-/// Puente estatico para acceder al AudioManager desde los botones en el Inspector.
+/// Puente estático para acceder al AudioManager desde los botones en el Inspector.
 public class AudioManagerBridge : MonoBehaviour
 {
-    // ===== METODOS PARA BOTONES (UI) =====
+    // ===== MÉTODOS PARA BOTONES (UI) =====
 
     public void PlayButtonClick()
     {
@@ -23,13 +23,7 @@ public class AudioManagerBridge : MonoBehaviour
             AudioManager.Instance.PlayTurnThePage();
     }
 
-    // ===== METODOS PARA GAMEPLAY =====
-
-    public void PlayCardSpawnCharacter()
-    {
-        if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayCardSpawnCharacter();
-    }
+    // ===== MÉTODOS PARA GAMEPLAY =====
 
     public void PlayCardSelected()
     {
@@ -37,10 +31,10 @@ public class AudioManagerBridge : MonoBehaviour
             AudioManager.Instance.PlayCardSelected();
     }
 
-    public void PlayOperationCreated()
+    public void PlayOperatorSelected()
     {
         if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayOperationCreated();
+            AudioManager.Instance.PlayOperatorSelected();
     }
 
     public void PlayTowerDestroyed()
@@ -55,12 +49,6 @@ public class AudioManagerBridge : MonoBehaviour
             AudioManager.Instance.PlayTimer5Seconds();
     }
 
-    public void PlayOperatorSelected()
-    {
-        if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayOperatorSelected();
-    }
-
     public void PlayAttackDefenseCollision()
     {
         if (AudioManager.Instance != null)
@@ -73,7 +61,45 @@ public class AudioManagerBridge : MonoBehaviour
             AudioManager.Instance.PlayTowerHit();
     }
 
-    // ===== M�TODOS PARA M�SICA =====
+    // ===== MÉTODOS PARA SPAWN (6 TIPOS) =====
+
+    public void PlayOperationCreated()
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayOperationCreated();
+    }
+
+    public void PlayTroopValue1Created()
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayTroopValue1Created();
+    }
+
+    public void PlayTroopValue2Created()
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayTroopValue2Created();
+    }
+
+    public void PlayTroopValue3Created()
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayTroopValue3Created();
+    }
+
+    public void PlayTroopValue4Created()
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayTroopValue4Created();
+    }
+
+    public void PlayTroopValue5Created()
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayTroopValue5Created();
+    }
+
+    // ===== MÉTODOS PARA MÚSICA =====
 
     public void PlayMainMenuMusic()
     {

@@ -43,7 +43,7 @@ public class UIManager : MonoBehaviour
             pauseButtonImage.sprite = pauseIcon;
         }
 
-        // Conecta el botón de pausa automáticamente
+        // Conecta el botï¿½n de pausa automï¿½ticamente
         if (pauseButton != null)
         {
             pauseButton.onClick.RemoveAllListeners();
@@ -83,7 +83,7 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    /// Este método se llama AUTOMÁTICAMENTE desde el botón (sin necesidad de asignarlo)
+    /// Este mï¿½todo se llama AUTOMï¿½TICAMENTE desde el botï¿½n (sin necesidad de asignarlo)
     public void TogglePause()
     {
         if (isPaused)
@@ -172,16 +172,10 @@ public class UIManager : MonoBehaviour
             return;
         }
 
-        // Reproducir sonido
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlayTurnThePage();
-        }
-
         // Resetear al inicio
         currentInstructionIndex = 0;
 
-        // Ocultar menú de pausa y mostrar panel de instrucciones
+        // Ocultar menï¿½ de pausa y mostrar panel de instrucciones
         if (pausePanel != null)
         {
             pausePanel.SetActive(false);
@@ -200,7 +194,7 @@ public class UIManager : MonoBehaviour
             instructionsPanel.SetActive(false);
         }
 
-        // Volver a mostrar el menú de pausa
+        // Volver a mostrar el menï¿½ de pausa
         if (pausePanel != null)
         {
             pausePanel.SetActive(true);
@@ -216,15 +210,9 @@ public class UIManager : MonoBehaviour
             return;
         }
 
-        // Reproducir sonido
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlayTurnThePage();
-        }
-
         currentInstructionIndex++;
         UpdateInstructionDisplay();
-        Debug.Log($"[UIManager] Siguiente instrucción: {currentInstructionIndex + 1}/{instructionSprites.Length}");
+        Debug.Log($"[UIManager] Siguiente instrucciï¿½n: {currentInstructionIndex + 1}/{instructionSprites.Length}");
     }
 
     private void PreviousInstruction()
@@ -234,15 +222,9 @@ public class UIManager : MonoBehaviour
             return;
         }
 
-        // Reproducir sonido
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlayTurnThePage();
-        }
-
         currentInstructionIndex--;
         UpdateInstructionDisplay();
-        Debug.Log($"[UIManager] Instrucción anterior: {currentInstructionIndex + 1}/{instructionSprites.Length}");
+        Debug.Log($"[UIManager] Instrucciï¿½n anterior: {currentInstructionIndex + 1}/{instructionSprites.Length}");
     }
 
     private void UpdateInstructionDisplay()
@@ -252,7 +234,7 @@ public class UIManager : MonoBehaviour
             instructionsImage.sprite = instructionSprites[currentInstructionIndex];
         }
 
-        // Activar/desactivar botones según la posición
+        // Activar/desactivar botones segï¿½n la posiciï¿½n
         if (previousInstructionButton != null)
         {
             previousInstructionButton.interactable = currentInstructionIndex > 0;

@@ -583,6 +583,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spawnDuration: 2
   spawnVFXPrefab: {fileID: 7190290771688677997, guid: b944594f521470a4db840fbeba0f9d8f, type: 3}
+  soundType: 0
   initialScale: 0
   growthSpeed: 1.5
 --- !u!54 &8769972986839527530

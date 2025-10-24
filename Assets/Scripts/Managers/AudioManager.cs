@@ -23,14 +23,31 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip turnThePageSFX;
 
     [Header("Gameplay Sound Effects")]
-    [SerializeField] private AudioClip cardSpawnCharacterSFX;      // Sonido cuando una carta aparece en el campo con personaje
     [SerializeField] private AudioClip cardSelectedSFX;            // Sonido al seleccionar una carta
-    [SerializeField] private AudioClip operationCreatedSFX;        // Sonido al crear operación (camión de ataque)
     [SerializeField] private AudioClip towerDestroyedSFX;          // Sonido cuando se destruye la torre
     [SerializeField] private AudioClip timer5SecondsSFX;           // Sonido cuando quedan 5 segundos
-    [SerializeField] private AudioClip operatorSelectedSFX;        // Sonido al seleccionar botón operador (suma/resta)
+    [SerializeField] private AudioClip operatorSelectedSFX;        // Sonido al seleccionar botÃ³n operador (suma/resta)
     [SerializeField] private AudioClip attackDefenseCollisionSFX;  // Sonido cuando ataque y defensa se encuentran y destruyen
     [SerializeField] private AudioClip towerHitSFX;                // Sonido al golpear la torre del jugador
+
+    [Header("Spawn SFX - 6 Tipos de Unidades")]
+    [Tooltip("Sonido cuando se crea un CAMIÃ“N/OPERACIÃ“N")]
+    public AudioClip operationCreatedSFX;
+
+    [Tooltip("Sonido cuando se crea una TROPA de valor 1")]
+    public AudioClip troopValue1CreatedSFX;
+
+    [Tooltip("Sonido cuando se crea una TROPA de valor 2")]
+    public AudioClip troopValue2CreatedSFX;
+
+    [Tooltip("Sonido cuando se crea una TROPA de valor 3")]
+    public AudioClip troopValue3CreatedSFX;
+
+    [Tooltip("Sonido cuando se crea una TROPA de valor 4")]
+    public AudioClip troopValue4CreatedSFX;
+
+    [Tooltip("Sonido cuando se crea una TROPA de valor 5")]
+    public AudioClip troopValue5CreatedSFX;
 
     [Header("Volume Settings")]
     [Range(0f, 1f)]
@@ -46,7 +63,7 @@ public class AudioManager : MonoBehaviour
 
     private void Awake()
     {
-        // Implementación del Singleton
+        // ImplementaciÃ³n del Singleton
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -74,7 +91,7 @@ public class AudioManager : MonoBehaviour
                 musicSource = existingMusic.GetComponent<AudioSource>();
             }
 
-            // Si aún no existe, crearlo
+            // Si aÃºn no existe, crearlo
             if (musicSource == null)
             {
                 GameObject musicObj = new GameObject("MusicSource");
@@ -82,7 +99,7 @@ public class AudioManager : MonoBehaviour
                 musicSource = musicObj.AddComponent<AudioSource>();
                 musicSource.loop = true;
                 musicSource.playOnAwake = false;
-                Debug.Log("[AudioManager] MusicSource creado automáticamente");
+                Debug.Log("[AudioManager] MusicSource creado automÃ¡ticamente");
             }
         }
 
@@ -95,7 +112,7 @@ public class AudioManager : MonoBehaviour
                 sfxSource = existingSFX.GetComponent<AudioSource>();
             }
 
-            // Si aún no existe, crearlo
+            // Si aÃºn no existe, crearlo
             if (sfxSource == null)
             {
                 GameObject sfxObj = new GameObject("SFXSource");
@@ -103,26 +120,26 @@ public class AudioManager : MonoBehaviour
                 sfxSource = sfxObj.AddComponent<AudioSource>();
                 sfxSource.loop = false;
                 sfxSource.playOnAwake = false;
-                Debug.Log("[AudioManager] SFXSource creado automáticamente");
+                Debug.Log("[AudioManager] SFXSource creado automÃ¡ticamente");
             }
         }
 
-        // Aplicar volúmenes iniciales
+        // Aplicar volÃºmenes iniciales
         if (musicSource != null) musicSource.volume = musicVolume;
         if (sfxSource != null) sfxSource.volume = sfxVolume;
     }
 
-    // ===== MÚSICA =====
+    // ===== MÃšSICA =====
 
     public void PlayMusic(AudioClip clip, bool fadeIn = true)
     {
         if (clip == null)
         {
-            Debug.LogWarning("[AudioManager] Clip de música nulo");
+            Debug.LogWarning("[AudioManager] Clip de mÃºsica nulo");
             return;
         }
 
-        // Si ya está sonando la misma música, no hacer nada
+        // Si ya estÃ¡ sonando la misma mÃºsica, no hacer nada
         if (musicSource.clip == clip && musicSource.isPlaying)
         {
             return;
@@ -140,7 +157,7 @@ public class AudioManager : MonoBehaviour
         else
         {
             musicSource.clip = clip;
-            musicSource.time = 0f; // Asegura que empiece desde el principio
+            musicSource.time = 0f;
             musicSource.Play();
         }
     }
@@ -181,7 +198,6 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    /// Detiene la música actual y la resetea completamente para que empiece desde 0 la próxima vez
     public void StopAndResetMusic()
     {
         if (musicFadeCoroutine != null)
@@ -191,11 +207,11 @@ public class AudioManager : MonoBehaviour
         }
 
         musicSource.Stop();
-        musicSource.time = 0f; // Resetea el tiempo de reproducción a 0
-        musicSource.clip = null; // Limpia el clip actual
-        musicSource.volume = musicVolume; // Restaura el volumen
+        musicSource.time = 0f;
+        musicSource.clip = null;
+        musicSource.volume = musicVolume;
 
-        Debug.Log("[AudioManager] Música detenida y reseteada completamente");
+        Debug.Log("[AudioManager] MÃºsica detenida y reseteada completamente");
     }
 
     public void PauseMusic()
@@ -221,7 +237,6 @@ public class AudioManager : MonoBehaviour
         sfxSource.PlayOneShot(clip, volumeScale * sfxVolume);
     }
 
-    // Método para evitar spam de sonidos (útil para botones)
     public void PlaySFXWithCooldown(AudioClip clip, string cooldownKey, float cooldownTime = 0.1f)
     {
         if (clip == null) return;
@@ -231,7 +246,7 @@ public class AudioManager : MonoBehaviour
         {
             if (Time.unscaledTime - lastPlayTime < cooldownTime)
             {
-                return; // Aún en cooldown
+                return;
             }
         }
 
@@ -258,19 +273,9 @@ public class AudioManager : MonoBehaviour
 
     // ===== EFECTOS DE GAMEPLAY =====
 
-    public void PlayCardSpawnCharacter()
-    {
-        PlaySFX(cardSpawnCharacterSFX);
-    }
-
     public void PlayCardSelected()
     {
         PlaySFX(cardSelectedSFX);
-    }
-
-    public void PlayOperationCreated()
-    {
-        PlaySFX(operationCreatedSFX);
     }
 
     public void PlayTowerDestroyed()
@@ -296,6 +301,91 @@ public class AudioManager : MonoBehaviour
     public void PlayTowerHit()
     {
         PlaySFX(towerHitSFX);
+    }
+
+    // ===== SONIDOS DE SPAWN (6 TIPOS) =====
+
+    /// Reproduce sonido cuando se crea un camiÃ³n/operaciÃ³n
+    public void PlayOperationCreated()
+    {
+        if (operationCreatedSFX != null)
+        {
+            sfxSource.PlayOneShot(operationCreatedSFX, sfxVolume);
+            Debug.Log("[AudioManager] ðŸš› Sonido de camiÃ³n reproducido");
+        }
+        else
+        {
+            Debug.LogWarning("[AudioManager] operationCreatedSFX no asignado");
+        }
+    }
+
+    /// Reproduce sonido cuando se crea una tropa de valor 1
+    public void PlayTroopValue1Created()
+    {
+        if (troopValue1CreatedSFX != null)
+        {
+            sfxSource.PlayOneShot(troopValue1CreatedSFX, sfxVolume);
+            Debug.Log("[AudioManager] 1ï¸âƒ£ Sonido de tropa valor 1 reproducido");
+        }
+        else
+        {
+            Debug.LogWarning("[AudioManager] troopValue1CreatedSFX no asignado");
+        }
+    }
+
+    /// Reproduce sonido cuando se crea una tropa de valor 2
+    public void PlayTroopValue2Created()
+    {
+        if (troopValue2CreatedSFX != null)
+        {
+            sfxSource.PlayOneShot(troopValue2CreatedSFX, sfxVolume);
+            Debug.Log("[AudioManager] 2ï¸âƒ£ Sonido de tropa valor 2 reproducido");
+        }
+        else
+        {
+            Debug.LogWarning("[AudioManager] troopValue2CreatedSFX no asignado");
+        }
+    }
+
+    /// Reproduce sonido cuando se crea una tropa de valor 3
+    public void PlayTroopValue3Created()
+    {
+        if (troopValue3CreatedSFX != null)
+        {
+            sfxSource.PlayOneShot(troopValue3CreatedSFX, sfxVolume);
+            Debug.Log("[AudioManager] 3ï¸âƒ£ Sonido de tropa valor 3 reproducido");
+        }
+        else
+        {
+            Debug.LogWarning("[AudioManager] troopValue3CreatedSFX no asignado");
+        }
+    }
+
+    public void PlayTroopValue4Created()
+    {
+        if (troopValue4CreatedSFX != null)
+        {
+            sfxSource.PlayOneShot(troopValue4CreatedSFX, sfxVolume);
+            Debug.Log("[AudioManager] 4ï¸âƒ£ Sonido de tropa valor 4 reproducido");
+        }
+        else
+        {
+            Debug.LogWarning("[AudioManager] troopValue4CreatedSFX no asignado");
+        }
+    }
+
+    /// Reproduce sonido cuando se crea una tropa de valor 5
+    public void PlayTroopValue5Created()
+    {
+        if (troopValue5CreatedSFX != null)
+        {
+            sfxSource.PlayOneShot(troopValue5CreatedSFX, sfxVolume);
+            Debug.Log("[AudioManager] 5ï¸âƒ£ Sonido de tropa valor 5 reproducido");
+        }
+        else
+        {
+            Debug.LogWarning("[AudioManager] troopValue5CreatedSFX no asignado");
+        }
     }
 
     // ===== CONTROL DE VOLUMEN =====
@@ -332,7 +422,7 @@ public class AudioManager : MonoBehaviour
 
         // Cambiar clip y resetear tiempo
         musicSource.clip = newClip;
-        musicSource.time = 0f; // Asegura que empiece desde el principio
+        musicSource.time = 0f;
         musicSource.Play();
 
         // Fade in
