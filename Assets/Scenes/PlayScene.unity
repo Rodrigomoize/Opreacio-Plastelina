@@ -5240,21 +5240,41 @@ MonoBehaviour:
   spawnPointIA: {fileID: 1753038883}
   spawnPointIA2: {fileID: 0}
   torreIA: {fileID: 1188949408}
-  intervaloDecision: 1
-  agresividad: 1
+  intervaloAccionMin: 7
+  intervaloAccionMax: 10
+  agresividad: 0.5
+  delayDefensaMin: 2
+  delayDefensaMax: 4
+  delayDefensaEmergenciaMin: 1
+  delayDefensaEmergenciaMax: 2
   debugMode: 0
   facil:
-    agresividad: 0.43
-    intervaloDecision: 3
-    regenInterval: 3.5
+    agresividad: 0.2
+    intervaloAccionMin: 7
+    intervaloAccionMax: 10
+    delayDefensaMin: 2
+    delayDefensaMax: 4
+    delayDefensaEmergenciaMin: 1
+    delayDefensaEmergenciaMax: 2
+    regenInterval: 3.2
   media:
-    agresividad: 0.6
-    intervaloDecision: 2
+    agresividad: 0.5
+    intervaloAccionMin: 4
+    intervaloAccionMax: 7
+    delayDefensaMin: 1.5
+    delayDefensaMax: 3
+    delayDefensaEmergenciaMin: 0.75
+    delayDefensaEmergenciaMax: 1.5
     regenInterval: 2.8
   dificil:
-    agresividad: 0.8
-    intervaloDecision: 1
-    regenInterval: 2.2
+    agresividad: 0.5
+    intervaloAccionMin: 1
+    intervaloAccionMax: 4
+    delayDefensaMin: 1
+    delayDefensaMax: 2
+    delayDefensaEmergenciaMin: 0.5
+    delayDefensaEmergenciaMax: 1
+    regenInterval: 2.4
 --- !u!4 &1556190453
 Transform:
   m_ObjectHideFlags: 0
