@@ -1,26 +1,20 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
-/// Panel simple de seleccion de dificultad
-/// Solo abre/cierra el panel, los botones llaman directamente a metodos publicos
 public class DifficultyPanel : MonoBehaviour
 {
     [Header("Referencias del Panel")]
     [SerializeField] private GameObject panelDificultad;
     [SerializeField] private Button botonAbrirPanel;
-
-    [Header("Bot�n Cerrar (Opcional)")]
     [SerializeField] private Button botonCerrar;
 
     private void Start()
     {
-        // Panel oculto al inicio
         if (panelDificultad != null)
         {
             panelDificultad.SetActive(false);
         }
 
-        // Configurar botones de abrir/cerrar panel
         if (botonAbrirPanel != null)
         {
             botonAbrirPanel.onClick.RemoveAllListeners();
@@ -39,7 +33,6 @@ public class DifficultyPanel : MonoBehaviour
         if (panelDificultad != null)
         {
             panelDificultad.SetActive(true);
-            Debug.Log("[DifficultyPanel] Panel abierto");
         }
     }
 
@@ -48,29 +41,45 @@ public class DifficultyPanel : MonoBehaviour
         if (panelDificultad != null)
         {
             panelDificultad.SetActive(false);
-            Debug.Log("[DifficultyPanel] Panel cerrado");
         }
     }
 
-    // M�todos p�blicos para llamar desde los botones en Unity Inspector
     public void IniciarJuegoFacil()
     {
-        Debug.Log("[DifficultyPanel] Iniciando juego F�CIL");
-        GameManager.Instance.SetDificultad(IAController.AIDificultad.Facil);
+        if (DifficultyManager.Instance != null)
+        {
+            DifficultyManager.Instance.SetDifficulty(IAController.AIDificultad.Facil);
+        }
+        else
+        {
+            GameManager.Instance.SetDificultad(IAController.AIDificultad.Facil);
+        }
         GameManager.GoToPlayScene();
     }
 
     public void IniciarJuegoMedio()
     {
-        Debug.Log("[DifficultyPanel] Iniciando juego MEDIO");
-        GameManager.Instance.SetDificultad(IAController.AIDificultad.Media);
+        if (DifficultyManager.Instance != null)
+        {
+            DifficultyManager.Instance.SetDifficulty(IAController.AIDificultad.Media);
+        }
+        else
+        {
+            GameManager.Instance.SetDificultad(IAController.AIDificultad.Media);
+        }
         GameManager.GoToPlayScene();
     }
 
     public void IniciarJuegoDificil()
     {
-        Debug.Log("[DifficultyPanel] Iniciando juego DIF�CIL");
-        GameManager.Instance.SetDificultad(IAController.AIDificultad.Dificil);
+        if (DifficultyManager.Instance != null)
+        {
+            DifficultyManager.Instance.SetDifficulty(IAController.AIDificultad.Dificil);
+        }
+        else
+        {
+            GameManager.Instance.SetDificultad(IAController.AIDificultad.Dificil);
+        }
         GameManager.GoToPlayScene();
     }
 
@@ -78,7 +87,6 @@ public class DifficultyPanel : MonoBehaviour
     {
         if (botonAbrirPanel != null)
             botonAbrirPanel.onClick.RemoveAllListeners();
-
         if (botonCerrar != null)
             botonCerrar.onClick.RemoveAllListeners();
     }

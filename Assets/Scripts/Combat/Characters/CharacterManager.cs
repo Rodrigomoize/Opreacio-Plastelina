@@ -64,6 +64,29 @@ public class CharacterManager : MonoBehaviour
 
         AssignTag(instance, teamTag);
 
+        // Activar Tint si es enemigo (AITeam)
+        if (teamTag == "AITeam")
+        {
+            EnemyRedEmissiveTint tint = instance.GetComponent<EnemyRedEmissiveTint>();
+            if (tint != null)
+            {
+                tint.enabled = true;
+                tint.applyEmissive = true;
+                // Forzar la reinicialización de renderers (importante para objetos recién instanciados)
+                tint.ForceRefreshRenderers();
+                // Forzar la aplicación inmediata del tinte
+                tint.ApplyEmissiveToAll();
+            }
+        }
+        else // Desactivar si es PlayerTeam
+        {
+            EnemyRedEmissiveTint tint = instance.GetComponent<EnemyRedEmissiveTint>();
+            if (tint != null)
+            {
+                tint.enabled = false;
+            }
+        }
+
         // Obtener o añadir componente Character
         Character charScript = instance.GetComponent<Character>();
         if (charScript == null)
@@ -189,6 +212,8 @@ public class CharacterManager : MonoBehaviour
             {
                 tint.enabled = true;
                 tint.applyEmissive = true;
+                // Forzar la reinicialización de renderers (importante para objetos recién instanciados)
+                tint.ForceRefreshRenderers();
                 // Forzar la aplicación inmediata del tinte
                 tint.ApplyEmissiveToAll();
             }

@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] PlayerCardManager playerCardManager;
     [SerializeField] GameTimer gameTimerManager;
     [SerializeField] ScoreManager scoreManager;
+    [SerializeField] DifficultyManager difficultyManager;
 
     [Header("Defaults")]
     [SerializeField] IAController.AIDificultad defaultAIDifficulty = IAController.AIDificultad.Media;
@@ -148,9 +149,20 @@ public class GameManager : MonoBehaviour
         }
 
         // Finalizar el score con bonus por tiempo
-        if (gameTimerManager != null && ScoreManager.Instance != null)
+        if (ScoreManager.Instance != null)
         {
-            float elapsedSeconds = gameTimerManager.ElapsedSeconds;
+            float elapsedSeconds = 0f;
+            
+            // Validar que el timer existe y es válido antes de obtener el tiempo
+            if (gameTimerManager != null && gameTimerManager.gameObject != null)
+            {
+                elapsedSeconds = gameTimerManager.ElapsedSeconds;
+            }
+            else
+            {
+                Debug.LogWarning("[GameManager] GameTimer no válido al finalizar, usando tiempo 0");
+            }
+            
             int timeBonus = ScoreManager.Instance.FinalizeScoreWithTime(elapsedSeconds);
             Debug.Log($"[GameManager] Victoria! Tiempo: {elapsedSeconds:F1}s, Bonus: {timeBonus}, Score final: {ScoreManager.Instance.CurrentScore}");
         }
@@ -250,31 +262,36 @@ public class GameManager : MonoBehaviour
     public void SetDificultad(IAController.AIDificultad dificultad)
     {
         defaultAIDifficulty = dificultad;
-        Debug.Log($"[GameManager] Dificultad cambiada a: {dificultad}");
-
-        // Aplicar velocidad del juego según la dificultad
-        ApplyDifficultySpeed();
+        
+        // Delegar al DifficultyManager
+        if (DifficultyManager.Instance != null)
+        {
+            DifficultyManager.Instance.SetDifficulty(dificultad);
+        }
+        else
+        {
+            Debug.LogWarning("[GameManager] DifficultyManager no encontrado");
+        }
     }
 
     /// Aplica la velocidad de juego correspondiente a la dificultad actual
     private void ApplyDifficultySpeed()
     {
-        if (GameSpeedManager.Instance == null)
+        // Ahora lo maneja el DifficultyManager
+        if (DifficultyManager.Instance != null)
         {
-            Debug.LogWarning("[GameManager] GameSpeedManager no encontrado");
-            return;
+            DifficultyManager.Instance.ApplyDifficultySettings();
         }
+    }
 
-        GameSpeedManager.GameDifficulty speedDifficulty = defaultAIDifficulty switch
+    /// Obtiene la duración de la partida según la dificultad actual
+    private float GetDurationForDifficulty()
+    {
+        if (DifficultyManager.Instance != null)
         {
-            IAController.AIDificultad.Facil => GameSpeedManager.GameDifficulty.Facil,
-            IAController.AIDificultad.Media => GameSpeedManager.GameDifficulty.Media,
-            IAController.AIDificultad.Dificil => GameSpeedManager.GameDifficulty.Dificil,
-            _ => GameSpeedManager.GameDifficulty.Media
-        };
-
-        GameSpeedManager.Instance.SetSpeedByDifficulty(speedDifficulty);
-        Debug.Log($"[GameManager] Velocidad de juego aplicada para dificultad: {defaultAIDifficulty}");
+            return DifficultyManager.Instance.GetGameDuration();
+        }
+        return 180f; // Valor por defecto
     }
 
     private void OnDestroy()
@@ -300,12 +317,18 @@ public class GameManager : MonoBehaviour
                 Debug.Log("[GameManager] Score reseteado para nueva partida");
             }
 
-            // Reiniciar y arrancar el timer
+            // Reiniciar y arrancar el timer con la duración según dificultad
             if (gameTimerManager != null)
             {
+                float duracion = GetDurationForDifficulty();
                 gameTimerManager.ResetTimer();
-                gameTimerManager.StartCountdown(gameTimerManager.CountdownDuration);
-                Debug.Log("[GameManager] Timer reseteado y arrancado para nueva partida");
+                gameTimerManager.StartCountdown(duracion);
+                
+                string dificultadActual = DifficultyManager.Instance != null 
+                    ? DifficultyManager.Instance.CurrentDifficulty.ToString() 
+                    : defaultAIDifficulty.ToString();
+                    
+                Debug.Log($"[GameManager] Timer reseteado y arrancado con duración de {duracion}s para dificultad {dificultadActual}");
             }
 
             // Iniciar la música de gameplay desde 0
@@ -368,16 +391,21 @@ public class GameManager : MonoBehaviour
         combatManager = combatManager ?? FindInScene<CardManager>(scene);
         aiCardManager = aiCardManager ?? FindInScene<IAController>(scene);
         playerCardManager = playerCardManager ?? FindInScene<PlayerCardManager>(scene);
-        gameTimerManager = gameTimerManager ?? FindInScene<GameTimer>(scene);
-        scoreManager = scoreManager ?? FindInScene<ScoreManager>(scene);
+        
+        // IMPORTANTE: Siempre reasignar el timer y score manager de la escena actual
+        // porque estas referencias se destruyen al cambiar de escena
+        gameTimerManager = FindInScene<GameTimer>(scene);
+        scoreManager = FindInScene<ScoreManager>(scene);
+        
+        difficultyManager = difficultyManager ?? FindInScene<DifficultyManager>(scene);
 
-        Debug.Log($"[GameManager] Managers asignados -> UI:{(uiManager != null)} Audio:{(audioManager != null)} Card:{(combatManager != null)} AI:{(aiCardManager != null)} PlayerCard:{(playerCardManager != null)} Timer:{(gameTimerManager != null)}");
+        Debug.Log($"[GameManager] Managers asignados -> UI:{(uiManager != null)} Audio:{(audioManager != null)} Card:{(combatManager != null)} AI:{(aiCardManager != null)} PlayerCard:{(playerCardManager != null)} Timer:{(gameTimerManager != null)} Difficulty:{(difficultyManager != null)}");
     }
 
     /// Busca un componente T dentro de la escena proporcionada (solo objetos activos).
     private T FindInScene<T>(Scene scene) where T : MonoBehaviour
     {
-        T[] all = FindObjectsOfType<T>();
+        T[] all = FindObjectsByType<T>(FindObjectsSortMode.None);
         foreach (var item in all)
         {
             if (item.gameObject.scene == scene) return item;

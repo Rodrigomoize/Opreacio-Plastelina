@@ -20,12 +20,24 @@ public class EnemyRedEmissiveTint : MonoBehaviour
 
     void OnEnable()
     {
+        // NO ejecutar en prefabs
+        if (!Application.isPlaying && (gameObject.scene.name == null || gameObject.scene.name == ""))
+        {
+            return;
+        }
+
         InitRenderers();
         ApplyEmissiveToAll();
     }
 
     void OnValidate()
     {
+        // NO ejecutar OnValidate en prefabs (objetos sin escena asignada)
+        if (gameObject.scene.name == null || gameObject.scene.name == "")
+        {
+            return; // Es un prefab, no hacer nada
+        }
+
         InitRenderers();
 
         // Evita aplicar el efecto si el componente está desactivado
@@ -41,7 +53,13 @@ public class EnemyRedEmissiveTint : MonoBehaviour
 
     void OnDisable()
     {
-        // 🔴 Cuando se desactiva el script, limpia el efecto emisivo
+        // NO ejecutar en prefabs
+        if (!Application.isPlaying && (gameObject.scene.name == null || gameObject.scene.name == ""))
+        {
+            return;
+        }
+
+        // Cuando se desactiva el script, limpia el efecto emisivo
         RemoveEmissiveFromAll();
     }
 
@@ -54,23 +72,29 @@ public class EnemyRedEmissiveTint : MonoBehaviour
             renderers = GetComponentsInChildren<Renderer>(includeInactive: true);
     }
 
+    /// <summary>
+    /// Fuerza la reinicialización de los renderers. Útil cuando se llama desde código externo.
+    /// </summary>
+    public void ForceRefreshRenderers()
+    {
+        renderers = null; // Forzar la reinicialización
+        InitRenderers();
+    }
+
     public void ApplyEmissiveToAll()
     {
         if (renderers == null) return;
 
-        // Solo instanciar materiales en runtime (play mode), no en editor ni en prefabs
-        bool useInstancedMaterials = Application.isPlaying;
-
         // Instanciar materiales solo la primera vez en play mode
-        if (useInstancedMaterials && !materialsInstanced)
+        if (Application.isPlaying && !materialsInstanced)
         {
             foreach (Renderer r in renderers)
             {
                 if (r == null) continue;
                 
-                // Usar .material en vez de .sharedMaterial para crear instancia única
-                // Esto se hace automáticamente al acceder a .material
-                if (r.material != null)
+                // Acceder a .material para crear instancia única (solo en play mode)
+                Material temp = r.material;
+                if (temp != null)
                 {
                     // Solo accediendo ya crea la instancia
                 }
@@ -80,10 +104,25 @@ public class EnemyRedEmissiveTint : MonoBehaviour
 
         foreach (Renderer r in renderers)
         {
-            // En editor usamos sharedMaterial, en runtime usamos material instanciado
-            Material mat = useInstancedMaterials ? r.material : r.sharedMaterial;
+            if (r == null)
+                continue;
+
+            // IMPORTANTE: En modo editor, siempre usar sharedMaterial para evitar errores con prefabs
+            // Solo en play mode usamos material instanciado
+            Material mat;
             
-            if (r == null || mat == null)
+            if (Application.isPlaying)
+            {
+                // En runtime, usar material instanciado
+                mat = r.material;
+            }
+            else
+            {
+                // En editor, usar sharedMaterial (funciona con prefabs y objetos de escena)
+                mat = r.sharedMaterial;
+            }
+            
+            if (mat == null)
                 continue;
 
             r.GetPropertyBlock(mpb);
@@ -111,15 +150,27 @@ public class EnemyRedEmissiveTint : MonoBehaviour
     {
         if (renderers == null) return;
 
-        // En editor usamos sharedMaterial, en runtime usamos material instanciado
-        bool useInstancedMaterials = Application.isPlaying;
-
         foreach (Renderer r in renderers)
         {
-            // En editor usamos sharedMaterial, en runtime usamos material instanciado
-            Material mat = useInstancedMaterials ? r.material : r.sharedMaterial;
+            if (r == null)
+                continue;
+
+            // IMPORTANTE: En modo editor, siempre usar sharedMaterial para evitar errores con prefabs
+            // Solo en play mode usamos material instanciado
+            Material mat;
             
-            if (r == null || mat == null)
+            if (Application.isPlaying)
+            {
+                // En runtime, usar material instanciado
+                mat = r.material;
+            }
+            else
+            {
+                // En editor, usar sharedMaterial (funciona con prefabs y objetos de escena)
+                mat = r.sharedMaterial;
+            }
+            
+            if (mat == null)
                 continue;
 
             r.GetPropertyBlock(mpb);
