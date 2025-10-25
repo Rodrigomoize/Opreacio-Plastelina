@@ -12,7 +12,7 @@ public class AccionEsperar : AIAction
         IntelectManager intelecto,
         AICardHand hand,
         AIThreatDetector detector
-    ) : base("Esperar")
+    ) : base("Esperar", TipoAccion.Neutral)
     {
         intelectManager = intelecto;
         aiHand = hand;
@@ -68,11 +68,23 @@ public class AccionEsperar : AIAction
         // Mano débil = promedio bajo
         float scoreManoDebil = 1f - Normalizar(promedioValor, 1, 5);
 
-        // CONSIDERACIÓN 5: No puedo hacer combo válido
-        // Si no tengo combos válidos, forzar esperar
-        bool tiengoComboSuma = aiHand.EncontrarMejorComboSuma() != null;
-        bool tiengoComboResta = aiHand.EncontrarMejorComboResta() != null;
-        float scoreSinCombos = (tiengoComboSuma || tiengoComboResta) ? 0f : 1f;
+        // CONSIDERACIÓN 5: No puedo hacer nada por falta de intelecto
+        // 🔧 SIMPLIFICADO: La IA SIEMPRE tiene cartas 1-5, solo importa el intelecto
+        bool tiengoDefensa = false; // Verificar si tengo intelecto para defender
+        
+        AIThreatDetector.Amenaza amenazaMasCercana = threatDetector.ObtenerAmenazaMasPeligrosa();
+        if (amenazaMasCercana != null)
+        {
+            // La carta siempre existe (1-5), solo verificar intelecto
+            tiengoDefensa = (intelectManager.currentIntelect >= amenazaMasCercana.valor);
+        }
+        
+        // Combo mínimo requiere 2 de intelecto (1+1=2)
+        bool tiengoIntelectoParaAtacar = intelectManager.currentIntelect >= 2;
+        
+        // No puedo hacer nada si no tengo intelecto para defender NI para atacar
+        bool noPuedoHacerNada = !tiengoDefensa && !tiengoIntelectoParaAtacar;
+        float scoreSinAcciones = noPuedoHacerNada ? 0.5f : 0f;
 
 
         // ===== COMBINAR CON PESOS =====
@@ -81,27 +93,58 @@ public class AccionEsperar : AIAction
             (scoreSinAmenazas * 0.25f) +         // 25% - Importante
             (scoreAmenazasLejanas * 0.15f) +     // 15% - Moderado
             (scoreManoDebil * 0.10f) +           // 10% - Poco importante
-            (scoreSinCombos * 0.15f);            // 15% - Importante
+            (scoreSinAcciones * 0.15f);          // 15% - Importante (renombrado de scoreSinCombos)
 
         // PENALIZACIÓN BASE: Esperar es generalmente peor que actuar
         // Solo queremos esperar en situaciones específicas
-        scoreFinal *= 0.6f; // Reducir a 60%
+        scoreFinal *= 0.4f; // 🔧 Reducido de 0.6 a 0.4 para ser AÚN MÁS CONSERVADOR
 
         // BOOST: Si realmente no puedo hacer nada (sin intelecto para nada)
         if (intelectManager.currentIntelect < 1)
         {
             scoreFinal = 0.8f; // Forzar esperar
-            Debug.Log($"[AccionEsperar] Sin intelecto, forzando espera");
+            Debug.Log($"[AccionEsperar] Sin intelecto, forzando espera (score: {scoreFinal:F3})");
+        }
+        // 🔧 FIX: Si NO puedo hacer nada por falta de intelecto, score moderado
+        else if (noPuedoHacerNada && intelectManager.currentIntelect >= 1)
+        {
+            scoreFinal = 0.25f;
+            Debug.Log($"[AccionEsperar] Sin intelecto suficiente para acciones, espera sugerida (score: {scoreFinal:F3})");
+        }
+        // 🔧 SIMPLIFICADO: Si tengo intelecto para atacar (≥2) pero bajo intelecto, penalizar espera
+        else if (tiengoIntelectoParaAtacar && intelectManager.currentIntelect < 4)
+        {
+            scoreFinal *= 0.7f; // Penalizar esperar si tengo opciones
+            Debug.Log($"[AccionEsperar] Tengo intelecto para atacar, penalizando espera (score: {scoreFinal:F3})");
         }
 
-        // PENALIZACIÓN CRÍTICA: Si hay amenaza MUY cerca, nunca esperar
+        // PENALIZACIÓN CRÍTICA: Si hay amenaza MUY cerca, normalmente no esperar
+        // EXCEPTO si realmente no puedo hacer nada por falta de intelecto
         if (threatDetector.HayAmenazaCritica())
         {
-            scoreFinal = 0f;
-            Debug.Log($"[AccionEsperar] Amenaza crítica, cancelando espera");
+            if (noPuedoHacerNada)
+            {
+                // 🔧 FIX CRÍTICO: Si hay amenaza crítica PERO no puedo defender (sin intelecto), 
+                // DEBO esperar (es mi única opción)
+                scoreFinal = 0.6f; // Score alto para forzar espera
+                Debug.Log($"[AccionEsperar] Amenaza crítica PERO sin intelecto para defenderla → Forzando espera (score: {scoreFinal:F3})");
+            }
+            else
+            {
+                // Puedo defender, así que NO esperar
+                scoreFinal = 0f;
+                Debug.Log($"[AccionEsperar] Amenaza crítica y SÍ puedo defender → Cancelando espera");
+            }
+        }
+        
+        // 🔧 FIX ADICIONAL: Si no hay amenazas pero tengo recursos, no esperar indefinidamente
+        if (amenazasActivas == 0 && intelectManager.currentIntelect >= 3)
+        {
+            scoreFinal *= 0.5f; // Reducir score cuando pueda atacar sin presión
+            Debug.Log($"[AccionEsperar] Sin amenazas pero con recursos, penalizando espera (score: {scoreFinal:F3})");
         }
 
-        Debug.Log($"[AccionEsperar] Score: {scoreFinal:F2}");
+        Debug.Log($"[AccionEsperar] Score FINAL: {scoreFinal:F3}");
 
         return scoreFinal;
     }

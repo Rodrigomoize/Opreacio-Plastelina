@@ -4,7 +4,7 @@ using UnityEngine;
 /// Gestiona centralmente TODOS los ajustes de dificultad del juego.
 /// - Duración de partida
 /// - Velocidad de tropas
-/// - Configuración de IA (agresividad, intervalo de decisión)
+/// - Configuración de IA (agresividad, intervalo de acción)
 /// </summary>
 public class DifficultyManager : MonoBehaviour
 {
@@ -126,7 +126,9 @@ public class DifficultyManager : MonoBehaviour
         if (aiController != null)
         {
             info += $"IA Agresividad: {aiController.agresividad:F2}\n";
-            info += $"IA Intervalo Decisión: {aiController.intervaloDecision:F2}s\n";
+            info += $"IA Intervalo Acción: {aiController.intervaloAccionMin:F2}s - {aiController.intervaloAccionMax:F2}s\n";
+            info += $"IA Delay Defensa: {aiController.delayDefensaMin:F2}s - {aiController.delayDefensaMax:F2}s\n";
+            info += $"IA Delay Emergencia: {aiController.delayDefensaEmergenciaMin:F2}s - {aiController.delayDefensaEmergenciaMax:F2}s\n";
         }
         
         return info;

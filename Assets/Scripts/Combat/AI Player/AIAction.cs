@@ -2,17 +2,26 @@ using UnityEngine;
 
 /// <summary>
 /// Clase base abstracta para todas las acciones de la IA
-/// Cada acción (Defender, Atacar, Esperar) hereda de esta
+/// Cada acciï¿½n (Defender, Atacar, Esperar) hereda de esta
 /// </summary>
 public abstract class AIAction
 {
+    public enum TipoAccion
+    {
+        Ataque,   // Operaciones ofensivas (CharacterCombined, Camiones, Operaciones)
+        Defensa,  // Cartas defensivas (Characters, Nï¿½meros)
+        Neutral   // Acciones que no son ni ataque ni defensa (Esperar)
+    }
+
     public string nombreAccion;
     public float scoreFinal;
+    public TipoAccion tipoAccion; // Nueva propiedad para identificar tipo de acciÃ³n
 
-    protected AIAction(string nombre)
+    protected AIAction(string nombre, TipoAccion tipo)
     {
         nombreAccion = nombre;
         scoreFinal = 0f;
+        tipoAccion = tipo;
     }
 
     public abstract float CalcularScore();

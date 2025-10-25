@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI; // Para NavMesh projection
 using UnityEngine.UI;
 
 public class CardManager : MonoBehaviour
@@ -205,8 +206,11 @@ public class CardManager : MonoBehaviour
             }
         }
 
+        // ⚡ PROYECTAR POSICIÓN AL NAVMESH (CRÍTICO para evitar errores de spawn)
+        Vector3 spawnPositionOnNavMesh = ProjectToNavMesh(spawnPosition);
+
         GameObject spawnedCombined = characterManager.InstantiateCombinedCharacter(
-            partA, partB, spawnPosition, operationResult, opSymbol, teamTag
+            partA, partB, spawnPositionOnNavMesh, operationResult, opSymbol, teamTag
         );
 
         if (spawnedCombined != null)
@@ -222,6 +226,27 @@ public class CardManager : MonoBehaviour
             }
             result = GenerateResult.OtherError;
             return false;
+        }
+    }
+
+    /// <summary>
+    /// Proyecta una posición al NavMesh más cercano
+    /// Esto evita errores de "not close enough to NavMesh"
+    /// </summary>
+    private Vector3 ProjectToNavMesh(Vector3 position)
+    {
+        NavMeshHit hit;
+        
+        // Buscar el punto más cercano en el NavMesh (radio: 50 unidades)
+        if (NavMesh.SamplePosition(position, out hit, 50f, NavMesh.AllAreas))
+        {
+            Debug.Log($"[CardManager] ✅ Posición proyectada al NavMesh: {position} → {hit.position} (dist: {hit.distance:F2}m)");
+            return hit.position;
+        }
+        else
+        {
+            Debug.LogError($"[CardManager] ⚠️ No se encontró NavMesh cerca de {position}. Usando posición original (puede fallar).");
+            return position;
         }
     }
 }

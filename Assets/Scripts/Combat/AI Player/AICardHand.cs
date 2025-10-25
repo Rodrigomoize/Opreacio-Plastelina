@@ -171,6 +171,35 @@ public class AICardHand
 
         return mejorCombo;
     }
+
+    /// <summary>
+    /// Devuelve TODOS los combos de suma posibles (para evaluación de scoring)
+    /// </summary>
+    public List<ComboAtaque> EncontrarTodosCombosSuma()
+    {
+        List<ComboAtaque> combos = new List<ComboAtaque>();
+
+        for (int i = 0; i < mano.Count; i++)
+        {
+            for (int j = i + 1; j < mano.Count; j++)
+            {
+                int suma = mano[i].cardValue + mano[j].cardValue;
+
+                if (suma >= 1 && suma <= 5) // Válido
+                {
+                    combos.Add(new ComboAtaque
+                    {
+                        cartaA = mano[i],
+                        cartaB = mano[j],
+                        resultado = suma,
+                        operador = '+'
+                    });
+                }
+            }
+        }
+
+        return combos;
+    }
     public CardManager.Card ObtenerCartaDiferenteDe(int valorExcluido)
     {
         if (mano.Count == 0) return null;
@@ -229,6 +258,37 @@ public class AICardHand
         }
 
         return mejorCombo;
+    }
+
+    /// <summary>
+    /// Devuelve TODOS los combos de resta posibles (para evaluación de scoring)
+    /// </summary>
+    public List<ComboAtaque> EncontrarTodosCombosResta()
+    {
+        List<ComboAtaque> combos = new List<ComboAtaque>();
+
+        for (int i = 0; i < mano.Count; i++)
+        {
+            for (int j = 0; j < mano.Count; j++)
+            {
+                if (i == j) continue;
+
+                int resta = mano[i].cardValue - mano[j].cardValue;
+
+                if (resta >= 1 && resta <= 5) // Válido
+                {
+                    combos.Add(new ComboAtaque
+                    {
+                        cartaA = mano[i],
+                        cartaB = mano[j],
+                        resultado = resta,
+                        operador = '-'
+                    });
+                }
+            }
+        }
+
+        return combos;
     }
 
     // Método de debug para ver qué cartas tengo

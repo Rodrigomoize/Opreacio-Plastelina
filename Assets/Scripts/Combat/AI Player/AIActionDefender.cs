@@ -8,6 +8,7 @@ public class AccionDefender : AIAction
     private AIThreatDetector threatDetector;
     private Transform spawnPoint;
     private Transform miTorre;
+    private AISpawnPositionCalculator spawnCalculator;
 
     public AccionDefender(
         IntelectManager intelecto,
@@ -15,8 +16,9 @@ public class AccionDefender : AIAction
         AICardHand hand,
         AIThreatDetector detector,
         Transform spawn,
-        Transform torre
-    ) : base("Defender Ataque")
+        Transform torre,
+        AISpawnPositionCalculator calculator
+    ) : base("Defender Ataque", TipoAccion.Defensa)
     {
         intelectManager = intelecto;
         cardManager = cards;
@@ -24,6 +26,7 @@ public class AccionDefender : AIAction
         threatDetector = detector;
         spawnPoint = spawn;
         miTorre = torre;
+        spawnCalculator = calculator;
     }
 
     public override float CalcularScore()
@@ -32,18 +35,20 @@ public class AccionDefender : AIAction
 
         if (amenaza == null)
         {
+            Debug.Log("[AccionDefender] No hay amenazas o todas están defendidas");
             scoreFinal = 0f;
             return 0f;
         }
 
         int valorNecesario = amenaza.valor;
+        
+        Debug.Log($"[AccionDefender] Evaluando defensa contra amenaza valor {valorNecesario}, dist={amenaza.distancia:F1}m");
 
-        // Buscar la carta correcta para defender (SIN errores intencionales)
         CardManager.Card cartaDefensora = aiHand.ObtenerCartaPorValor(valorNecesario);
 
         if (cartaDefensora == null)
         {
-            Debug.Log($"[AccionDefender] No tengo carta de valor {valorNecesario} para defender");
+            Debug.Log($"[AccionDefender] No tengo carta de valor {valorNecesario}");
             scoreFinal = 0f;
             return 0f;
         }
@@ -57,7 +62,7 @@ public class AccionDefender : AIAction
             return 0f;
         }
 
-        // === CÁLCULO DE SCORE ===
+        // Cálculo de score
         float scorePeligrosidad = amenaza.peligrosidad;
         float scoreUrgencia = Normalizar(amenaza.distancia, 0f, 20f);
         scoreUrgencia = CurvaInversa(scoreUrgencia);
@@ -68,7 +73,8 @@ public class AccionDefender : AIAction
         int intelectoDespues = intelectManager.currentIntelect - costeIntelecto;
         float scoreEconomia = Normalizar(intelectoDespues, 0, intelectManager.maxIntelect);
 
-        float scoreDesesperacion = 0.5f;
+        float ratioIntelecto = (float)intelectManager.currentIntelect / intelectManager.maxIntelect;
+        float scoreDesesperacion = ratioIntelecto < 0.5f ? 0.8f : 0.5f;
 
         scoreFinal =
             (scorePeligrosidad * 0.35f) +
@@ -77,15 +83,23 @@ public class AccionDefender : AIAction
             (scoreEconomia * 0.05f) +
             (scoreDesesperacion * 0.10f);
 
-        // BOOST amenaza crítica
+        // Boost amenaza crítica
         if (amenaza.distancia < 5f)
         {
-            scoreFinal = Mathf.Min(1f, scoreFinal * 1.3f);
-            Debug.Log($"[AccionDefender] ¡AMENAZA CRÍTICA! Boosting score a {scoreFinal:F2}");
+            scoreFinal = Mathf.Min(1f, scoreFinal * 1.5f);
+            Debug.Log($"[AccionDefender] AMENAZA CRÍTICA! Score: {scoreFinal:F3}");
+        }
+        
+        // Boost múltiples amenazas
+        int totalAmenazas = threatDetector.ContarAmenazas();
+        if (totalAmenazas > 1)
+        {
+            float boost = 1.0f + (totalAmenazas * 0.1f);
+            scoreFinal *= boost;
+            Debug.Log($"[AccionDefender] {totalAmenazas} amenazas, boost x{boost:F2}");
         }
 
-        Debug.Log($"[AccionDefender] Score calculado: {scoreFinal:F2} para amenaza valor {valorNecesario}");
-
+        Debug.Log($"[AccionDefender] Score FINAL: {scoreFinal:F3}");
         return scoreFinal;
     }
 
@@ -95,71 +109,35 @@ public class AccionDefender : AIAction
 
         if (amenaza == null)
         {
-            Debug.LogWarning("[AccionDefender] Ejecutar llamado pero no hay amenaza");
+            Debug.LogWarning("[AccionDefender] No hay amenazas para defender");
             return;
         }
 
         int valorNecesario = amenaza.valor;
-
-        // Buscar la carta correcta (SIN errores intencionales)
         CardManager.Card carta = aiHand.ObtenerCartaPorValor(valorNecesario);
 
         if (carta == null)
         {
-            Debug.LogWarning($"[AccionDefender] No tengo carta para defender");
+            Debug.LogWarning($"[AccionDefender] No tengo carta de valor {valorNecesario}");
             return;
         }
 
-        // === CALCULAR POSICIÓN DE SPAWN MEJORADA ===
-        // Usar el área completa del spawnPoint (puede tener un BoxCollider para definir bounds)
-        Vector3 posicionSpawn = CalcularPosicionDefensaAleatoria(amenaza.objeto.transform.position);
+        // Marcar amenaza como defendida
+        threatDetector.MarcarAmenazaComoDefendida(amenaza.objeto);
 
+        // Calcular posición de spawn
+        Vector3 posicionSpawn = spawnCalculator.CalcularMejorPosicionDefensa(amenaza.objeto.transform.position);
+
+        // Ejecutar defensa
         bool exito = cardManager.GenerateCharacter(carta, posicionSpawn, "AITeam", intelectManager);
 
         if (exito)
         {
-            Debug.Log($"[AccionDefender] ✅ Defendí ataque de valor {valorNecesario} con carta {carta.cardName}");
-            aiHand.RemoverCarta(carta);
-            aiHand.RobarCarta();
+            Debug.Log($"[AccionDefender] Defendí ataque valor {valorNecesario} con {carta.cardName}");
         }
         else
         {
-            Debug.LogError($"[AccionDefender] ❌ Falló al generar defender {carta.cardName}");
+            Debug.LogError($"[AccionDefender] Falló al generar defensor {carta.cardName}");
         }
-    }
-
-    /// Calcula una posición aleatoria en el área de spawn, más cerca de la torre
-    private Vector3 CalcularPosicionDefensaAleatoria(Vector3 posicionAmenaza)
-    {
-        Vector3 posicionBase = spawnPoint.position;
-
-        // Intentar obtener bounds del área de spawn
-        BoxCollider spawnArea = spawnPoint.GetComponent<BoxCollider>();
-
-        if (spawnArea != null)
-        {
-            // Usar el área completa del BoxCollider
-            Vector3 halfSize = spawnArea.size * 0.5f;
-
-            float randomX = Random.Range(-halfSize.x, halfSize.x);
-            float randomZ = Random.Range(-halfSize.z * 0.3f, halfSize.z * 0.7f); // Más cerca de la torre (atrás)
-
-            posicionBase = spawnPoint.position + spawnPoint.TransformDirection(new Vector3(randomX, 0, randomZ));
-        }
-        else
-        {
-            // Fallback: usar un área de 5x5 metros, posicionando más atrás
-            float randomX = Random.Range(-2.5f, 2.5f);
-            float randomZ = Random.Range(-1f, 1.5f); // Más cerca de la torre
-
-            posicionBase += new Vector3(randomX, 0, randomZ);
-        }
-
-        // Mantener la altura del spawn original
-        posicionBase.y = spawnPoint.position.y;
-
-        Debug.Log($"[AccionDefender] Spawneando defensa en posición aleatoria: {posicionBase}");
-
-        return posicionBase;
     }
 }
