@@ -125,10 +125,7 @@ public class DifficultyManager : MonoBehaviour
         IAController aiController = GameManager.Instance?.GetAICardManager();
         if (aiController != null)
         {
-            info += $"IA Agresividad: {aiController.agresividad:F2}\n";
-            info += $"IA Intervalo Acción: {aiController.intervaloAccionMin:F2}s - {aiController.intervaloAccionMax:F2}s\n";
-            info += $"IA Delay Defensa: {aiController.delayDefensaMin:F2}s - {aiController.delayDefensaMax:F2}s\n";
-            info += $"IA Delay Emergencia: {aiController.delayDefensaEmergenciaMin:F2}s - {aiController.delayDefensaEmergenciaMax:F2}s\n";
+            info += aiController.GetConfigInfo();
         }
         
         return info;

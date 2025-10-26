@@ -464,6 +464,7 @@ MonoBehaviour:
   useMinutesSeconds: 1
   countdownMode: 0
   countdownDuration: 181
+  warningThreshold: 4.5
 --- !u!4 &104346809
 Transform:
   m_ObjectHideFlags: 0
@@ -5236,45 +5237,35 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::IAController
   cardManager: {fileID: 88149202}
   intelectManagerIA: {fileID: 1587260387}
-  intelectManagerPlayer: {fileID: 1639695185}
+  intelectManagerPlayer: {fileID: 0}
   spawnPointIA: {fileID: 1753038883}
-  spawnPointIA2: {fileID: 0}
   torreIA: {fileID: 1188949408}
-  intervaloAccionMin: 7
-  intervaloAccionMax: 10
-  agresividad: 0.5
-  delayDefensaMin: 2
-  delayDefensaMax: 4
-  delayDefensaEmergenciaMin: 1
-  delayDefensaEmergenciaMax: 2
-  debugMode: 0
-  facil:
-    agresividad: 0.2
-    intervaloAccionMin: 7
-    intervaloAccionMax: 10
-    delayDefensaMin: 2
-    delayDefensaMax: 4
-    delayDefensaEmergenciaMin: 1
-    delayDefensaEmergenciaMax: 2
-    regenInterval: 3.2
-  media:
-    agresividad: 0.5
-    intervaloAccionMin: 4
-    intervaloAccionMax: 7
-    delayDefensaMin: 1.5
-    delayDefensaMax: 3
-    delayDefensaEmergenciaMin: 0.75
-    delayDefensaEmergenciaMax: 1.5
-    regenInterval: 2.8
-  dificil:
-    agresividad: 0.5
-    intervaloAccionMin: 1
-    intervaloAccionMax: 4
-    delayDefensaMin: 1
-    delayDefensaMax: 2
-    delayDefensaEmergenciaMin: 0.5
-    delayDefensaEmergenciaMax: 1
-    regenInterval: 2.4
+  dificultadInicial: 1
+  mostrarLogs: 1
+  configFacil:
+    intervaloMin: 8
+    intervaloMax: 10
+    reaccionMin: 1.5
+    reaccionMax: 3
+    umbralDefensa: 20
+    chanceAtaque: 0.4
+    velocidadRegenIntelecto: 3.2
+  configMedia:
+    intervaloMin: 6
+    intervaloMax: 8
+    reaccionMin: 1
+    reaccionMax: 2.5
+    umbralDefensa: 20
+    chanceAtaque: 0.5
+    velocidadRegenIntelecto: 2.8
+  configDificil:
+    intervaloMin: 4
+    intervaloMax: 6
+    reaccionMin: 0.5
+    reaccionMax: 2
+    umbralDefensa: 20
+    chanceAtaque: 0.6
+    velocidadRegenIntelecto: 2.4
 --- !u!4 &1556190453
 Transform:
   m_ObjectHideFlags: 0
@@ -5323,7 +5314,7 @@ MonoBehaviour:
   minIntelect: 0
   currentIntelect: 3
   regenDelay: 0
-  regenInterval: 2.4
+  regenInterval: 2.8
   regenAmount: 1
   intelectSlider: {fileID: 0}
 --- !u!4 &1587260388
@@ -5523,7 +5514,7 @@ MonoBehaviour:
   minIntelect: 0
   currentIntelect: 3
   regenDelay: 0
-  regenInterval: 2.4
+  regenInterval: 2.8
   regenAmount: 1
   intelectSlider: {fileID: 0}
 --- !u!4 &1639695186
