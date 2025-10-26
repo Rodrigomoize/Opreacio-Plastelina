@@ -79,6 +79,19 @@ public class AudioManager : MonoBehaviour
         Debug.Log("[AudioManager] Inicializado correctamente");
     }
 
+    private void Start()
+{
+    // Reproducir música de menú al iniciar si estamos en una escena de menú
+    string currentScene = SceneManager.GetActiveScene().name;
+    string[] menuScenes = { "MainMenu", "HistoryScene", "InstructionScene", "LevelScene" };
+    
+    if (System.Array.Exists(menuScenes, s => s == currentScene))
+    {
+        PlayMainMenuMusic();
+        Debug.Log($"[AudioManager] Música de menú iniciada automáticamente en {currentScene}");
+    }
+}
+
     private void SetupAudioSources()
     {
         if (musicSource == null)

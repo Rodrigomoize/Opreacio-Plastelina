@@ -14,13 +14,13 @@ public class Tower : MonoBehaviour
     [Header("Tower Type")]
     public bool isEnemyTower = true; // marcar en inspector
     [Tooltip("Tag que identifica al equipo (ej: 'AITeam' o 'PlayerTeam')")]
-    public string teamTag = "AITeam";    
+    public string teamTag = "AITeam";
     private Animator animator;
 
     void Start()
     {
         currentHealth = maxHealth;
-        
+
         // Obtener el Animator (puede estar en un hijo)
         animator = GetComponentInChildren<Animator>();
         if (animator == null)
@@ -58,20 +58,18 @@ public class Tower : MonoBehaviour
         }
     }
 
-    /// <summary>
     /// Reinicializa la vida de la torre con un nuevo máximo
     /// Útil para configurar dificultad antes de que empiece el combate
-    /// </summary>
     public void SetMaxHealth(int newMaxHealth)
     {
         maxHealth = newMaxHealth;
         currentHealth = maxHealth;
-        
+
         if (healthBarInstance != null)
         {
             healthBarInstance.Initialize(transform, maxHealth, teamTag);
         }
-        
+
         Debug.Log($"[Tower] {gameObject.name} vida configurada a {maxHealth}");
     }
 
@@ -79,6 +77,7 @@ public class Tower : MonoBehaviour
     {
         currentHealth = Mathf.Max(0, currentHealth - damage);
 
+        // Sonido de impacto en torre (suena siempre que recibe daño)
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PlayTowerHit();
@@ -88,10 +87,6 @@ public class Tower : MonoBehaviour
         {
             Debug.LogWarning("[Tower] AudioManager.Instance es NULL, no se puede reproducir sonido");
         }
-        
-        if (healthBarInstance != null) healthBarInstance.SetHealth(currentHealth);
-        Debug.Log($"[Tower] {gameObject.name} recibió {damage}. Vida: {currentHealth}/{maxHealth}");
-        if (currentHealth <= 0) OnTowerDestroyed();
 
         // Activar animación de hit
         if (animator != null)
@@ -118,7 +113,10 @@ public class Tower : MonoBehaviour
     public void Heal(int amount)
     {
         currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
-        if (healthBarInstance != null) healthBarInstance.SetHealth(currentHealth);
+        if (healthBarInstance != null)
+        {
+            healthBarInstance.SetHealth(currentHealth);
+        }
         Debug.Log($"[Tower] {gameObject.name} curada por {amount}. Vida: {currentHealth}/{maxHealth}");
     }
 
@@ -129,13 +127,20 @@ public class Tower : MonoBehaviour
     {
         Debug.Log($"[Tower] {gameObject.name} destruida!");
 
-        if (AudioManager.Instance != null)
+        if (!isEnemyTower) // Si NO es torre enemiga = es torre del jugador
         {
-            AudioManager.Instance.PlayTowerDestroyed();
-            Debug.Log($"[Tower] 💀 Sonido de torre destruida reproducido");
-        }
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayTowerDestroyed();
+                Debug.Log($"[Tower] 💀 Sonido de torre destruida reproducido (torre del jugador)");
+            }
 
-        if (isEnemyTower) SceneBridge.LoadWinScene();
-        else SceneBridge.LoadLoseScene();
+            SceneBridge.LoadLoseScene();
+        }
+        else // Si es torre enemiga = el jugador gana
+        {
+            Debug.Log($"[Tower] 🎉 Torre enemiga destruida (sin sonido, solo victoria)");
+            SceneBridge.LoadWinScene();
+        }
     }
 }

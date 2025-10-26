@@ -102,11 +102,6 @@ public class GameManager : MonoBehaviour
     private void LoadMainMenu()
     {
         SceneManager.LoadScene("MainMenu");
-
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlayMainMenuMusic();
-        }
     }
 
     private void LoadHistoryScene()
@@ -165,12 +160,6 @@ public class GameManager : MonoBehaviour
         }
 
         SceneManager.LoadScene("WinScene");
-
-        // Ahora reproduce SFX en lugar de música
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlayVictorySFX();
-        }
     }
 
     private void LoadLoseScene()
@@ -188,12 +177,6 @@ public class GameManager : MonoBehaviour
         }
 
         SceneManager.LoadScene("LoseScene");
-
-        // Ahora reproduce SFX en lugar de música
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlayDefeatSFX();
-        }
     }
 
     // PAUSE MENU
@@ -233,6 +216,7 @@ public class GameManager : MonoBehaviour
             AudioManager.Instance.StopAndResetMusic();
         }
 
+        ResumeGame();
         LoadMainMenu();
     }
 
@@ -242,7 +226,8 @@ public class GameManager : MonoBehaviour
         {
             AudioManager.Instance.StopAndResetMusic();
         }
-
+        
+        ResumeGame();
         LoadPlayScene();
     }
 
@@ -300,8 +285,27 @@ public class GameManager : MonoBehaviour
     {
         AssignSceneManagers(scene);
 
-        if (scene.name == "PlayScene")
+        string[] menuScenes = { "MainMenu", "HistoryScene", "InstructionScene", "LevelScene" };
+        bool isMenuScene = System.Array.Exists(menuScenes, s => s == scene.name);
+
+        if (isMenuScene)
         {
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayMainMenuMusic();
+                Debug.Log($"[GameManager] Música de menú iniciada/continuada en {scene.name}");
+            }
+
+            UnsubscribeFromTimer();
+        }
+        else if (scene.name == "PlayScene")
+        {
+            // DETENER música de menú antes de iniciar gameplay
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.StopAndResetMusic();
+            }
+
             if (ScoreManager.Instance != null)
             {
                 ScoreManager.Instance.ResetScore();
@@ -313,14 +317,15 @@ public class GameManager : MonoBehaviour
                 float duracion = GetDurationForDifficulty();
                 gameTimerManager.ResetTimer();
                 gameTimerManager.StartCountdown(duracion);
-                
-                string dificultadActual = DifficultyManager.Instance != null 
-                    ? DifficultyManager.Instance.CurrentDifficulty.ToString() 
+
+                string dificultadActual = DifficultyManager.Instance != null
+                    ? DifficultyManager.Instance.CurrentDifficulty.ToString()
                     : currentSelectedDifficulty.ToString();
-                    
+
                 Debug.Log($"[GameManager] Timer reseteado y arrancado con duración de {duracion}s para dificultad {dificultadActual}");
             }
 
+            // Reproducir música de gameplay
             if (AudioManager.Instance != null)
             {
                 AudioManager.Instance.PlayGameplayMusic();
@@ -339,6 +344,26 @@ public class GameManager : MonoBehaviour
             ApplyDifficultySpeed();
             SubscribeToTimer();
         }
+        else if (scene.name == "WinScene")
+        {
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.StopAndResetMusic();
+                AudioManager.Instance.PlayVictorySFX();
+                Debug.Log("[GameManager] 🎉 SFX de VICTORIA reproducido al cargar WinScene");
+            }
+            UnsubscribeFromTimer();
+        }
+        else if (scene.name == "LoseScene")
+        {
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.StopAndResetMusic();
+                AudioManager.Instance.PlayDefeatSFX();
+                Debug.Log("[GameManager] 💀 SFX de DERROTA reproducido al cargar LoseScene");
+            }
+            UnsubscribeFromTimer();
+        }
         else
         {
             UnsubscribeFromTimer();
@@ -350,7 +375,11 @@ public class GameManager : MonoBehaviour
         if (gameTimerManager != null)
         {
             gameTimerManager.OnCountdownCompleted += HandleTimeoutLose;
-            Debug.Log("[GameManager] Suscrito al evento OnCountdownCompleted del timer");
+            Debug.Log("[GameManager] Suscrito al evento de timeout del timer");
+        }
+        else
+        {
+            Debug.LogWarning("[GameManager] No se pudo suscribir al timer: gameTimerManager es null");
         }
     }
 
