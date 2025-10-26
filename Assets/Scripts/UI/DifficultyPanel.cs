@@ -46,40 +46,22 @@ public class DifficultyPanel : MonoBehaviour
 
     public void IniciarJuegoFacil()
     {
-        if (DifficultyManager.Instance != null)
-        {
-            DifficultyManager.Instance.SetDifficulty(IAController.AIDificultad.Facil);
-        }
-        else
-        {
-            GameManager.Instance.SetDificultad(IAController.AIDificultad.Facil);
-        }
+        Debug.Log("[DifficultyPanel] Dificultad seleccionada: FÁCIL");
+        GameManager.Instance.SetDificultad(IAController.AIDificultad.Facil);
         GameManager.GoToPlayScene();
     }
 
     public void IniciarJuegoMedio()
     {
-        if (DifficultyManager.Instance != null)
-        {
-            DifficultyManager.Instance.SetDifficulty(IAController.AIDificultad.Media);
-        }
-        else
-        {
-            GameManager.Instance.SetDificultad(IAController.AIDificultad.Media);
-        }
+        Debug.Log("[DifficultyPanel] Dificultad seleccionada: MEDIA");
+        GameManager.Instance.SetDificultad(IAController.AIDificultad.Media);
         GameManager.GoToPlayScene();
     }
 
     public void IniciarJuegoDificil()
     {
-        if (DifficultyManager.Instance != null)
-        {
-            DifficultyManager.Instance.SetDifficulty(IAController.AIDificultad.Dificil);
-        }
-        else
-        {
-            GameManager.Instance.SetDificultad(IAController.AIDificultad.Dificil);
-        }
+        Debug.Log("[DifficultyPanel] Dificultad seleccionada: DIFÍCIL");
+        GameManager.Instance.SetDificultad(IAController.AIDificultad.Dificil);
         GameManager.GoToPlayScene();
     }
 

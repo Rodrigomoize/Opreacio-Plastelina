@@ -127,11 +127,17 @@ public class IAController : MonoBehaviour
     private AISpawnPositionCalculator spawnCalc;
 
     // ========== CONFIGURACIÓN ACTIVA ==========
-    private AIDificultad dificultadActual;
-    private float intervaloMin, intervaloMax;          // Tiempo entre acciones
-    private float reaccionMin, reaccionMax;            // Tiempo pensando la defensa
-    private float umbralDefensa;                        // Distancia para priorizar defensa
-    private float chanceAtaque;                         // Probabilidad de atacar en vez de defender
+    [Header("Estado Actual (Runtime)")]
+    [SerializeField] private AIDificultad dificultadActual;
+    
+    [Header("Valores Activos de Configuración")]
+    [SerializeField] private float intervaloMin, intervaloMax;          // Tiempo entre acciones
+    [SerializeField] private float reaccionMin, reaccionMax;            // Tiempo pensando la defensa
+    [SerializeField] private float umbralDefensa;                        // Distancia para priorizar defensa
+    [SerializeField] private float chanceAtaque;                         // Probabilidad de atacar en vez de defender
+    [SerializeField] private float velocidadRegenIntelecto;              // Velocidad de regeneración de intelecto
+    [SerializeField] private int vidaTorrePlayer;                        // Vida de torre del jugador
+    [SerializeField] private int vidaTorreIA;                            // Vida de torre de la IA
 
     // ========== ESTADO ==========
     private float tiempoHastaAccion;                    // Tiempo restante hasta poder actuar
@@ -453,13 +459,16 @@ public class IAController : MonoBehaviour
             _ => configMedia
         };
 
-        // Aplicar configuración a las variables activas
+        // Aplicar configuración a las variables activas (visibles en Inspector)
         intervaloMin = config.intervaloMin;
         intervaloMax = config.intervaloMax;
         reaccionMin = config.reaccionMin;
         reaccionMax = config.reaccionMax;
         umbralDefensa = config.umbralDefensa;
         chanceAtaque = config.chanceAtaque;
+        velocidadRegenIntelecto = config.velocidadRegenIntelecto;
+        vidaTorrePlayer = config.vidaTorrePlayer;
+        vidaTorreIA = config.vidaTorreIA;
 
         // Aplicar velocidad de regeneración de intelecto
         if (intelectManagerIA != null)

@@ -18,12 +18,15 @@ public class GameManager : MonoBehaviour
     [SerializeField] ScoreManager scoreManager;
     [SerializeField] DifficultyManager difficultyManager;
 
-    [Header("Defaults")]
-    [SerializeField] IAController.AIDificultad defaultAIDifficulty = IAController.AIDificultad.Media;
-
+    [Header("Difficulty Settings")]
+    [Tooltip("Dificultad actual seleccionada por el jugador")]
+    [SerializeField] private IAController.AIDificultad currentSelectedDifficulty = IAController.AIDificultad.Media;
+    
     [Header("Game State")]
     private bool isPaused = false;
     public bool IsPaused => isPaused;
+    
+    public IAController.AIDificultad CurrentDifficulty => currentSelectedDifficulty;
 
     private void Awake()
     {
@@ -254,7 +257,8 @@ public class GameManager : MonoBehaviour
 
     public void SetDificultad(IAController.AIDificultad dificultad)
     {
-        defaultAIDifficulty = dificultad;
+        currentSelectedDifficulty = dificultad;
+        Debug.Log($"[GameManager] ✅ Dificultad establecida en GameManager: {dificultad}");
         
         if (DifficultyManager.Instance != null)
         {
@@ -312,7 +316,7 @@ public class GameManager : MonoBehaviour
                 
                 string dificultadActual = DifficultyManager.Instance != null 
                     ? DifficultyManager.Instance.CurrentDifficulty.ToString() 
-                    : defaultAIDifficulty.ToString();
+                    : currentSelectedDifficulty.ToString();
                     
                 Debug.Log($"[GameManager] Timer reseteado y arrancado con duración de {duracion}s para dificultad {dificultadActual}");
             }
@@ -325,7 +329,7 @@ public class GameManager : MonoBehaviour
 
             if (aiCardManager != null)
             {
-                aiCardManager.SetDificultad(defaultAIDifficulty);
+                aiCardManager.SetDificultad(currentSelectedDifficulty);
             }
             else
             {

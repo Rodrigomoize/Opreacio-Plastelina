@@ -5242,13 +5242,13 @@ MonoBehaviour:
   torreIA: {fileID: 1188949408}
   torrePlayer: {fileID: 1632648660}
   torreAI: {fileID: 1188949411}
-  dificultadInicial: 2
+  dificultadInicial: 0
   mostrarLogs: 1
   configFacil:
     intervaloMin: 8
     intervaloMax: 18
-    reaccionMin: 4.5
-    reaccionMax: 8
+    reaccionMin: 6
+    reaccionMax: 12
     umbralDefensa: 8
     chanceAtaque: 0.4
     velocidadRegenIntelecto: 3.6
@@ -5257,8 +5257,8 @@ MonoBehaviour:
   configMedia:
     intervaloMin: 5
     intervaloMax: 15
-    reaccionMin: 2.5
-    reaccionMax: 7
+    reaccionMin: 4
+    reaccionMax: 8
     umbralDefensa: 8
     chanceAtaque: 0.5
     velocidadRegenIntelecto: 3.2
@@ -5267,8 +5267,8 @@ MonoBehaviour:
   configDificil:
     intervaloMin: 2
     intervaloMax: 12
-    reaccionMin: 0.5
-    reaccionMax: 6
+    reaccionMin: 4
+    reaccionMax: 8
     umbralDefensa: 8
     chanceAtaque: 0.6
     velocidadRegenIntelecto: 2.8
