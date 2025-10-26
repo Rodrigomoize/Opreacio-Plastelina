@@ -25,16 +25,16 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip turnThePageSFX;
 
     [Header("Gameplay Sound Effects")]
-    [SerializeField] private AudioClip cardSelectedSFX;            // Sonido al seleccionar una carta
-    [SerializeField] private AudioClip towerDestroyedSFX;          // Sonido cuando se destruye la torre
-    [SerializeField] private AudioClip timer5SecondsSFX;           // Sonido cuando quedan 5 segundos
-    [SerializeField] private AudioClip operatorSelectedSFX;        // Sonido al seleccionar botón operador (suma/resta)
-    [SerializeField] private AudioClip attackDefenseCollisionSFX;  // Sonido cuando ataque y defensa se encuentran y destruyen
-    [SerializeField] private AudioClip towerHitSFX;                // Sonido al golpear la torre del jugador
+    [SerializeField] private AudioClip cardSelectedSFX;
+    [SerializeField] private AudioClip towerDestroyedSFX;
+    [SerializeField] private AudioClip timer5SecondsSFX;
+    [SerializeField] private AudioClip operatorSelectedSFX;
+    [SerializeField] private AudioClip attackDefenseCollisionSFX;
+    [SerializeField] private AudioClip towerHitSFX;
 
     [Header("Spawn SFX - 6 Tipos de Unidades")]
-    [Tooltip("Sonido cuando se crea un CAMIÓN/OPERACIÓN")]
-    public AudioClip operationCreatedSFX;
+    [Tooltip("Sonidos cuando se crea un CAMIÓN/OPERACIÓN (se elige uno aleatorio)")]
+    public AudioClip[] operationCreatedSFX;
 
     [Tooltip("Sonido cuando se crea una TROPA de valor 1")]
     public AudioClip troopValue1CreatedSFX;
@@ -65,7 +65,6 @@ public class AudioManager : MonoBehaviour
 
     private void Awake()
     {
-        // Implementación del Singleton
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -75,7 +74,6 @@ public class AudioManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        // Crear AudioSources si no existen
         SetupAudioSources();
 
         Debug.Log("[AudioManager] Inicializado correctamente");
@@ -83,17 +81,14 @@ public class AudioManager : MonoBehaviour
 
     private void SetupAudioSources()
     {
-        // Si no hay AudioSources asignados, crearlos
         if (musicSource == null)
         {
-            // Buscar si ya existe un hijo llamado MusicSource
             Transform existingMusic = transform.Find("MusicSource");
             if (existingMusic != null)
             {
                 musicSource = existingMusic.GetComponent<AudioSource>();
             }
 
-            // Si aún no existe, crearlo
             if (musicSource == null)
             {
                 GameObject musicObj = new GameObject("MusicSource");
@@ -107,14 +102,12 @@ public class AudioManager : MonoBehaviour
 
         if (sfxSource == null)
         {
-            // Buscar si ya existe un hijo llamado SFXSource
             Transform existingSFX = transform.Find("SFXSource");
             if (existingSFX != null)
             {
                 sfxSource = existingSFX.GetComponent<AudioSource>();
             }
 
-            // Si aún no existe, crearlo
             if (sfxSource == null)
             {
                 GameObject sfxObj = new GameObject("SFXSource");
@@ -126,7 +119,6 @@ public class AudioManager : MonoBehaviour
             }
         }
 
-        // Aplicar volúmenes iniciales
         if (musicSource != null) musicSource.volume = musicVolume;
         if (sfxSource != null) sfxSource.volume = sfxVolume;
     }
@@ -141,7 +133,6 @@ public class AudioManager : MonoBehaviour
             return;
         }
 
-        // Si ya está sonando la misma música, no hacer nada
         if (musicSource.clip == clip && musicSource.isPlaying)
         {
             return;
@@ -323,21 +314,39 @@ public class AudioManager : MonoBehaviour
 
     // ===== SONIDOS DE SPAWN (6 TIPOS) =====
 
-    /// Reproduce sonido cuando se crea un camión/operación
+    /// Reproduce un sonido ALEATORIO de camión/operación
     public void PlayOperationCreated()
     {
-        if (operationCreatedSFX != null)
+        if (operationCreatedSFX != null && operationCreatedSFX.Length > 0)
         {
-            sfxSource.PlayOneShot(operationCreatedSFX, sfxVolume);
-            Debug.Log("[AudioManager] 🚛 Sonido de camión reproducido");
+            // Filtrar clips nulos
+            List<AudioClip> validClips = new List<AudioClip>();
+            foreach (var clip in operationCreatedSFX)
+            {
+                if (clip != null)
+                    validClips.Add(clip);
+            }
+
+            if (validClips.Count > 0)
+            {
+                // Elegir uno aleatorio
+                int randomIndex = Random.Range(0, validClips.Count);
+                AudioClip selectedClip = validClips[randomIndex];
+                
+                sfxSource.PlayOneShot(selectedClip, sfxVolume);
+                Debug.Log($"[AudioManager] 🚛 Sonido de camión reproducido (variante {randomIndex + 1}/{validClips.Count})");
+            }
+            else
+            {
+                Debug.LogWarning("[AudioManager] operationCreatedSFX array no tiene clips asignados");
+            }
         }
         else
         {
-            Debug.LogWarning("[AudioManager] operationCreatedSFX no asignado");
+            Debug.LogWarning("[AudioManager] operationCreatedSFX array vacío o no asignado");
         }
     }
 
-    /// Reproduce sonido cuando se crea una tropa de valor 1
     public void PlayTroopValue1Created()
     {
         if (troopValue1CreatedSFX != null)
@@ -351,7 +360,6 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    /// Reproduce sonido cuando se crea una tropa de valor 2
     public void PlayTroopValue2Created()
     {
         if (troopValue2CreatedSFX != null)
@@ -365,7 +373,6 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    /// Reproduce sonido cuando se crea una tropa de valor 3
     public void PlayTroopValue3Created()
     {
         if (troopValue3CreatedSFX != null)
@@ -392,7 +399,6 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    /// Reproduce sonido cuando se crea una tropa de valor 5
     public void PlayTroopValue5Created()
     {
         if (troopValue5CreatedSFX != null)
@@ -429,7 +435,6 @@ public class AudioManager : MonoBehaviour
     {
         float startVolume = musicSource.volume;
 
-        // Fade out
         float elapsed = 0f;
         while (elapsed < musicFadeDuration / 2f)
         {
@@ -438,12 +443,10 @@ public class AudioManager : MonoBehaviour
             yield return null;
         }
 
-        // Cambiar clip y resetear tiempo
         musicSource.clip = newClip;
         musicSource.time = 0f;
         musicSource.Play();
 
-        // Fade in
         elapsed = 0f;
         while (elapsed < musicFadeDuration / 2f)
         {

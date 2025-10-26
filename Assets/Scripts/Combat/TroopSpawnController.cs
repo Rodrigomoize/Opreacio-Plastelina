@@ -91,7 +91,6 @@ public class TroopSpawnController : MonoBehaviour
         // Si es una tropa normal, detectar por el valor
         if (characterScript != null)
         {
-            // ⭐ CORREGIDO: Character usa GetValue() en lugar de attackDamage
             int troopValue = characterScript.GetValue();
             string prefabName = gameObject.name.Replace("(Clone)", "").Trim();
 
