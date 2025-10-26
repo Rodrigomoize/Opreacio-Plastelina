@@ -1031,7 +1031,9 @@ MonoBehaviour:
   operatorSelectedSFX: {fileID: 8300000, guid: fb2ca457b80d19442a7bcde0e694a1b6, type: 3}
   attackDefenseCollisionSFX: {fileID: 8300000, guid: 8a61b9cd738697745aeb3452568d0e70, type: 3}
   towerHitSFX: {fileID: 8300000, guid: 65aec844a64b75a4daf61d5381eb5bda, type: 3}
-  operationCreatedSFX: {fileID: 8300000, guid: c86b3325b5a647344ab57e995e65f106, type: 3}
+  operationCreatedSFX:
+  - {fileID: 8300000, guid: c86b3325b5a647344ab57e995e65f106, type: 3}
+  - {fileID: 8300000, guid: 5a95837a7f4ff5943ab610fc69cbc64c, type: 3}
   troopValue1CreatedSFX: {fileID: 8300000, guid: c111dd50130cc79479b53502167f66ba, type: 3}
   troopValue2CreatedSFX: {fileID: 8300000, guid: aa7b48fff36dd9441895159b3068310b, type: 3}
   troopValue3CreatedSFX: {fileID: 8300000, guid: 2021364ea441e01438e99952e10175ad, type: 3}
