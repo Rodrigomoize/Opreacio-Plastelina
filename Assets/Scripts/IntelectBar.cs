@@ -1,5 +1,6 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 using UnityEngine.UI;
+using TMPro; // A√±adido para TextMeshPro
 
 /// <summary>
 /// Barra de Intelecto que escala la altura en lugar de usar fillAmount
@@ -7,17 +8,22 @@ using UnityEngine.UI;
 /// </summary>
 public class IntelectBar : MonoBehaviour
 {
-    [Header("Referencias - MÈtodo de Escala")]
+    [Header("Referencias - M√©todo de Escala")]
     public IntelectManager intelectManager;
-    public RectTransform fillScaler;        // El GameObject que cambia de altura
-    public RectTransform previewScaler;     // Opcional: para mostrar preview
+    public RectTransform fillScaler;        
+    public RectTransform previewScaler;    
 
-    [Header("Referencias - MÈtodo Alternativo (Image Fill)")]
+    [Header("Referencias - M√©todo Alternativo (Image Fill)")]
     public Image currentFillImage;          // Si prefieres usar fillAmount
     public Image previewFillImage;
 
-    [Header("ConfiguraciÛn")]
-    public float maxHeight = 856f;          // Altura m·xima de la barra
+    [Header("Texto de Intelecto")]
+    public TextMeshProUGUI intelectText;    // Para TextMeshPro
+    public Text intelectTextLegacy;         // Para UI Text tradicional
+    public string textFormat = "{0}/{1}";   // Formato: "7/10"
+
+    [Header("Configuraci√≥n")]
+    public float maxHeight = 856f;          // Altura m√°xima de la barra
     public bool useSmoothTransition = true;
     public float smoothSpeed = 5f;
 
@@ -50,7 +56,7 @@ public class IntelectBar : MonoBehaviour
 
         maxIntelect = intelectManager.maxIntelect;
 
-        // Detectar altura m·xima autom·ticamente si no est· configurada
+        // Detectar altura m√°xima autom√°ticamente si no est√° configurada
         if (maxHeight <= 0 && fillScaler != null)
         {
             RectTransform parent = fillScaler.parent as RectTransform;
@@ -60,11 +66,8 @@ public class IntelectBar : MonoBehaviour
             }
         }
 
-        // Configurar preview si existe
-        if (previewScaler != null)
-        {
-            previewScaler.gameObject.SetActive(false);
-        }
+        // Configurar preview al inicio
+        HidePreview();
     }
 
     public void UpdateBar()
@@ -75,7 +78,7 @@ public class IntelectBar : MonoBehaviour
         float fillPercent = Mathf.Clamp01(currentValue / maxIntelect);
         targetHeight = maxHeight * fillPercent;
 
-        // M…TODO 1: Escalar altura (RECOMENDADO para sprites redondeados)
+        // M√âTODO 1: Escalar altura (RECOMENDADO para sprites redondeados)
         if (fillScaler != null)
         {
             if (useSmoothTransition)
@@ -90,7 +93,7 @@ public class IntelectBar : MonoBehaviour
             fillScaler.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, currentHeight);
         }
 
-        // M…TODO 2: Fill Amount (alternativo, pero corta las esquinas)
+        // M√âTODO 2: Fill Amount (alternativo, pero corta las esquinas)
         if (currentFillImage != null)
         {
             if (useSmoothTransition)
@@ -107,26 +110,52 @@ public class IntelectBar : MonoBehaviour
             }
         }
 
-        // Actualizar preview
+        // Actualizar texto del intelecto
+        UpdateIntelectText(currentValue);
+
+        // Actualizar preview si hay costo activo
         if (enablePreview && currentPreviewCost > 0)
         {
             UpdatePreview(currentValue);
         }
     }
 
+    /// <summary>
+    /// Actualiza el texto que muestra el valor num√©rico del intelecto
+    /// </summary>
+    private void UpdateIntelectText(float currentValue)
+    {
+        int currentInt = Mathf.RoundToInt(currentValue);
+        int maxInt = Mathf.RoundToInt(maxIntelect);
+        string displayText = string.Format(textFormat, currentInt, maxInt);
+
+        // TextMeshPro (recomendado)
+        if (intelectText != null)
+        {
+            intelectText.text = displayText;
+        }
+
+        // UI Text tradicional (fallback)
+        if (intelectTextLegacy != null)
+        {
+            intelectTextLegacy.text = displayText;
+        }
+    }
+
     private void UpdatePreview(float currentValue)
     {
+        // Calcular cu√°nto intelecto quedar√≠a despu√©s de gastar currentPreviewCost
         float previewValue = Mathf.Max(0, currentValue - currentPreviewCost);
         float previewPercent = Mathf.Clamp01(previewValue / maxIntelect);
         float previewHeight = maxHeight * previewPercent;
 
-        // MÈtodo de escala
+        // M√©todo de escala
         if (previewScaler != null)
         {
             previewScaler.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, previewHeight);
         }
 
-        // MÈtodo fillAmount
+        // M√©todo fillAmount - AQU√ç es donde se ve el preview del intelecto restante
         if (previewFillImage != null)
         {
             previewFillImage.fillAmount = previewPercent;
@@ -134,27 +163,37 @@ public class IntelectBar : MonoBehaviour
     }
 
     /// <summary>
-    /// Muestra preview de cu·nto intelecto quedarÌa
+    /// Muestra preview de cu√°nto intelecto quedar√≠a despu√©s de gastar el costo especificado
     /// </summary>
+    /// <param name="cost">Costo de la carta u operaci√≥n seleccionada (0 si no hay selecci√≥n)</param>
     public void ShowPreview(int cost)
     {
         if (!enablePreview) return;
 
         currentPreviewCost = cost;
 
+        // Activar/desactivar el preview seg√∫n si hay costo
+        bool showPreview = cost > 0;
+
         if (previewScaler != null)
         {
-            previewScaler.gameObject.SetActive(cost > 0);
+            previewScaler.gameObject.SetActive(showPreview);
         }
 
         if (previewFillImage != null)
         {
-            previewFillImage.gameObject.SetActive(cost > 0);
+            previewFillImage.gameObject.SetActive(showPreview);
+        }
+
+        // Forzar actualizaci√≥n inmediata del preview
+        if (showPreview && intelectManager != null)
+        {
+            UpdatePreview(intelectManager.GetCurrentIntelectFloat());
         }
     }
 
     /// <summary>
-    /// Oculta el preview
+    /// Oculta el preview (cuando no hay carta seleccionada)
     /// </summary>
     public void HidePreview()
     {
@@ -171,14 +210,14 @@ public class IntelectBar : MonoBehaviour
         }
     }
 
-    // MÈtodo de compatibilidad
+    // M√©todo de compatibilidad
     public void SetIntelect()
     {
         UpdateBar();
     }
 
     /// <summary>
-    /// Ajusta la altura m·xima manualmente
+    /// Ajusta la altura m√°xima manualmente
     /// </summary>
     public void SetMaxHeight(float height)
     {

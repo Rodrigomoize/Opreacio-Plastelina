@@ -37,6 +37,9 @@ public class PlayerCardManager : MonoBehaviour
     [Tooltip("Color para el operador actualmente seleccionado")]
     public Color selectedOperatorColor = new Color(1f, 1f, 0.5f, 1f);
 
+    [Header("UI Feedback")]
+    public IntelectBar intelectBar; // Referencia a la barra de intelecto
+
     // Estado de selección / operación
     private List<CardDisplay> selectedDisplays = new List<CardDisplay>(2);
     private List<CardManager.Card> playerCards = new List<CardManager.Card>();
@@ -841,6 +844,9 @@ public class PlayerCardManager : MonoBehaviour
         // Actualizar feedback de zonas de despliegue
         UpdateDeploymentZoneFeedback();
         
+        // ===== NUEVO: Actualizar preview de intelecto =====
+        UpdateIntelectPreview();
+        
         // Detectar si hay auto-combinación (misma carta seleccionada 2 veces)
         bool isAutoCombination = false;
         if (selectedDisplays.Count == 2 && ReferenceEquals(selectedDisplays[0], selectedDisplays[1]))
@@ -992,5 +998,59 @@ public class PlayerCardManager : MonoBehaviour
         }
         
         Debug.Log("[PlayerCardManager] ⚠ Intelecto insuficiente - Feedback visual mostrado");
+    }
+
+    /// <summary>
+    /// Actualiza el preview de la barra de intelecto según la selección actual
+    /// </summary>
+    private void UpdateIntelectPreview()
+    {
+        if (intelectBar == null) return;
+        
+        int previewCost = 0;
+        
+        // Calcular el costo según lo seleccionado
+        if (selectedDisplays.Count == 1)
+        {
+            // Una carta sola
+            var card = selectedDisplays[0].GetCardData();
+            if (card != null)
+            {
+                previewCost = (card.intelectCost > 0) ? card.intelectCost : card.cardValue;
+            }
+        }
+        else if (selectedDisplays.Count == 2 && currentOperator != '\0')
+        {
+            // Operación completa: calcular el resultado
+            var cardA = selectedDisplays[0].GetCardData();
+            var cardB = selectedDisplays[1].GetCardData();
+            
+            if (cardA != null && cardB != null)
+            {
+                int result = 0;
+                
+                if (currentOperator == '+')
+                {
+                    result = cardA.cardValue + cardB.cardValue;
+                }
+                else if (currentOperator == '-')
+                {
+                    result = Mathf.Abs(cardA.cardValue - cardB.cardValue);
+                }
+                
+                // El costo es el resultado de la operación
+                previewCost = Mathf.Max(0, result);
+            }
+        }
+        
+        // Mostrar u ocultar preview según el costo
+        if (previewCost > 0)
+        {
+            intelectBar.ShowPreview(previewCost);
+        }
+        else
+        {
+            intelectBar.HidePreview();
+        }
     }
 }
