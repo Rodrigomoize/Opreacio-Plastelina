@@ -17,6 +17,12 @@ public class IAController : MonoBehaviour
     public IntelectManager intelectManagerPlayer;
     public Transform spawnPointIA;
     public Transform torreIA;
+    
+    [Header("Torres")]
+    [Tooltip("Torre del jugador")]
+    public Tower torrePlayer;
+    [Tooltip("Torre de la IA")]
+    public Tower torreAI;
 
     [Header("Dificultad")]
     [Tooltip("Selecciona la dificultad de la IA")]
@@ -33,20 +39,20 @@ public class IAController : MonoBehaviour
     {
         [Header("Velocidad de Acción")]
         [Tooltip("Tiempo MÍNIMO entre acciones (segundos)")]
-        [Range(0.5f, 10f)]
+        [Range(0.1f, 30f)]
         public float intervaloMin = 1.5f;
 
         [Tooltip("Tiempo MÁXIMO entre acciones (segundos)")]
-        [Range(0.5f, 10f)]
+        [Range(0.1f, 30f)]
         public float intervaloMax = 3f;
 
         [Header("Tiempo de Reacción")]
         [Tooltip("Tiempo MÍNIMO para ejecutar defensa")]
-        [Range(0.1f, 5f)]
+        [Range(0.1f, 20f)]
         public float reaccionMin = 0.8f;
 
         [Tooltip("Tiempo MÁXIMO para ejecutar defensa")]
-        [Range(0.1f, 5f)]
+        [Range(0.1f, 20f)]
         public float reaccionMax = 2f;
 
         [Header("Comportamiento Táctico")]
@@ -62,6 +68,15 @@ public class IAController : MonoBehaviour
         [Tooltip("Velocidad de regeneración de intelecto (segundos por punto)")]
         [Range(1f, 5f)]
         public float velocidadRegenIntelecto = 2.8f;
+
+        [Header("Vida de Torres")]
+        [Tooltip("Vida total de la torre del JUGADOR")]
+        [Range(5, 50)]
+        public int vidaTorrePlayer = 10;
+
+        [Tooltip("Vida total de la torre de la IA")]
+        [Range(5, 50)]
+        public int vidaTorreIA = 10;
     }
 
     [Header("=== CONFIGURACIÓN FÁCIL ===")]
@@ -73,7 +88,9 @@ public class IAController : MonoBehaviour
         reaccionMax = 3f,
         umbralDefensa = 8f,
         chanceAtaque = 0.4f,
-        velocidadRegenIntelecto = 3.5f
+        velocidadRegenIntelecto = 3.5f,
+        vidaTorrePlayer = 10,  // Normal
+        vidaTorreIA = 8        // Menos vida para IA (fácil)
     };
 
     [Header("=== CONFIGURACIÓN MEDIA ===")]
@@ -85,7 +102,9 @@ public class IAController : MonoBehaviour
         reaccionMax = 2f,
         umbralDefensa = 12f,
         chanceAtaque = 0.5f,
-        velocidadRegenIntelecto = 2.8f
+        velocidadRegenIntelecto = 2.8f,
+        vidaTorrePlayer = 10,  // Normal
+        vidaTorreIA = 10       // Misma vida (medio)
     };
 
     [Header("=== CONFIGURACIÓN DIFÍCIL ===")]
@@ -97,7 +116,9 @@ public class IAController : MonoBehaviour
         reaccionMax = 1f,
         umbralDefensa = 15f,
         chanceAtaque = 0.6f,
-        velocidadRegenIntelecto = 2.2f
+        velocidadRegenIntelecto = 2.2f,
+        vidaTorrePlayer = 10,  // Normal
+        vidaTorreIA = 12       // Más vida para IA (difícil)
     };
 
     // ========== COMPONENTES INTERNOS ==========
@@ -143,35 +164,60 @@ public class IAController : MonoBehaviour
 
     void Update()
     {
-        // ===== 1. ESPERA PARA EJECUTAR DEFENSA =====
+        // ===== 1. SISTEMA DE DEFENSA (PARALELO - SIEMPRE ACTIVO) =====
+        // Las defensas NO consumen el cooldown de ataque, funcionan independientemente
+        
         if (esperandoDefender)
         {
+            // Esperando para ejecutar una defensa
             tiempoEsperaDefensa -= Time.deltaTime;
 
             if (tiempoEsperaDefensa <= 0f)
             {
-                // Ejecutar defensa ahora
                 EjecutarDefensa();
                 esperandoDefender = false;
-                
-                // Resetear cooldown para próxima acción
-                tiempoHastaAccion = Random.Range(intervaloMin, intervaloMax);
             }
-            return; // No hacer nada más mientras espera
+        }
+        else
+        {
+            // Verificar constantemente si hay amenazas que defender
+            VerificarAmenazasYDefender();
         }
 
-        // ===== 2. COOLDOWN ENTRE ACCIONES =====
+        // ===== 2. SISTEMA DE ATAQUE (COOLDOWN INDEPENDIENTE) =====
+        // Los ataques solo se lanzan cada X segundos
         tiempoHastaAccion -= Time.deltaTime;
 
         if (tiempoHastaAccion <= 0f)
         {
-            TomarDecision();
+            IntentarAtacar();
         }
     }
 
     /// <summary>
-    /// LÓGICA PRINCIPAL: ¿Defender o Atacar?
+    /// Verifica si hay amenazas y decide defender (sistema paralelo)
     /// </summary>
+    private void VerificarAmenazasYDefender()
+    {
+        var amenazas = detector.DetectarAmenazas();
+        if (amenazas.Count == 0) return;
+
+        var amenazaMasPeligrosa = amenazas[0];
+
+        // Decidir si defender según distancia y configuración
+        bool debeDefender = DecidirSiDefender(amenazaMasPeligrosa);
+
+        if (debeDefender)
+        {
+            IniciarDefensa(amenazaMasPeligrosa);
+        }
+    }
+
+    /// <summary>
+    /// MÉTODO OBSOLETO - Ya no se usa (lógica separada en sistemas paralelos)
+    /// Se mantiene comentado por si hace falta revertir
+    /// </summary>
+    /*
     private void TomarDecision()
     {
         Log("\n========== NUEVA DECISIÓN ==========");
@@ -213,6 +259,7 @@ public class IAController : MonoBehaviour
             Log($"No puedo actuar - reintento en {tiempoHastaAccion:F1}s");
         }
     }
+    */
 
     /// <summary>
     /// Decide si debe defender un ataque o ignorarlo
@@ -309,8 +356,11 @@ public class IAController : MonoBehaviour
     /// Intenta lanzar un ataque (operación matemática)
     /// Alterna aleatoriamente entre suma y resta para variedad
     /// </summary>
-    private bool IntentarAtacar()
+    private void IntentarAtacar()
     {
+        Log("\n========== INTENTANDO ATACAR ==========");
+        Log($"Intelecto: {intelectManagerIA.currentIntelect} | Cartas: {mano.CantidadCartas()}");
+
         // Obtener TODOS los combos posibles
         var combosSuma = mano.EncontrarTodosCombosSuma();
         var combosResta = mano.EncontrarTodosCombosResta();
@@ -337,15 +387,23 @@ public class IAController : MonoBehaviour
         // ¿Hay algún combo viable?
         if (todosLosCombos.Count == 0)
         {
-            Log("No tengo intelecto para ningún ataque");
-            return false;
+            Log("No tengo intelecto para ningún ataque - Reintento pronto");
+            tiempoHastaAccion = intervaloMin * 0.5f;
+            return;
         }
 
         // ELEGIR UNO ALEATORIO para máxima variedad
         int indiceAleatorio = Random.Range(0, todosLosCombos.Count);
         var comboElegido = todosLosCombos[indiceAleatorio];
 
-        return EjecutarAtaque(comboElegido.combo, comboElegido.esResta);
+        bool exito = EjecutarAtaque(comboElegido.combo, comboElegido.esResta);
+        
+        if (!exito)
+        {
+            // Si falló, reintentar más rápido
+            tiempoHastaAccion = intervaloMin * 0.5f;
+        }
+        // Si tuvo éxito, EjecutarAtaque ya resetea el cooldown
     }
 
     /// <summary>
@@ -414,12 +472,35 @@ public class IAController : MonoBehaviour
             intelectManagerPlayer.regenInterval = config.velocidadRegenIntelecto;
         }
 
+        // Aplicar vida de torres
+        if (torrePlayer != null)
+        {
+            torrePlayer.SetMaxHealth(config.vidaTorrePlayer);
+            Log($"Torre Player configurada con {config.vidaTorrePlayer} de vida");
+        }
+        else
+        {
+            LogError("Torre Player no asignada en el Inspector!");
+        }
+
+        if (torreAI != null)
+        {
+            torreAI.SetMaxHealth(config.vidaTorreIA);
+            Log($"Torre IA configurada con {config.vidaTorreIA} de vida");
+        }
+        else
+        {
+            LogError("Torre IA no asignada en el Inspector!");
+        }
+
         Log($"Dificultad {dificultadActual} configurada:\n" +
             $"  - Intervalo: {intervaloMin}-{intervaloMax}s\n" +
             $"  - Reacción: {reaccionMin}-{reaccionMax}s\n" +
             $"  - Umbral Defensa: {umbralDefensa}m\n" +
             $"  - Chance Ataque: {chanceAtaque:F2}\n" +
-            $"  - Regen Intelecto: {config.velocidadRegenIntelecto}s/punto");
+            $"  - Regen Intelecto: {config.velocidadRegenIntelecto}s/punto\n" +
+            $"  - Vida Torre Player: {config.vidaTorrePlayer}\n" +
+            $"  - Vida Torre IA: {config.vidaTorreIA}");
     }
 
     private bool ValidarReferencias()
@@ -474,6 +555,8 @@ public class IAController : MonoBehaviour
         info += $"IA Umbral Defensa: {umbralDefensa:F1}m\n";
         info += $"IA Chance Ataque: {chanceAtaque:F2} ({(1-chanceAtaque):F2} defensa)\n";
         info += $"Velocidad Regen Intelecto: {config.velocidadRegenIntelecto:F2}s/punto\n";
+        info += $"Vida Torre Player: {config.vidaTorrePlayer}\n";
+        info += $"Vida Torre IA: {config.vidaTorreIA}\n";
         return info;
     }
 }

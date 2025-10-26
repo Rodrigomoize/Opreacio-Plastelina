@@ -58,6 +58,23 @@ public class Tower : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Reinicializa la vida de la torre con un nuevo máximo
+    /// Útil para configurar dificultad antes de que empiece el combate
+    /// </summary>
+    public void SetMaxHealth(int newMaxHealth)
+    {
+        maxHealth = newMaxHealth;
+        currentHealth = maxHealth;
+        
+        if (healthBarInstance != null)
+        {
+            healthBarInstance.Initialize(transform, maxHealth, teamTag);
+        }
+        
+        Debug.Log($"[Tower] {gameObject.name} vida configurada a {maxHealth}");
+    }
+
     public void TakeDamage(int damage)
     {
         currentHealth = Mathf.Max(0, currentHealth - damage);

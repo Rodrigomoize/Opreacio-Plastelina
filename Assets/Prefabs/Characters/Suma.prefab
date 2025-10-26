@@ -460,7 +460,7 @@ GameObject:
   - component: {fileID: 2570839306225106214}
   - component: {fileID: 3037549751159851463}
   - component: {fileID: 8769972986839527530}
-  - component: {fileID: 5493746081887631109}
+  - component: {fileID: 8958488370606605798}
   m_Layer: 0
   m_Name: Suma
   m_TagString: Untagged
@@ -529,7 +529,7 @@ NavMeshAgent:
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
-  m_Height: 2
+  m_Height: 18.65
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
@@ -613,8 +613,8 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!136 &5493746081887631109
-CapsuleCollider:
+--- !u!65 &8958488370606605798
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -631,11 +631,9 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 10.7
-  m_Height: 21.199999
-  m_Direction: 1
-  m_Center: {x: 0.2835822, y: 12.713842, z: 2.6650772}
+  serializedVersion: 3
+  m_Size: {x: 17.4, y: 19.028187, z: 27.89}
+  m_Center: {x: 0.000010893433, y: 10.798961, z: 2}
 --- !u!1 &1904418998511495468
 GameObject:
   m_ObjectHideFlags: 0

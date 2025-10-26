@@ -282,7 +282,7 @@ GameObject:
   - component: {fileID: 6293183623452462938}
   - component: {fileID: 5803252407778248745}
   - component: {fileID: 1957220688570447800}
-  - component: {fileID: 3134629601104586906}
+  - component: {fileID: 7966521319521633507}
   m_Layer: 0
   m_Name: Resta
   m_TagString: Untagged
@@ -357,7 +357,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 947906142550811159}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 1
+  m_Radius: 5
   m_Speed: 1.65
   m_Acceleration: 8
   avoidancePriority: 50
@@ -435,8 +435,8 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!136 &3134629601104586906
-CapsuleCollider:
+--- !u!65 &7966521319521633507
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -453,11 +453,9 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 10.7
-  m_Height: 21.199999
-  m_Direction: 1
-  m_Center: {x: 0.2835822, y: 12.713842, z: 2.6650772}
+  serializedVersion: 3
+  m_Size: {x: 17.4, y: 19.028187, z: 27.89}
+  m_Center: {x: 0.000010893433, y: 10.798961, z: 2}
 --- !u!1 &3803893001296102907
 GameObject:
   m_ObjectHideFlags: 0

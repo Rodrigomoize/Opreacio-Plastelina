@@ -2760,7 +2760,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f451b9296a7cf9446bd0b2c0ffa3210a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameSpeedManager
-  gameSpeedMultiplier: 0.5
+  gameSpeedMultiplier: 0.75
   easySpeed: 0.25
   mediumSpeed: 0.5
   hardSpeed: 0.75
@@ -5240,32 +5240,40 @@ MonoBehaviour:
   intelectManagerPlayer: {fileID: 0}
   spawnPointIA: {fileID: 1753038883}
   torreIA: {fileID: 1188949408}
-  dificultadInicial: 1
+  torrePlayer: {fileID: 1632648660}
+  torreAI: {fileID: 1188949411}
+  dificultadInicial: 2
   mostrarLogs: 1
   configFacil:
     intervaloMin: 8
-    intervaloMax: 10
-    reaccionMin: 1.5
-    reaccionMax: 3
-    umbralDefensa: 20
+    intervaloMax: 18
+    reaccionMin: 4.5
+    reaccionMax: 8
+    umbralDefensa: 8
     chanceAtaque: 0.4
-    velocidadRegenIntelecto: 3.2
+    velocidadRegenIntelecto: 3.6
+    vidaTorrePlayer: 10
+    vidaTorreIA: 10
   configMedia:
-    intervaloMin: 6
-    intervaloMax: 8
-    reaccionMin: 1
-    reaccionMax: 2.5
-    umbralDefensa: 20
+    intervaloMin: 5
+    intervaloMax: 15
+    reaccionMin: 2.5
+    reaccionMax: 7
+    umbralDefensa: 8
     chanceAtaque: 0.5
-    velocidadRegenIntelecto: 2.8
+    velocidadRegenIntelecto: 3.2
+    vidaTorrePlayer: 10
+    vidaTorreIA: 10
   configDificil:
-    intervaloMin: 4
-    intervaloMax: 6
+    intervaloMin: 2
+    intervaloMax: 12
     reaccionMin: 0.5
-    reaccionMax: 2
-    umbralDefensa: 20
+    reaccionMax: 6
+    umbralDefensa: 8
     chanceAtaque: 0.6
-    velocidadRegenIntelecto: 2.4
+    velocidadRegenIntelecto: 2.8
+    vidaTorrePlayer: 10
+    vidaTorreIA: 10
 --- !u!4 &1556190453
 Transform:
   m_ObjectHideFlags: 0
@@ -5314,7 +5322,7 @@ MonoBehaviour:
   minIntelect: 0
   currentIntelect: 3
   regenDelay: 0
-  regenInterval: 2.8
+  regenInterval: 3.6
   regenAmount: 1
   intelectSlider: {fileID: 0}
 --- !u!4 &1587260388
@@ -5514,7 +5522,7 @@ MonoBehaviour:
   minIntelect: 0
   currentIntelect: 3
   regenDelay: 0
-  regenInterval: 2.8
+  regenInterval: 3.6
   regenAmount: 1
   intelectSlider: {fileID: 0}
 --- !u!4 &1639695186
