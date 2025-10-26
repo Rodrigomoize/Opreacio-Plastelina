@@ -1020,17 +1020,17 @@ MonoBehaviour:
   sfxSource: {fileID: 284459729}
   mainMenuMusic: {fileID: 0}
   gameplayMusic: {fileID: 8300000, guid: ef144e17336ba554ba002e4fea7edee4, type: 3}
-  victoryMusic: {fileID: 0}
-  defeatMusic: {fileID: 0}
+  victoryMusic: {fileID: 8300000, guid: eba9c9621cb082647a452d5d0cf7b5bd, type: 3}
+  defeatMusic: {fileID: 8300000, guid: 0cfa284b9f464f94db7773e84f92df5f, type: 3}
   buttonClickSFX: {fileID: 8300000, guid: 61ecc9bd547c78e4497dbb40364153ea, type: 3}
   buttonClaySFX: {fileID: 8300000, guid: a661ece449edd194c9e57e47f025830b, type: 3}
   turnThePageSFX: {fileID: 8300000, guid: 1db48f9eb85cb44448c384aa2d4bede1, type: 3}
   cardSelectedSFX: {fileID: 8300000, guid: c8fedade8769601448e784a337488fa0, type: 3}
   towerDestroyedSFX: {fileID: 8300000, guid: 5a94d68238540ae43a11e22e263df27c, type: 3}
-  timer5SecondsSFX: {fileID: 0}
+  timer5SecondsSFX: {fileID: 8300000, guid: 1ab18cf77b78b5340b3ca7d67a0deaef, type: 3}
   operatorSelectedSFX: {fileID: 8300000, guid: fb2ca457b80d19442a7bcde0e694a1b6, type: 3}
   attackDefenseCollisionSFX: {fileID: 8300000, guid: 8a61b9cd738697745aeb3452568d0e70, type: 3}
-  towerHitSFX: {fileID: 0}
+  towerHitSFX: {fileID: 8300000, guid: 65aec844a64b75a4daf61d5381eb5bda, type: 3}
   operationCreatedSFX: {fileID: 8300000, guid: c86b3325b5a647344ab57e995e65f106, type: 3}
   troopValue1CreatedSFX: {fileID: 8300000, guid: c111dd50130cc79479b53502167f66ba, type: 3}
   troopValue2CreatedSFX: {fileID: 8300000, guid: aa7b48fff36dd9441895159b3068310b, type: 3}

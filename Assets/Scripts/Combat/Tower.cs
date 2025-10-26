@@ -61,6 +61,17 @@ public class Tower : MonoBehaviour
     public void TakeDamage(int damage)
     {
         currentHealth = Mathf.Max(0, currentHealth - damage);
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayTowerHit();
+            Debug.Log($"[Tower] 💥 Sonido de impacto en torre reproducido");
+        }
+        else
+        {
+            Debug.LogWarning("[Tower] AudioManager.Instance es NULL, no se puede reproducir sonido");
+        }
+        
         if (healthBarInstance != null) healthBarInstance.SetHealth(currentHealth);
         Debug.Log($"[Tower] {gameObject.name} recibió {damage}. Vida: {currentHealth}/{maxHealth}");
         if (currentHealth <= 0) OnTowerDestroyed();
@@ -100,6 +111,13 @@ public class Tower : MonoBehaviour
     private void OnTowerDestroyed()
     {
         Debug.Log($"[Tower] {gameObject.name} destruida!");
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayTowerDestroyed();
+            Debug.Log($"[Tower] 💀 Sonido de torre destruida reproducido");
+        }
+
         if (isEnemyTower) SceneBridge.LoadWinScene();
         else SceneBridge.LoadLoseScene();
     }
