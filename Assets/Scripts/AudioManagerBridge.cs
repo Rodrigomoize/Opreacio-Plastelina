@@ -113,16 +113,17 @@ public class AudioManagerBridge : MonoBehaviour
             AudioManager.Instance.PlayGameplayMusic();
     }
 
-    public void PlayVictoryMusic()
+    // CAMBIADO: Ahora son métodos SFX en lugar de música
+    public void PlayVictorySFX()
     {
         if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayVictoryMusic();
+            AudioManager.Instance.PlayVictorySFX();
     }
 
-    public void PlayDefeatMusic()
+    public void PlayDefeatSFX()
     {
         if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayDefeatMusic();
+            AudioManager.Instance.PlayDefeatSFX();
     }
 
     public void StopMusic()

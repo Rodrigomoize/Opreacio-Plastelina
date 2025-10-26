@@ -3,12 +3,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-/// <summary>
 /// Temporizador simple para partidas.
 /// - Cuenta el tiempo transcurrido.
 /// - Muestra el tiempo en un Text/UIText opcional.
 /// - Puede iniciar, pausar, reanudar y detener.
-/// </summary>
 public class GameTimer : MonoBehaviour
 {
     [Header("UI (opcional)")]
@@ -27,6 +25,10 @@ public class GameTimer : MonoBehaviour
     [Tooltip("Duración para la cuenta atrás en segundos.")]
     [SerializeField] private float countdownDuration = 180f;
 
+    [Header("Audio")]
+    [Tooltip("Segundos restantes para reproducir el sonido de advertencia")]
+    [SerializeField] private float warningThreshold = 4.5f;
+
     public bool IsRunning { get; private set; }
     public float ElapsedSeconds { get; private set; }
     public float RemainingSeconds => countdownMode ? Mathf.Max(0f, countdownDuration - ElapsedSeconds) : 0f;
@@ -36,6 +38,8 @@ public class GameTimer : MonoBehaviour
     public event Action<float> OnTimerTick; // envía segundos acumulados
     public event Action<float> OnTimerStopped; // envía segundos finales
     public event Action OnCountdownCompleted; // se dispara cuando la cuenta atrás llega a 0
+
+    private bool hasPlayedWarningSound = false;
 
     private void OnEnable()
     {
@@ -48,6 +52,25 @@ public class GameTimer : MonoBehaviour
     {
         if (!IsRunning) return;
         ElapsedSeconds += Time.deltaTime;
+
+        if (countdownMode && !hasPlayedWarningSound)
+        {
+            float remaining = countdownDuration - ElapsedSeconds;
+            if (remaining <= warningThreshold && remaining > 0f)
+            {
+                hasPlayedWarningSound = true;
+                
+                if (AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.PlayTimer5Seconds();
+                    Debug.Log($"[GameTimer] ⏰ Sonido de advertencia reproducido - Quedan {remaining:F1} segundos");
+                }
+                else
+                {
+                    Debug.LogWarning("[GameTimer] AudioManager.Instance es NULL, no se puede reproducir sonido de advertencia");
+                }
+            }
+        }
 
         // Si es cuenta atrás y se llegó al final, detener
         if (countdownMode && ElapsedSeconds >= countdownDuration)
@@ -69,18 +92,18 @@ public class GameTimer : MonoBehaviour
         countdownMode = false;
         ElapsedSeconds = Mathf.Max(0f, startAt);
         IsRunning = true;
+        hasPlayedWarningSound = false; // resetear flag
         UpdateText();
     }
 
-    /// <summary>
     /// Inicia una cuenta atrás de la duración indicada (en segundos).
-    /// </summary>
     public void StartCountdown(float durationSeconds)
     {
         countdownMode = true;
         countdownDuration = Mathf.Max(0f, durationSeconds);
         ElapsedSeconds = 0f;
         IsRunning = true;
+        hasPlayedWarningSound = false; // resetear flag
         UpdateText();
     }
 
@@ -109,6 +132,7 @@ public class GameTimer : MonoBehaviour
     {
         IsRunning = false;
         ElapsedSeconds = 0f;
+        hasPlayedWarningSound = false; // resetear flag
         UpdateText();
     }
 

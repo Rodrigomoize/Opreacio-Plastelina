@@ -6,10 +6,8 @@ using static IAController;
 
 public class GameManager : MonoBehaviour
 {
-
     public static GameManager Instance { get; private set; }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     [Header("References")]
     [SerializeField] UIManager uiManager;
     [SerializeField] AudioManager audioManager;
@@ -121,8 +119,6 @@ public class GameManager : MonoBehaviour
     private void LoadLevelScene()
     {
         SceneManager.LoadScene("LevelScene");
-
-        // Mantener la música del MainMenu (no cambiar)
     }
 
     private void LoadPlayScene()
@@ -131,12 +127,11 @@ public class GameManager : MonoBehaviour
         isPaused = false;
 
         SceneManager.LoadScene("PlayScene");
-        // La música se iniciará en HandleSceneLoaded para asegurar que empiece desde 0
     }
 
     private void LoadWinScene()
     {
-        // DETENER Y RESETEAR completamente la música de gameplay antes de cambiar de escena
+        // DETENER Y RESETEAR completamente la música de gameplay
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.StopAndResetMusic();
@@ -153,7 +148,6 @@ public class GameManager : MonoBehaviour
         {
             float elapsedSeconds = 0f;
             
-            // Validar que el timer existe y es válido antes de obtener el tiempo
             if (gameTimerManager != null && gameTimerManager.gameObject != null)
             {
                 elapsedSeconds = gameTimerManager.ElapsedSeconds;
@@ -169,15 +163,16 @@ public class GameManager : MonoBehaviour
 
         SceneManager.LoadScene("WinScene");
 
+        // Ahora reproduce SFX en lugar de música
         if (AudioManager.Instance != null)
         {
-            AudioManager.Instance.PlayVictoryMusic();
+            AudioManager.Instance.PlayVictorySFX();
         }
     }
 
     private void LoadLoseScene()
     {
-        // DETENER Y RESETEAR completamente la música de gameplay antes de cambiar de escena
+        // DETENER Y RESETEAR completamente la música de gameplay
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.StopAndResetMusic();
@@ -191,9 +186,10 @@ public class GameManager : MonoBehaviour
 
         SceneManager.LoadScene("LoseScene");
 
+        // Ahora reproduce SFX en lugar de música
         if (AudioManager.Instance != null)
         {
-            AudioManager.Instance.PlayDefeatMusic();
+            AudioManager.Instance.PlayDefeatSFX();
         }
     }
 
@@ -229,7 +225,6 @@ public class GameManager : MonoBehaviour
 
     public void BackToMainMenu()
     {
-        // DETENER Y RESETEAR completamente la música de gameplay antes de volver al menú
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.StopAndResetMusic();
@@ -240,7 +235,6 @@ public class GameManager : MonoBehaviour
 
     public void RestartCurrentLevel()
     {
-        // DETENER Y RESETEAR completamente la música de gameplay antes de reiniciar
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.StopAndResetMusic();
@@ -249,7 +243,7 @@ public class GameManager : MonoBehaviour
         LoadPlayScene();
     }
 
-    //GETTERS PBLICOS
+    // GETTERS PUBLICOS
 
     public UIManager GetUIManager() => uiManager;
     public AudioManager GetAudioManager() => audioManager;
@@ -258,12 +252,10 @@ public class GameManager : MonoBehaviour
     public PlayerCardManager GetPlayerCardManager() => playerCardManager;
     public GameTimer GetGameTimer() => gameTimerManager;
 
-    // ===== MÉTODO PARA CAMBIAR DIFICULTAD =====
     public void SetDificultad(IAController.AIDificultad dificultad)
     {
         defaultAIDifficulty = dificultad;
         
-        // Delegar al DifficultyManager
         if (DifficultyManager.Instance != null)
         {
             DifficultyManager.Instance.SetDifficulty(dificultad);
@@ -274,24 +266,21 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    /// Aplica la velocidad de juego correspondiente a la dificultad actual
     private void ApplyDifficultySpeed()
     {
-        // Ahora lo maneja el DifficultyManager
         if (DifficultyManager.Instance != null)
         {
             DifficultyManager.Instance.ApplyDifficultySettings();
         }
     }
 
-    /// Obtiene la duración de la partida según la dificultad actual
     private float GetDurationForDifficulty()
     {
         if (DifficultyManager.Instance != null)
         {
             return DifficultyManager.Instance.GetGameDuration();
         }
-        return 180f; // Valor por defecto
+        return 180f;
     }
 
     private void OnDestroy()
@@ -305,19 +294,16 @@ public class GameManager : MonoBehaviour
 
     private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Asignar managers presentes en la escena cargada
         AssignSceneManagers(scene);
 
         if (scene.name == "PlayScene")
         {
-            // Reiniciar puntuación
             if (ScoreManager.Instance != null)
             {
                 ScoreManager.Instance.ResetScore();
                 Debug.Log("[GameManager] Score reseteado para nueva partida");
             }
 
-            // Reiniciar y arrancar el timer con la duración según dificultad
             if (gameTimerManager != null)
             {
                 float duracion = GetDurationForDifficulty();
@@ -331,14 +317,12 @@ public class GameManager : MonoBehaviour
                 Debug.Log($"[GameManager] Timer reseteado y arrancado con duración de {duracion}s para dificultad {dificultadActual}");
             }
 
-            // Iniciar la música de gameplay desde 0
             if (AudioManager.Instance != null)
             {
                 AudioManager.Instance.PlayGameplayMusic();
                 Debug.Log("[GameManager] Música de gameplay iniciada desde el principio");
             }
 
-            // Asegurar que la IA reciba la dificultad por defecto una vez esté presente
             if (aiCardManager != null)
             {
                 aiCardManager.SetDificultad(defaultAIDifficulty);
@@ -348,9 +332,7 @@ public class GameManager : MonoBehaviour
                 Debug.LogWarning("[GameManager] IAController no encontrado en PlayScene para asignar dificultad");
             }
 
-            // Aplicar la velocidad de juego según la dificultad seleccionada
             ApplyDifficultySpeed();
-
             SubscribeToTimer();
         }
         else
@@ -382,8 +364,6 @@ public class GameManager : MonoBehaviour
         LoadLoseScene();
     }
 
-    /// Busca e asigna los managers que existan en la escena especificada.
-    /// Solo asigna si el campo aún es null (permite preconfiguración por Inspector).
     private void AssignSceneManagers(Scene scene)
     {
         uiManager = uiManager ?? FindInScene<UIManager>(scene);
@@ -392,8 +372,6 @@ public class GameManager : MonoBehaviour
         aiCardManager = aiCardManager ?? FindInScene<IAController>(scene);
         playerCardManager = playerCardManager ?? FindInScene<PlayerCardManager>(scene);
         
-        // IMPORTANTE: Siempre reasignar el timer y score manager de la escena actual
-        // porque estas referencias se destruyen al cambiar de escena
         gameTimerManager = FindInScene<GameTimer>(scene);
         scoreManager = FindInScene<ScoreManager>(scene);
         
@@ -402,7 +380,6 @@ public class GameManager : MonoBehaviour
         Debug.Log($"[GameManager] Managers asignados -> UI:{(uiManager != null)} Audio:{(audioManager != null)} Card:{(combatManager != null)} AI:{(aiCardManager != null)} PlayerCard:{(playerCardManager != null)} Timer:{(gameTimerManager != null)} Difficulty:{(difficultyManager != null)}");
     }
 
-    /// Busca un componente T dentro de la escena proporcionada (solo objetos activos).
     private T FindInScene<T>(Scene scene) where T : MonoBehaviour
     {
         T[] all = FindObjectsByType<T>(FindObjectsSortMode.None);

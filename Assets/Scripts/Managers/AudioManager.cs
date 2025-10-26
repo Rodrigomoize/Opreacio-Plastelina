@@ -14,8 +14,10 @@ public class AudioManager : MonoBehaviour
     [Header("Music Tracks")]
     [SerializeField] private AudioClip mainMenuMusic;
     [SerializeField] private AudioClip gameplayMusic;
-    [SerializeField] private AudioClip victoryMusic;
-    [SerializeField] private AudioClip defeatMusic;
+
+    [Header("Ending SFX")]
+    [SerializeField] private AudioClip victorySFX;
+    [SerializeField] private AudioClip defeatSFX;
 
     [Header("UI Sound Effects")]
     [SerializeField] private AudioClip buttonClickSFX;
@@ -172,14 +174,30 @@ public class AudioManager : MonoBehaviour
         PlayMusic(gameplayMusic);
     }
 
-    public void PlayVictoryMusic()
+    public void PlayVictorySFX()
     {
-        PlayMusic(victoryMusic, false);
+        if (victorySFX != null)
+        {
+            PlaySFX(victorySFX);
+            Debug.Log("[AudioManager] 🎉 SFX de victoria reproducido (una vez)");
+        }
+        else
+        {
+            Debug.LogWarning("[AudioManager] victorySFX no asignado");
+        }
     }
 
-    public void PlayDefeatMusic()
+    public void PlayDefeatSFX()
     {
-        PlayMusic(defeatMusic, false);
+        if (defeatSFX != null)
+        {
+            PlaySFX(defeatSFX);
+            Debug.Log("[AudioManager] 💀 SFX de derrota reproducido (una vez)");
+        }
+        else
+        {
+            Debug.LogWarning("[AudioManager] defeatSFX no asignado");
+        }
     }
 
     public void StopMusic(bool fadeOut = true)
