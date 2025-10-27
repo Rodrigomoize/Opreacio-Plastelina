@@ -32,7 +32,7 @@ public class PlayerCardManager : MonoBehaviour
     public Color selectedButBlockedCardColor = new Color(0.7f, 0.7f, 0.4f, 0.8f); // Amarillo oscuro/grisáceo
     [Tooltip("Color para botones de operación válidos")]
     public Color validOperatorColor = Color.white;
-    [Tooltip("Color para botones de operación inválidos")]
+    [Tooltip("Color para botones de operación inválidos")]       
     public Color invalidOperatorColor = new Color(0.5f, 0.5f, 0.5f, 0.6f);
     [Tooltip("Color para el operador actualmente seleccionado")]
     public Color selectedOperatorColor = new Color(1f, 1f, 0.5f, 1f);
@@ -430,11 +430,11 @@ public class PlayerCardManager : MonoBehaviour
 
         if (selectedDisplays.Count == 1)
         {
+            // Se jugó una carta simple
             CardManager.Card c = selectedDisplays[0].GetCardData();
             CardManager.GenerateResult result;
             GameObject character = cardManager.GenerateCharacter(c, spawnPosition, "PlayerTeam", out result, null);
             
-            // Si falló por falta de intelecto, mostrar feedback negativo
             if (result == CardManager.GenerateResult.InsufficientIntellect)
             {
                 ShowInsufficientIntellectFeedback();
@@ -443,10 +443,8 @@ public class PlayerCardManager : MonoBehaviour
                 return;
             }
             
-            // Si tuvo éxito, procesar normalmente
             if (character != null)
             {
-                // Resto del código de éxito (remover carta, etc)
                 int cardValuePlayed = c.cardValue;
                 Transform slotOfCard = selectedDisplays[0].transform.parent;
                 
@@ -461,6 +459,12 @@ public class PlayerCardManager : MonoBehaviour
                     {
                         CreateCard(cardManager.CloneCard(newCard), slotOfCard);
                     }
+                }
+                
+                // 🔔 NOTIFICAR AL TUTORIAL
+                if (TutorialManager.Instance != null)
+                {
+                    TutorialManager.Instance.OnPlayerPlaysCard(cardValuePlayed);
                 }
             }
             
@@ -539,7 +543,6 @@ public class PlayerCardManager : MonoBehaviour
             CardManager.GenerateResult result;
             bool played = cardManager.GenerateCombinedCharacter(a, b, spawnPosition, operationResult, currentOperator, "PlayerTeam", out result, null);
 
-            // Si falló por falta de intelecto, mostrar feedback negativo
             if (result == CardManager.GenerateResult.InsufficientIntellect)
             {
                 ShowInsufficientIntellectFeedback();
@@ -605,6 +608,12 @@ public class PlayerCardManager : MonoBehaviour
                         }
                     }
                 }
+
+                // 🔔 NOTIFICAR AL TUTORIAL
+                if (TutorialManager.Instance != null)
+                {
+                    TutorialManager.Instance.OnPlayerPlaysOperation();
+                }
             }
             else
             {
@@ -615,6 +624,27 @@ public class PlayerCardManager : MonoBehaviour
             UpdateVisualFeedback();
             return;
         }
+        
+        // === NOTIFICAR AL TUTORIAL ===
+        if (TutorialManager.Instance != null)
+        {
+            // Si jugó una carta simple
+            if (selectedDisplays.Count == 1)
+            {
+                int cardValue = selectedDisplays[0].cardData.cardValue;
+                TutorialManager.Instance.OnPlayerPlaysCard(cardValue);
+                Debug.Log($"[PlayerCardManager] ✅ Notificado al Tutorial: carta {cardValue} jugada");
+            }
+            // Si jugó una operación (2 cartas)
+            else if (selectedDisplays.Count == 2)
+            {
+                TutorialManager.Instance.OnPlayerPlaysOperation();
+                Debug.Log($"[PlayerCardManager] ✅ Notificado al Tutorial: operación jugada");
+            }
+        }
+        
+        DeselectAll();
+        currentOperator = '\0';
     }
 
     public bool RequestGenerateCharacter(CardManager.Card cardData, Vector3 spawnPosition, GameObject cardUI)

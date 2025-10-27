@@ -174,7 +174,7 @@ public class PowerUpManager : MonoBehaviour
 
         if (p.isOnCooldown || p.isActive)
         {
-            Debug.Log($"PowerUp '{powerUpName}' no est� disponible!");
+            Debug.Log($"PowerUp '{powerUpName}' no está disponible!");
             return;
         }
 
@@ -192,19 +192,24 @@ public class PowerUpManager : MonoBehaviour
                 return;
         }
 
-        // Marcar activo y temporizador de duraci�n
+        // Marcar activo y temporizador de duración
         p.isActive = true;
         p.durationTimer = p.duration;
 
-        // Si es instant�neo, iniciar cooldown ahora
+        // Si es instantáneo, iniciar cooldown ahora
         if (p.duration <= 0f)
         {
             StartCooldown(p);
-            // si no necesita duraci�n, tambi�n marcamos isActive = false (pero puede usarse para VFX temporales)
-            // Mantendremos isActive=true hasta que UpdateCooldowns lo desactive si necesitas ver color activo breve.
         }
 
         UpdatePowerUpUI(p);
+        
+        // === NOTIFICAR AL TUTORIAL ===
+        if (TutorialManager.Instance != null)
+        {
+            TutorialManager.Instance.OnPowerUpActivated(powerUpName);
+            Debug.Log($"[PowerUpManager] ✅ Notificado al Tutorial: PowerUp '{powerUpName}' activado");
+        }
     }
 
     private void StartCooldown(PowerUpData p)
@@ -363,5 +368,11 @@ public class PowerUpManager : MonoBehaviour
         if (p != null && p.isOnCooldown && p.cooldownTime > 0f)
             return 1f - (p.cooldownTimer / p.cooldownTime);
         return 1f;
+    }
+
+    public Button GetPowerUpButton(string powerUpName)
+    {
+        PowerUpData p = powerUps.Find(x => x.powerUpName == powerUpName);
+        return p?.powerUpButton;
     }
 }
