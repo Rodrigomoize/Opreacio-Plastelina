@@ -379,7 +379,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: b6bf58ed3054f65499a9ce0f7300440b, type: 3}
   - {fileID: 21300000, guid: c01f7e2371a620f43a00042cb75af64d, type: 3}
   - {fileID: 21300000, guid: acd8139b700b2e943aa8938fe0a94e6a, type: 3}
-  - {fileID: 21300000, guid: c6098b83a3539b540bb1f31251aaa7b3, type: 3}
+  - {fileID: 21300000, guid: 113f9a17430d555418617b69c4c019a5, type: 3}
   - {fileID: 21300000, guid: ff4a4c7a2b33a7d4ebf11d809112a17a, type: 3}
   normalButtonSprite: {fileID: 21300000, guid: 98590a77d97c5a94dabb4455233aaa00, type: 3}
   finalButtonSprite: {fileID: 21300000, guid: 8a694137076656543ab5a32a376faff1, type: 3}
