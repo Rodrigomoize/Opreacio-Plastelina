@@ -14,16 +14,16 @@ public class IntelectBar : MonoBehaviour
     public RectTransform previewScaler;    
 
     [Header("Referencias - Método Alternativo (Image Fill)")]
-    public Image currentFillImage;          // Si prefieres usar fillAmount
+    public Image currentFillImage;          
     public Image previewFillImage;
 
     [Header("Texto de Intelecto")]
-    public TextMeshProUGUI intelectText;    // Para TextMeshPro
-    public Text intelectTextLegacy;         // Para UI Text tradicional
-    public string textFormat = "{0}/{1}";   // Formato: "7/10"
+    public TextMeshProUGUI intelectText;    
+    public Text intelectTextLegacy;         
+    public string textFormat = "{0}";   
 
     [Header("Configuración")]
-    public float maxHeight = 856f;          // Altura máxima de la barra
+    public float maxHeight = 856f;         
     public bool useSmoothTransition = true;
     public float smoothSpeed = 5f;
 
@@ -78,7 +78,7 @@ public class IntelectBar : MonoBehaviour
         float fillPercent = Mathf.Clamp01(currentValue / maxIntelect);
         targetHeight = maxHeight * fillPercent;
 
-        // MÉTODO 1: Escalar altura (RECOMENDADO para sprites redondeados)
+        
         if (fillScaler != null)
         {
             if (useSmoothTransition)
@@ -93,7 +93,7 @@ public class IntelectBar : MonoBehaviour
             fillScaler.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, currentHeight);
         }
 
-        // MÉTODO 2: Fill Amount (alternativo, pero corta las esquinas)
+        
         if (currentFillImage != null)
         {
             if (useSmoothTransition)
@@ -125,7 +125,7 @@ public class IntelectBar : MonoBehaviour
     /// </summary>
     private void UpdateIntelectText(float currentValue)
     {
-        int currentInt = Mathf.RoundToInt(currentValue);
+        int currentInt = Mathf.FloorToInt(currentValue);
         int maxInt = Mathf.RoundToInt(maxIntelect);
         string displayText = string.Format(textFormat, currentInt, maxInt);
 
