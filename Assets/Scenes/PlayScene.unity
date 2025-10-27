@@ -3996,6 +3996,7 @@ GameObject:
   - component: {fileID: 1188949408}
   - component: {fileID: 1188949411}
   - component: {fileID: 1188949410}
+  - component: {fileID: 1188949412}
   m_Layer: 0
   m_Name: TorreEnemiga
   m_TagString: AITeam
@@ -4051,6 +4052,26 @@ MonoBehaviour:
   healthBarPrefab: {fileID: 8608500109205576431, guid: de29a2f92f9b54443a64fae0fe2d29fc, type: 3}
   isEnemyTower: 1
   teamTag: AITeam
+  fractureObject: {fileID: 1188949412}
+  explosionDelay: 3
+--- !u!114 &1188949412
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1188949406}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b1f260e81aff7449b0c6a499b5e5a68, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FractureObject
+  fracturedObject: {fileID: 1945109079949330859, guid: d9adaccf8f483dc4a8ebf81836e3ebdc, type: 3}
+  explosionVFX: {fileID: 1000011797152326, guid: acf39d9f4addf294d93fa56fa373961b, type: 3}
+  explosionMinForce: 5
+  explosionMaxForce: 100
+  explosionForceRadius: 10
+  fragScaleFactor: 1
 --- !u!1 &1239716053
 GameObject:
   m_ObjectHideFlags: 0
@@ -4584,6 +4605,14 @@ PrefabInstance:
       propertyPath: m_LocalScale.x
       value: 1.1169
       objectReference: {fileID: 0}
+    - target: {fileID: 1388799224543567635, guid: 98c0ddeff1bc9804a8ad99f2fa287831, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.247
+      objectReference: {fileID: 0}
+    - target: {fileID: 1388799224543567635, guid: 98c0ddeff1bc9804a8ad99f2fa287831, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.248
+      objectReference: {fileID: 0}
     - target: {fileID: 1442450553484104045, guid: 98c0ddeff1bc9804a8ad99f2fa287831, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -4611,6 +4640,10 @@ PrefabInstance:
     - target: {fileID: 5254385616608680870, guid: 98c0ddeff1bc9804a8ad99f2fa287831, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.32
+      objectReference: {fileID: 0}
+    - target: {fileID: 6517106484261771666, guid: 98c0ddeff1bc9804a8ad99f2fa287831, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.57
       objectReference: {fileID: 0}
     - target: {fileID: 6830945432629781959, guid: 98c0ddeff1bc9804a8ad99f2fa287831, type: 3}
       propertyPath: m_LocalScale.x
@@ -5239,18 +5272,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::IAController
   cardManager: {fileID: 88149202}
   intelectManagerIA: {fileID: 1587260387}
-  intelectManagerPlayer: {fileID: 0}
+  intelectManagerPlayer: {fileID: 1639695185}
   spawnPointIA: {fileID: 1753038883}
   torreIA: {fileID: 1188949408}
   torrePlayer: {fileID: 1632648660}
   torreAI: {fileID: 1188949411}
-  dificultadInicial: 0
+  dificultadInicial: 2
   mostrarLogs: 1
   configFacil:
     intervaloMin: 8
     intervaloMax: 18
     reaccionMin: 6
-    reaccionMax: 12
+    reaccionMax: 14
     umbralDefensa: 8
     chanceAtaque: 0.4
     velocidadRegenIntelecto: 3.6
@@ -5269,7 +5302,7 @@ MonoBehaviour:
   configDificil:
     intervaloMin: 2
     intervaloMax: 12
-    reaccionMin: 4
+    reaccionMin: 2
     reaccionMax: 8
     umbralDefensa: 8
     chanceAtaque: 0.6
@@ -5478,6 +5511,8 @@ MonoBehaviour:
   healthBarPrefab: {fileID: 8608500109205576431, guid: de29a2f92f9b54443a64fae0fe2d29fc, type: 3}
   isEnemyTower: 0
   teamTag: PlayerTeam
+  fractureObject: {fileID: 0}
+  explosionDelay: 3
 --- !u!136 &1632648661
 CapsuleCollider:
   m_ObjectHideFlags: 0

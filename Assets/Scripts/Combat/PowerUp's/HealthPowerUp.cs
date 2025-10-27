@@ -10,7 +10,7 @@ public class HealthPowerUp : MonoBehaviour
     [SerializeField] private int maxRetries = 10;
     [SerializeField] private bool showLogs = true;
 
-    public string teamTag = "";
+    public string teamTag = "PlayerTeam";
 
     private void Start()
     {
@@ -22,13 +22,22 @@ public class HealthPowerUp : MonoBehaviour
         int tries = 0;
         while (tries < maxRetries && towerHealthBar == null)
         {
-            TowerHealthBar[] bars = FindObjectsOfType<TowerHealthBar>();
+            TowerHealthBar[] bars = FindObjectsByType<TowerHealthBar>(FindObjectsSortMode.None);
             if (bars != null && bars.Length > 0)
             {
                 // Si hay varias, podrías filtrar por nombre o tag, aquí tomo la primera
-                towerHealthBar = bars[0];
-                Log($"Encontrada TowerHealthBar: {towerHealthBar.gameObject.name}");
-                yield break;
+                if (!string.IsNullOrEmpty(teamTag))
+                {
+                    foreach (var bar in bars)
+                    {
+                        if (bar.gameObject.CompareTag(teamTag))
+                        {
+                            towerHealthBar = bar;
+                            Log($"Encontrada TowerHealthBar con tag {teamTag}: {towerHealthBar.gameObject.name}");
+                            yield break;
+                        }
+                    }
+                }
             }
 
             tries++;

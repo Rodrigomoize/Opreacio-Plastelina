@@ -148,6 +148,13 @@ public class PlayerCardManager : MonoBehaviour
 
     public void OnCardClickedRequest(CardDisplay display)
     {
+        // Verificar si el gameplay está desactivado (ej: durante secuencia de victoria)
+        if (GameManager.Instance != null && GameManager.Instance.IsGameplayDisabled)
+        {
+            Debug.Log("[PlayerCardManager] 🚫 Acción bloqueada: gameplay desactivado");
+            return;
+        }
+
         if (display == null)
         {
             Debug.LogWarning("[PlayerCardManager] CardDisplay es null!");
@@ -367,6 +374,13 @@ public class PlayerCardManager : MonoBehaviour
 
     private void TryToggleOperator(char op)
     {
+        // Verificar si el gameplay está desactivado (ej: durante secuencia de victoria)
+        if (GameManager.Instance != null && GameManager.Instance.IsGameplayDisabled)
+        {
+            Debug.Log("[PlayerCardManager] 🚫 Acción bloqueada: gameplay desactivado");
+            return;
+        }
+
         float now = Time.time;
         if (now - lastOperatorToggleTime < operatorToggleCooldown)
         {

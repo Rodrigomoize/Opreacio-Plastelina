@@ -170,6 +170,12 @@ public class IAController : MonoBehaviour
 
     void Update()
     {
+        // Verificar si el gameplay está desactivado (ej: durante secuencia de victoria)
+        if (GameManager.Instance != null && GameManager.Instance.IsGameplayDisabled)
+        {
+            return; // No hacer nada si el gameplay está bloqueado
+        }
+
         // ===== 1. SISTEMA DE DEFENSA (PARALELO - SIEMPRE ACTIVO) =====
         // Las defensas NO consumen el cooldown de ataque, funcionan independientemente
         

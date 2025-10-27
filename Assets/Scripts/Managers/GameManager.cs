@@ -26,6 +26,9 @@ public class GameManager : MonoBehaviour
     private bool isPaused = false;
     public bool IsPaused => isPaused;
     
+    private bool gameplayDisabled = false;
+    public bool IsGameplayDisabled => gameplayDisabled;
+    
     public IAController.AIDificultad CurrentDifficulty => currentSelectedDifficulty;
 
     private void Awake()
@@ -209,6 +212,20 @@ public class GameManager : MonoBehaviour
             PauseGame();
     }
 
+    // DISABLE GAMEPLAY (sin afectar Time.timeScale - para secuencias cinemáticas)
+
+    public void DisableGameplay()
+    {
+        gameplayDisabled = true;
+        Debug.Log("[GameManager] 🚫 Gameplay desactivado (IA y Player bloqueados, física continúa)");
+    }
+
+    public void EnableGameplay()
+    {
+        gameplayDisabled = false;
+        Debug.Log("[GameManager] ✅ Gameplay activado");
+    }
+
     public void BackToMainMenu()
     {
         if (AudioManager.Instance != null)
@@ -216,7 +233,10 @@ public class GameManager : MonoBehaviour
             AudioManager.Instance.StopAndResetMusic();
         }
 
+        // Resetear todos los estados antes de volver al menú
         ResumeGame();
+        EnableGameplay();
+        
         LoadMainMenu();
     }
 
@@ -227,7 +247,10 @@ public class GameManager : MonoBehaviour
             AudioManager.Instance.StopAndResetMusic();
         }
         
+        // Resetear todos los estados antes de cargar la escena
         ResumeGame();
+        EnableGameplay();
+        
         LoadPlayScene();
     }
 
@@ -283,6 +306,10 @@ public class GameManager : MonoBehaviour
 
     private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        // Resetear estado de gameplay al cambiar de escena
+        gameplayDisabled = false;
+        Debug.Log($"[GameManager] Estado de gameplay reseteado al cargar {scene.name}");
+
         AssignSceneManagers(scene);
 
         string[] menuScenes = { "MainMenu", "HistoryScene", "InstructionScene", "LevelScene" };

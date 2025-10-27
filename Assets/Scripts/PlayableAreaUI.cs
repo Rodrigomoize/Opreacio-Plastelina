@@ -118,6 +118,13 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler, IPointerEnter
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        // Verificar si el gameplay está desactivado (ej: durante secuencia de victoria)
+        if (GameManager.Instance != null && GameManager.Instance.IsGameplayDisabled)
+        {
+            Debug.Log("[PlayableAreaUI] 🚫 Click bloqueado: gameplay desactivado");
+            return;
+        }
+
         Vector3 spawnPos = Vector3.zero;
         bool hitFound = false;
         Ray usedRay = default;

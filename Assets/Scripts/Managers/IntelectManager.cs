@@ -129,7 +129,7 @@ public class IntelectManager : MonoBehaviour
         }
         else
         {
-            UnityEngine.Debug.LogWarning("[IntelectManager] intelectSlider no asignado.");
+            //UnityEngine.Debug.LogWarning("[IntelectManager] intelectSlider no asignado.");
         }
     }
 

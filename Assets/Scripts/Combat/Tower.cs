@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using static CharacterManager;
 
 public class Tower : MonoBehaviour
@@ -15,7 +16,15 @@ public class Tower : MonoBehaviour
     public bool isEnemyTower = true; // marcar en inspector
     [Tooltip("Tag que identifica al equipo (ej: 'AITeam' o 'PlayerTeam')")]
     public string teamTag = "AITeam";
+    
+    [Header("Destruction FX")]
+    [Tooltip("Componente FractureObject para la explosión (opcional, puede estar en este objeto o en un hijo)")]
+    public FractureObject fractureObject;
+    [Tooltip("Tiempo de espera después de la explosión antes de cambiar de escena")]
+    public float explosionDelay = 3f;
+    
     private Animator animator;
+    private bool isDestroyed = false;
 
     void Start()
     {
@@ -26,6 +35,16 @@ public class Tower : MonoBehaviour
         if (animator == null)
         {
             Debug.LogWarning($"[Tower] {gameObject.name} no tiene Animator component en sus hijos!");
+        }
+
+        // Buscar FractureObject si no está asignado
+        if (fractureObject == null)
+        {
+            fractureObject = GetComponentInChildren<FractureObject>();
+            if (fractureObject == null)
+            {
+                Debug.LogWarning($"[Tower] {gameObject.name} no tiene FractureObject asignado. No habrá efecto de explosión.");
+            }
         }
 
         Collider col = GetComponent<Collider>();
@@ -75,6 +94,8 @@ public class Tower : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        if (isDestroyed) return; // No recibir más daño si ya está destruida
+        
         currentHealth = Mathf.Max(0, currentHealth - damage);
 
         // Sonido de impacto en torre (suena siempre que recibe daño)
@@ -125,6 +146,9 @@ public class Tower : MonoBehaviour
 
     private void OnTowerDestroyed()
     {
+        if (isDestroyed) return; // Evitar llamadas múltiples
+        isDestroyed = true;
+        
         Debug.Log($"[Tower] {gameObject.name} destruida!");
 
         if (!isEnemyTower) // Si NO es torre enemiga = es torre del jugador
@@ -139,8 +163,38 @@ public class Tower : MonoBehaviour
         }
         else // Si es torre enemiga = el jugador gana
         {
-            Debug.Log($"[Tower] 🎉 Torre enemiga destruida (sin sonido, solo victoria)");
-            SceneBridge.LoadWinScene();
+            Debug.Log($"[Tower] 🎉 Torre enemiga destruida - Iniciando secuencia de victoria");
+            StartCoroutine(VictorySequence());
         }
+    }
+
+    private IEnumerator VictorySequence()
+    {
+        // Desactivar gameplay para evitar que el jugador o la IA hagan acciones
+        // (sin afectar Time.timeScale para que la física de la explosión funcione)
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.DisableGameplay();
+            Debug.Log($"[Tower] 🚫 Gameplay desactivado para secuencia de victoria (física continúa)");
+        }
+
+        // Reproducir efecto de explosión/fractura si está disponible
+        if (fractureObject != null)
+        {
+            fractureObject.Explode();
+            Debug.Log($"[Tower] 💥 Explosión de torre reproducida");
+        }
+        else
+        {
+            Debug.LogWarning($"[Tower] No hay FractureObject asignado, omitiendo explosión");
+        }
+
+        // Esperar el tiempo configurado (usa WaitForSeconds normal porque Time.timeScale no está afectado)
+        Debug.Log($"[Tower] ⏳ Esperando {explosionDelay} segundos antes de ir a WinScene...");
+        yield return new WaitForSeconds(explosionDelay);
+
+        // Transicionar a WinScene
+        Debug.Log($"[Tower] ✅ Cargando WinScene...");
+        SceneBridge.LoadWinScene();
     }
 }
