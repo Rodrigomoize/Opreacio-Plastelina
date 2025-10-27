@@ -230,11 +230,20 @@ public class PowerUpManager : MonoBehaviour
         else colors.normalColor = availableColor;
         p.powerUpButton.colors = colors;
 
+        // Actualizar fill del cooldown
         if (p.cooldownFillImage != null)
         {
             if (p.isOnCooldown && p.cooldownTime > 0f)
-                p.cooldownFillImage.fillAmount = 1f - (p.cooldownTimer / p.cooldownTime);
-            else p.cooldownFillImage.fillAmount = 0f;
+            {
+                // Durante cooldown: el fill va de 1 (recién usado) a 0 (listo)
+                float fillProgress = p.cooldownTimer / p.cooldownTime;
+                p.cooldownFillImage.fillAmount = fillProgress;
+            }
+            else
+            {
+                // Cuando está disponible (sin usar), el fill está vacío
+                p.cooldownFillImage.fillAmount = 0f;
+            }
         }
     }
 
@@ -251,14 +260,14 @@ public class PowerUpManager : MonoBehaviour
         int affected = GameSpeedManager.Instance.ApplyTagSpeedMultiplier(p.targetTeam, p.slowMultiplier);
         Debug.Log($"[PowerUpManager] SlowTime activado para tag '{p.targetTeam}' (objetos afectados: {affected})");
 
-        // Flash azul continuo durante toda la duración del powerup
+        // Filtro azul constante durante toda la duración del powerup
         if (ScreenFlashEffect.Instance != null && p.duration > 0f)
         {
-            StartCoroutine(ContinuousFlashCoroutine(slowTimeFlashColor, p.duration));
+            StartCoroutine(ConstantFilterCoroutine(slowTimeFlashColor, p.duration));
         }
         else if (ScreenFlashEffect.Instance != null)
         {
-            // Si es instantáneo, un solo flash
+            // Si es instantáneo, un solo flash breve
             ScreenFlashEffect.Instance.Flash(slowTimeFlashColor, flashDuration);
         }
 
@@ -274,24 +283,51 @@ public class PowerUpManager : MonoBehaviour
     }
     
     /// <summary>
-    /// Corrutina para mantener un flash visual durante toda la duración del powerup
+    /// Corrutina para mantener un filtro de color constante durante toda la duración del powerup
     /// </summary>
-    private System.Collections.IEnumerator ContinuousFlashCoroutine(Color flashColor, float duration)
+    private System.Collections.IEnumerator ConstantFilterCoroutine(Color filterColor, float duration)
     {
-        if (ScreenFlashEffect.Instance == null) yield break;
+        if (ScreenFlashEffect.Instance == null || ScreenFlashEffect.Instance.flashImage == null) 
+            yield break;
         
+        Image flashImage = ScreenFlashEffect.Instance.flashImage;
+        
+        // Fade in rápido al color del filtro
+        float fadeInTime = 0.2f;
         float elapsed = 0f;
         
-        // Mantener el flash visible durante toda la duración
-        while (elapsed < duration)
+        while (elapsed < fadeInTime)
         {
-            // Aplicar el flash con una duración que se solape
-            ScreenFlashEffect.Instance.Flash(flashColor, Mathf.Min(0.5f, duration - elapsed));
-            
-            // Esperar un poco antes del siguiente flash (pero menos que la duración para mantener continuidad)
-            yield return new WaitForSeconds(0.3f);
-            elapsed += 0.3f;
+            elapsed += Time.deltaTime;
+            float alpha = Mathf.Lerp(0, filterColor.a, elapsed / fadeInTime);
+            Color c = filterColor;
+            c.a = alpha;
+            flashImage.color = c;
+            yield return null;
         }
+        
+        // Mantener el filtro constante
+        flashImage.color = filterColor;
+        yield return new WaitForSeconds(duration - fadeInTime - 0.3f);
+        
+        // Fade out al final
+        float fadeOutTime = 0.3f;
+        elapsed = 0f;
+        
+        while (elapsed < fadeOutTime)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = Mathf.Lerp(filterColor.a, 0, elapsed / fadeOutTime);
+            Color c = filterColor;
+            c.a = alpha;
+            flashImage.color = c;
+            yield return null;
+        }
+        
+        // Asegurarse de que quede invisible
+        Color finalColor = filterColor;
+        finalColor.a = 0;
+        flashImage.color = finalColor;
     }
 
     private void DeactivateSlowTimePowerUp(PowerUpData p)
