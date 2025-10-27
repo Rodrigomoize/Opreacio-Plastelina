@@ -226,10 +226,8 @@ public class GameManager : MonoBehaviour
         Debug.Log("[GameManager] ✅ Gameplay activado");
     }
 
-    /// <summary>
     /// Detiene todas las tropas en el campo durante la secuencia de victoria.
     /// Congela su movimiento y desactiva su capacidad de combate/interacción.
-    /// </summary>
     public void FreezeAllTroops()
     {
         Debug.Log("[GameManager] ❄️ Congelando todas las tropas en el campo...");
@@ -479,11 +477,28 @@ public class GameManager : MonoBehaviour
 
     private void AssignSceneManagers(Scene scene)
     {
-        uiManager = uiManager ?? FindInScene<UIManager>(scene);
+        if (scene.name == "PlayScene")
+        {
+            uiManager = FindInScene<UIManager>(scene);
+            
+            if (uiManager != null)
+            {
+                uiManager.Reinitialize();
+                Debug.Log("[GameManager] ✅ UIManager reinicializado para nueva partida");
+            }
+            else
+            {
+                Debug.LogWarning("[GameManager] ⚠️ No se encontró UIManager en PlayScene");
+            }
+        }
+        else
+        {
+            uiManager = uiManager ?? FindInScene<UIManager>(scene);
+        }
+        
         audioManager = audioManager ?? FindInScene<AudioManager>(scene);
         combatManager = combatManager ?? FindInScene<CardManager>(scene);
         
-        // SIEMPRE buscar AIController en PlayScene (se destruye y recrea en cada partida)
         if (scene.name == "PlayScene")
         {
             aiCardManager = FindInScene<IAController>(scene);

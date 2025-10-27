@@ -26,6 +26,18 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
+        Initialize();
+    }
+
+    // ⭐ NUEVO: Método de inicialización separado
+    private void Initialize()
+    {
+        Debug.Log("[UIManager] ===== INICIALIZANDO UIManager =====");
+        
+        // Resetear estado
+        isPaused = false;
+        currentInstructionIndex = 0;
+
         // Panel de pausa oculto al inicio
         if (pausePanel != null)
         {
@@ -43,11 +55,16 @@ public class UIManager : MonoBehaviour
             pauseButtonImage.sprite = pauseIcon;
         }
 
-        // Conecta el bot�n de pausa autom�ticamente
+        // Conecta el botón de pausa automáticamente
         if (pauseButton != null)
         {
             pauseButton.onClick.RemoveAllListeners();
             pauseButton.onClick.AddListener(TogglePause);
+            Debug.Log("[UIManager] Botón de pausa configurado");
+        }
+        else
+        {
+            Debug.LogWarning("[UIManager] ⚠️ pauseButton es NULL");
         }
 
         // Conecta los botones de instrucciones
@@ -56,34 +73,62 @@ public class UIManager : MonoBehaviour
         Debug.Log("[UIManager] Inicializado correctamente");
     }
 
+    // ⭐ NUEVO: Método público para reinicializar desde GameManager
+    public void Reinitialize()
+    {
+        Debug.Log("[UIManager] 🔄 Reinicializando UIManager...");
+        Initialize();
+    }
+
     private void SetupInstructionButtons()
     {
+        Debug.Log("[UIManager] Configurando botones de instrucciones...");
+        
         if (showInstructionsButton != null)
         {
             showInstructionsButton.onClick.RemoveAllListeners();
             showInstructionsButton.onClick.AddListener(ShowInstructions);
+            Debug.Log("[UIManager] ✅ Botón 'Mostrar Instrucciones' configurado");
+        }
+        else
+        {
+            Debug.LogWarning("[UIManager] ⚠️ showInstructionsButton es NULL");
         }
 
         if (closeInstructionsButton != null)
         {
             closeInstructionsButton.onClick.RemoveAllListeners();
             closeInstructionsButton.onClick.AddListener(CloseInstructions);
+            Debug.Log("[UIManager] ✅ Botón 'Cerrar Instrucciones' configurado");
+        }
+        else
+        {
+            Debug.LogWarning("[UIManager] ⚠️ closeInstructionsButton es NULL");
         }
 
         if (nextInstructionButton != null)
         {
             nextInstructionButton.onClick.RemoveAllListeners();
             nextInstructionButton.onClick.AddListener(NextInstruction);
+            Debug.Log("[UIManager] ✅ Botón 'Siguiente' configurado");
+        }
+        else
+        {
+            Debug.LogWarning("[UIManager] ⚠️ nextInstructionButton es NULL");
         }
 
         if (previousInstructionButton != null)
         {
             previousInstructionButton.onClick.RemoveAllListeners();
             previousInstructionButton.onClick.AddListener(PreviousInstruction);
+            Debug.Log("[UIManager] ✅ Botón 'Anterior' configurado");
+        }
+        else
+        {
+            Debug.LogWarning("[UIManager] ⚠️ previousInstructionButton es NULL");
         }
     }
 
-    /// Este m�todo se llama AUTOM�TICAMENTE desde el bot�n (sin necesidad de asignarlo)
     public void TogglePause()
     {
         if (isPaused)
@@ -96,7 +141,6 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    /// Pausa el juego: muestra el panel y cambia el icono
     private void PauseGame()
     {
         isPaused = true;
@@ -115,7 +159,6 @@ public class UIManager : MonoBehaviour
             AudioManager.Instance.PauseMusic();
         }
 
-        // Llamar al GameManager para congelar el tiempo
         if (GameManager.Instance != null)
         {
             GameManager.Instance.PauseGame();
@@ -129,7 +172,6 @@ public class UIManager : MonoBehaviour
         Debug.Log("[UIManager] Juego pausado - Panel visible");
     }
 
-    /// Reanuda el juego: oculta el panel y cambia el icono
     private void ResumeGame()
     {
         isPaused = false;
@@ -166,16 +208,24 @@ public class UIManager : MonoBehaviour
 
     public void ShowInstructions()
     {
-        if (instructionsPanel == null || instructionSprites == null || instructionSprites.Length == 0)
+        Debug.Log("[UIManager] ShowInstructions() llamado");
+        
+        if (instructionsPanel == null)
         {
-            Debug.LogWarning("[UIManager] No se pueden mostrar instrucciones: panel o sprites no configurados");
+            Debug.LogError("[UIManager] ❌ instructionsPanel es NULL");
+            return;
+        }
+        
+        if (instructionSprites == null || instructionSprites.Length == 0)
+        {
+            Debug.LogError("[UIManager] ❌ instructionSprites vacío o NULL");
             return;
         }
 
         // Resetear al inicio
         currentInstructionIndex = 0;
 
-        // Ocultar men� de pausa y mostrar panel de instrucciones
+        // Ocultar menú de pausa y mostrar panel de instrucciones
         if (pausePanel != null)
         {
             pausePanel.SetActive(false);
@@ -184,17 +234,19 @@ public class UIManager : MonoBehaviour
         instructionsPanel.SetActive(true);
         UpdateInstructionDisplay();
 
-        Debug.Log("[UIManager] Mostrando instrucciones");
+        Debug.Log("[UIManager] ✅ Instrucciones mostradas correctamente");
     }
 
     public void CloseInstructions()
     {
+        Debug.Log("[UIManager] CloseInstructions() llamado");
+        
         if (instructionsPanel != null)
         {
             instructionsPanel.SetActive(false);
         }
 
-        // Volver a mostrar el men� de pausa
+        // Volver a mostrar el menú de pausa
         if (pausePanel != null)
         {
             pausePanel.SetActive(true);
@@ -212,7 +264,7 @@ public class UIManager : MonoBehaviour
 
         currentInstructionIndex++;
         UpdateInstructionDisplay();
-        Debug.Log($"[UIManager] Siguiente instrucci�n: {currentInstructionIndex + 1}/{instructionSprites.Length}");
+        Debug.Log($"[UIManager] Siguiente instrucción: {currentInstructionIndex + 1}/{instructionSprites.Length}");
     }
 
     private void PreviousInstruction()
@@ -224,7 +276,7 @@ public class UIManager : MonoBehaviour
 
         currentInstructionIndex--;
         UpdateInstructionDisplay();
-        Debug.Log($"[UIManager] Instrucci�n anterior: {currentInstructionIndex + 1}/{instructionSprites.Length}");
+        Debug.Log($"[UIManager] Instrucción anterior: {currentInstructionIndex + 1}/{instructionSprites.Length}");
     }
 
     private void UpdateInstructionDisplay()
@@ -234,7 +286,7 @@ public class UIManager : MonoBehaviour
             instructionsImage.sprite = instructionSprites[currentInstructionIndex];
         }
 
-        // Activar/desactivar botones seg�n la posici�n
+        // Activar/desactivar botones según la posición
         if (previousInstructionButton != null)
         {
             previousInstructionButton.interactable = currentInstructionIndex > 0;
@@ -248,6 +300,8 @@ public class UIManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        Debug.Log("[UIManager] OnDestroy llamado - Limpiando listeners");
+        
         if (pauseButton != null)
         {
             pauseButton.onClick.RemoveListener(TogglePause);

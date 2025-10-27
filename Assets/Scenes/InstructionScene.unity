@@ -376,13 +376,13 @@ MonoBehaviour:
   screenImage: {fileID: 1393097535}
   nextButton: {fileID: 1033863065}
   screenSprites:
-  - {fileID: 21300000, guid: b1e0e867bd5f40844947a0019252180d, type: 3}
-  - {fileID: 21300000, guid: 0bec1fcb5e66ba146a5afa4c8e8ff03f, type: 3}
-  - {fileID: 21300000, guid: 198bc2131c496a945a9f888d6e6d5b1c, type: 3}
-  - {fileID: 21300000, guid: d4a15b945820df34ab2afdb30c52946f, type: 3}
+  - {fileID: 21300000, guid: b6bf58ed3054f65499a9ce0f7300440b, type: 3}
+  - {fileID: 21300000, guid: c01f7e2371a620f43a00042cb75af64d, type: 3}
+  - {fileID: 21300000, guid: acd8139b700b2e943aa8938fe0a94e6a, type: 3}
+  - {fileID: 21300000, guid: c6098b83a3539b540bb1f31251aaa7b3, type: 3}
   - {fileID: 21300000, guid: ff4a4c7a2b33a7d4ebf11d809112a17a, type: 3}
-  normalButtonSprite: {fileID: 21300000, guid: ca64e9511e8cdf344b55c998e70cf884, type: 3}
-  finalButtonSprite: {fileID: 21300000, guid: 2dc4c5254d6d5f342985ed031a5cfacd, type: 3}
+  normalButtonSprite: {fileID: 21300000, guid: 98590a77d97c5a94dabb4455233aaa00, type: 3}
+  finalButtonSprite: {fileID: 21300000, guid: 8a694137076656543ab5a32a376faff1, type: 3}
   onNormalButtonClick:
     m_PersistentCalls:
       m_Calls:
@@ -734,7 +734,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: ca64e9511e8cdf344b55c998e70cf884, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 98590a77d97c5a94dabb4455233aaa00, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -809,7 +809,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: b1e0e867bd5f40844947a0019252180d, type: 3}
+  m_Sprite: {fileID: 21300000, guid: b6bf58ed3054f65499a9ce0f7300440b, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
