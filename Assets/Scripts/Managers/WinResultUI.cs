@@ -138,7 +138,7 @@ public class WinResultUI : MonoBehaviour
 
     private void OnMainMenuClicked()
     {
-        Debug.Log("[WinResultUI] Volviendo a LevelScene...");
-        GameManager.GoToLevelScene();
+        Debug.Log("[WinResultUI] Volviendo a MainMenuScene...");
+        GameManager.GoToMainMenu();
     }
 }

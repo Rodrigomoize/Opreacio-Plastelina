@@ -41,7 +41,7 @@ public class GameResultUI : MonoBehaviour
 
     private void OnMainMenuClicked()
     {
-        Debug.Log("[GameResultUI] Volviendo a LevelScene...");
-        GameManager.GoToLevelScene();
+        Debug.Log("[GameResultUI] Volviendo a MainMenuScene...");
+        GameManager.GoToMainMenu();
     }
 }

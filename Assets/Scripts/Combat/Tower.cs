@@ -153,19 +153,55 @@ public class Tower : MonoBehaviour
 
         if (!isEnemyTower) // Si NO es torre enemiga = es torre del jugador
         {
-            if (AudioManager.Instance != null)
-            {
-                AudioManager.Instance.PlayTowerDestroyed();
-                Debug.Log($"[Tower] 💀 Sonido de torre destruida reproducido (torre del jugador)");
-            }
-
-            SceneBridge.LoadLoseScene();
+            Debug.Log($"[Tower] 💀 Torre del jugador destruida - Iniciando secuencia de derrota");
+            StartCoroutine(DefeatSequence());
         }
         else // Si es torre enemiga = el jugador gana
         {
             Debug.Log($"[Tower] 🎉 Torre enemiga destruida - Iniciando secuencia de victoria");
             StartCoroutine(VictorySequence());
         }
+    }
+
+    private IEnumerator DefeatSequence()
+    {
+        // Reproducir sonido de torre destruida
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayTowerDestroyed();
+            Debug.Log($"[Tower] 💀 Sonido de torre destruida reproducido (torre del jugador)");
+        }
+
+        // Desactivar gameplay para evitar que el jugador o la IA hagan acciones
+        // (sin afectar Time.timeScale para que la física de la explosión funcione)
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.DisableGameplay();
+            Debug.Log($"[Tower] 🚫 Gameplay desactivado para secuencia de derrota (física continúa)");
+            
+            // Congelar todas las tropas en el campo para evitar errores
+            GameManager.Instance.FreezeAllTroops();
+            Debug.Log($"[Tower] ❄️ Tropas congeladas para secuencia de derrota");
+        }
+
+        // Reproducir efecto de explosión/fractura si está disponible
+        if (fractureObject != null)
+        {
+            fractureObject.Explode();
+            Debug.Log($"[Tower] 💥 Explosión de torre del jugador reproducida");
+        }
+        else
+        {
+            Debug.LogWarning($"[Tower] No hay FractureObject asignado, omitiendo explosión");
+        }
+
+        // Esperar el tiempo configurado (usa WaitForSeconds normal porque Time.timeScale no está afectado)
+        Debug.Log($"[Tower] ⏳ Esperando {explosionDelay} segundos antes de ir a LoseScene...");
+        yield return new WaitForSeconds(explosionDelay);
+
+        // Transicionar a LoseScene
+        Debug.Log($"[Tower] ✅ Cargando LoseScene...");
+        SceneBridge.LoadLoseScene();
     }
 
     private IEnumerator VictorySequence()

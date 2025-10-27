@@ -5471,6 +5471,7 @@ GameObject:
   - component: {fileID: 1632648659}
   - component: {fileID: 1632648660}
   - component: {fileID: 1632648661}
+  - component: {fileID: 1632648662}
   m_Layer: 0
   m_Name: TorrePlayer
   m_TagString: PlayerTeam
@@ -5511,7 +5512,7 @@ MonoBehaviour:
   healthBarPrefab: {fileID: 8608500109205576431, guid: de29a2f92f9b54443a64fae0fe2d29fc, type: 3}
   isEnemyTower: 0
   teamTag: PlayerTeam
-  fractureObject: {fileID: 0}
+  fractureObject: {fileID: 1632648662}
   explosionDelay: 3
 --- !u!136 &1632648661
 CapsuleCollider:
@@ -5536,6 +5537,24 @@ CapsuleCollider:
   m_Height: 1.1791626
   m_Direction: 1
   m_Center: {x: 0, y: 0.5896389, z: 0.13004997}
+--- !u!114 &1632648662
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1632648658}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b1f260e81aff7449b0c6a499b5e5a68, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FractureObject
+  fracturedObject: {fileID: 905805386559412860, guid: 0d32628c84b69804ea4959a47f7416ec, type: 3}
+  explosionVFX: {fileID: 1000011797152326, guid: acf39d9f4addf294d93fa56fa373961b, type: 3}
+  explosionMinForce: 5
+  explosionMaxForce: 100
+  explosionForceRadius: 10
+  fragScaleFactor: 1
 --- !u!1 &1639695184
 GameObject:
   m_ObjectHideFlags: 0
