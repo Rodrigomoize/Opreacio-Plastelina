@@ -158,14 +158,10 @@ public class IAController : MonoBehaviour
         detector = new AIThreatDetector(torreIA);
         spawnCalc = new AISpawnPositionCalculator(spawnPointIA, torreIA, detector);
 
-        // Aplicar dificultad inicial (puede ser sobreescrita por DifficultyManager)
-        dificultadActual = dificultadInicial;
-        ConfigurarDificultad();
-
-        // Primer intervalo aleatorio
-        tiempoHastaAccion = Random.Range(intervaloMin, intervaloMax);
-
-        Log($"IA inicializada - Dificultad: {dificultadActual} - Primera acción en {tiempoHastaAccion:F1}s");
+        // NO configurar dificultad aquí - esperar a que GameManager llame a SetDificultad()
+        // Esto evita que se use dificultadInicial cuando el jugador seleccionó otra
+        
+        Log($"IA inicializada - Esperando configuración de dificultad desde GameManager...");
     }
 
     void Update()
@@ -174,6 +170,12 @@ public class IAController : MonoBehaviour
         if (GameManager.Instance != null && GameManager.Instance.IsGameplayDisabled)
         {
             return; // No hacer nada si el gameplay está bloqueado
+        }
+
+        // Verificar si la dificultad ya fue configurada (evitar errores antes de SetDificultad)
+        if (intervaloMin <= 0f || intervaloMax <= 0f)
+        {
+            return; // Esperar a que GameManager configure la dificultad
         }
 
         // ===== 1. SISTEMA DE DEFENSA (PARALELO - SIEMPRE ACTIVO) =====
@@ -543,6 +545,13 @@ public class IAController : MonoBehaviour
     {
         dificultadActual = nuevaDificultad;
         ConfigurarDificultad();
+        
+        // Inicializar el primer intervalo si aún no se ha configurado
+        if (tiempoHastaAccion <= 0f)
+        {
+            tiempoHastaAccion = Random.Range(intervaloMin, intervaloMax);
+            Log($"Primera acción programada en {tiempoHastaAccion:F1}s");
+        }
     }
 
     public void ForzarDecision()
