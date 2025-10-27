@@ -94,6 +94,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4c0d05da3efb5574f847fca1dffc7aec, type: 3}
       insertIndex: -1
       addedObject: {fileID: 842079451391197714}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4c0d05da3efb5574f847fca1dffc7aec, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5471933437784379180}
   m_SourcePrefab: {fileID: 100100000, guid: 4c0d05da3efb5574f847fca1dffc7aec, type: 3}
 --- !u!1 &3742557994316045736 stripped
 GameObject:
@@ -119,7 +122,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 12
+  m_Radius: 4
   m_Center: {x: 0, y: 3.76, z: 0}
 --- !u!114 &1914698062107730344
 MonoBehaviour:
@@ -228,7 +231,22 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.51
+  m_Radius: 1.51
   m_Height: 5.8961945
   m_Direction: 1
-  m_Center: {x: 0, y: 3.51849, z: 0.8715122}
+  m_Center: {x: 0, y: 3.51849, z: 0.84}
+--- !u!114 &5471933437784379180
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3742557994316045736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aaa71a047fb5fe3449cace3b11aae9ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TroopDespawnController
+  despawnDuration: 1
+  puddleVFXPrefab: {fileID: 7190290771688677997, guid: 823c3b07aac1843418a987931bb569db, type: 3}
+  shrinkSpeed: 3

@@ -176,6 +176,10 @@ public class Tower : MonoBehaviour
         {
             GameManager.Instance.DisableGameplay();
             Debug.Log($"[Tower] 🚫 Gameplay desactivado para secuencia de victoria (física continúa)");
+            
+            // Congelar todas las tropas en el campo para evitar errores
+            GameManager.Instance.FreezeAllTroops();
+            Debug.Log($"[Tower] ❄️ Tropas congeladas para secuencia de victoria");
         }
 
         // Reproducir efecto de explosión/fractura si está disponible

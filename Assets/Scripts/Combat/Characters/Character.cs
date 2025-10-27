@@ -156,6 +156,10 @@ public class Character : MonoBehaviour
         // Si está en spawn, no actualizar movimiento ni animaciones
         if (spawnController != null && spawnController.IsSpawning) return;
         
+        // Si está en despawn, no actualizar movimiento ni animaciones
+        TroopDespawnController despawnController = GetComponent<TroopDespawnController>();
+        if (despawnController != null && despawnController.IsDespawning) return;
+        
         if (agent == null || enemyTower == null) return;
 
         // Actualizar animación de caminar basándose en la velocidad del agente
@@ -181,6 +185,10 @@ public class Character : MonoBehaviour
     {
         // Verificar si está en spawn - no puede interactuar
         if (spawnController != null && !spawnController.CanAttack()) return;
+        
+        // Verificar si está en despawn - no puede interactuar
+        TroopDespawnController despawnController = GetComponent<TroopDespawnController>();
+        if (despawnController != null && despawnController.IsDespawning) return;
         
         if (isInCombat) return; // Ya está en combate
 

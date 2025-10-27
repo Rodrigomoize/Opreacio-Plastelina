@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -158,10 +159,28 @@ public class IAController : MonoBehaviour
         detector = new AIThreatDetector(torreIA);
         spawnCalc = new AISpawnPositionCalculator(spawnPointIA, torreIA, detector);
 
-        // NO configurar dificultad aquí - esperar a que GameManager llame a SetDificultad()
-        // Esto evita que se use dificultadInicial cuando el jugador seleccionó otra
+        // Esperar un frame para que GameManager configure la dificultad
+        // Si no lo hace, usar dificultadInicial como respaldo
+        StartCoroutine(InitializeDifficultyFallback());
         
         Log($"IA inicializada - Esperando configuración de dificultad desde GameManager...");
+    }
+
+    private IEnumerator InitializeDifficultyFallback()
+    {
+        // Esperar hasta el final del frame para que HandleSceneLoaded se ejecute
+        yield return new WaitForEndOfFrame();
+        
+        // Si después de 1 frame los intervalos siguen en 0, usar dificultadInicial
+        if (intervaloMin <= 0f || intervaloMax <= 0f)
+        {
+            Debug.LogWarning($"[IA] GameManager no configuró la dificultad. Usando dificultadInicial: {dificultadInicial}");
+            SetDificultad(dificultadInicial);
+        }
+        else
+        {
+            Log($"Dificultad configurada correctamente por GameManager: {dificultadActual}");
+        }
     }
 
     void Update()

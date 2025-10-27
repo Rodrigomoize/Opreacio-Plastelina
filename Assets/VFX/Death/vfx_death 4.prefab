@@ -62,10 +62,12 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 33d4847cdb0332c469c00d4730ec0cc3, type: 2}
+  - {fileID: 2100000, guid: 036596fb9f4104a4fabfe4968171165e, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -83,6 +85,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -4894,6 +4897,8 @@ ParticleSystemRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -4915,6 +4920,7 @@ ParticleSystemRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -9785,10 +9791,12 @@ ParticleSystemRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 33d4847cdb0332c469c00d4730ec0cc3, type: 2}
+  - {fileID: 2100000, guid: 036596fb9f4104a4fabfe4968171165e, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -9806,6 +9814,7 @@ ParticleSystemRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -9850,9 +9859,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8744162051134573521}
-  - component: {fileID: 3002862154442344493}
+  - component: {fileID: 2227740228003079713}
   m_Layer: 0
-  m_Name: vfx_spawn_1
+  m_Name: vfx_death 4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9876,7 +9885,7 @@ Transform:
   - {fileID: 1579670211239834837}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3002862154442344493
+--- !u!114 &2227740228003079713
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -9885,13 +9894,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 7190290771688677997}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7455a5bbd9eab3b4ea94c4371334d7f0, type: 3}
+  m_Script: {fileID: 11500000, guid: 015e979f55e700d4fab63960414569ee, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
-  dirtParticles: {fileID: 8228452630537430570}
-  clayParticles: {fileID: 3062076929054648106}
-  splatSphere: {fileID: 808882428857258044}
-  splatInitialScale: 1
-  splatFinalScale: 0.1
-  splatDuration: 0.8
-  lifetime: 1
+  m_EditorClassIdentifier: Assembly-CSharp::PuddleVFX
+  expansionDuration: 0.5
+  holdDuration: 0.3
+  fadeOutDuration: 0.5
+  initialScale: 0.1
+  finalScale: 1

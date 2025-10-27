@@ -226,6 +226,59 @@ public class GameManager : MonoBehaviour
         Debug.Log("[GameManager] ✅ Gameplay activado");
     }
 
+    /// <summary>
+    /// Detiene todas las tropas en el campo durante la secuencia de victoria.
+    /// Congela su movimiento y desactiva su capacidad de combate/interacción.
+    /// </summary>
+    public void FreezeAllTroops()
+    {
+        Debug.Log("[GameManager] ❄️ Congelando todas las tropas en el campo...");
+        
+        // Buscar todos los Characters (tropas individuales)
+        Character[] characters = FindObjectsByType<Character>(FindObjectsSortMode.None);
+        foreach (Character character in characters)
+        {
+            if (character != null && character.gameObject != null)
+            {
+                // Detener el NavMeshAgent
+                UnityEngine.AI.NavMeshAgent agent = character.GetComponent<UnityEngine.AI.NavMeshAgent>();
+                if (agent != null && agent.enabled)
+                {
+                    agent.isStopped = true;
+                    agent.velocity = Vector3.zero;
+                }
+                
+                // Marcar como en combate para evitar nuevas interacciones
+                character.isInCombat = true;
+                
+                Debug.Log($"[GameManager] Congelado Character: {character.gameObject.name}");
+            }
+        }
+        
+        // Buscar todos los CharacterCombined (camiones/operaciones)
+        CharacterCombined[] combinedCharacters = FindObjectsByType<CharacterCombined>(FindObjectsSortMode.None);
+        foreach (CharacterCombined combined in combinedCharacters)
+        {
+            if (combined != null && combined.gameObject != null)
+            {
+                // Detener el NavMeshAgent
+                UnityEngine.AI.NavMeshAgent agent = combined.GetComponent<UnityEngine.AI.NavMeshAgent>();
+                if (agent != null && agent.enabled)
+                {
+                    agent.isStopped = true;
+                    agent.velocity = Vector3.zero;
+                }
+                
+                // Marcar como en combate para evitar nuevas interacciones
+                combined.isInCombat = true;
+                
+                Debug.Log($"[GameManager] Congelado CharacterCombined: {combined.gameObject.name}");
+            }
+        }
+        
+        Debug.Log($"[GameManager] ✅ Congeladas {characters.Length} tropas individuales y {combinedCharacters.Length} operaciones");
+    }
+
     public void BackToMainMenu()
     {
         if (AudioManager.Instance != null)
@@ -429,8 +482,18 @@ public class GameManager : MonoBehaviour
         uiManager = uiManager ?? FindInScene<UIManager>(scene);
         audioManager = audioManager ?? FindInScene<AudioManager>(scene);
         combatManager = combatManager ?? FindInScene<CardManager>(scene);
-        aiCardManager = aiCardManager ?? FindInScene<IAController>(scene);
-        playerCardManager = playerCardManager ?? FindInScene<PlayerCardManager>(scene);
+        
+        // SIEMPRE buscar AIController en PlayScene (se destruye y recrea en cada partida)
+        if (scene.name == "PlayScene")
+        {
+            aiCardManager = FindInScene<IAController>(scene);
+            playerCardManager = FindInScene<PlayerCardManager>(scene);
+        }
+        else
+        {
+            aiCardManager = aiCardManager ?? FindInScene<IAController>(scene);
+            playerCardManager = playerCardManager ?? FindInScene<PlayerCardManager>(scene);
+        }
         
         gameTimerManager = FindInScene<GameTimer>(scene);
         scoreManager = FindInScene<ScoreManager>(scene);
