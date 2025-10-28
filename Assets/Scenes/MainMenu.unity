@@ -1027,6 +1027,7 @@ MonoBehaviour:
   turnThePageSFX: {fileID: 8300000, guid: 1db48f9eb85cb44448c384aa2d4bede1, type: 3}
   cardSelectedSFX: {fileID: 8300000, guid: c8fedade8769601448e784a337488fa0, type: 3}
   towerDestroyedSFX: {fileID: 8300000, guid: 8b1cd5ec01df09f478af17159fc7025f, type: 3}
+  enemyTowerDestroyedSFX: {fileID: 8300000, guid: 8ff9d9997c092c144a5e0da4c40b1030, type: 3}
   timer5SecondsSFX: {fileID: 8300000, guid: 1ab18cf77b78b5340b3ca7d67a0deaef, type: 3}
   operatorSelectedSFX: {fileID: 8300000, guid: fb2ca457b80d19442a7bcde0e694a1b6, type: 3}
   attackDefenseCollisionSFX: {fileID: 8300000, guid: 8a61b9cd738697745aeb3452568d0e70, type: 3}

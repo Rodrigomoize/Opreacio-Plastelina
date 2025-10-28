@@ -14,13 +14,10 @@ public class Tower : MonoBehaviour
 
     [Header("Tower Type")]
     public bool isEnemyTower = true; // marcar en inspector
-    [Tooltip("Tag que identifica al equipo (ej: 'AITeam' o 'PlayerTeam')")]
     public string teamTag = "AITeam";
     
     [Header("Destruction FX")]
-    [Tooltip("Componente FractureObject para la explosión (opcional, puede estar en este objeto o en un hijo)")]
     public FractureObject fractureObject;
-    [Tooltip("Tiempo de espera después de la explosión antes de cambiar de escena")]
     public float explosionDelay = 3f;
     
     private Animator animator;
@@ -156,65 +153,47 @@ public class Tower : MonoBehaviour
 
     private IEnumerator DefeatSequence()
     {
-        // Reproducir sonido de torre destruida
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PlayTowerDestroyed();
         }
 
-        // Desactivar gameplay para evitar que el jugador o la IA hagan acciones
-        // (sin afectar Time.timeScale para que la física de la explosión funcione)
         if (GameManager.Instance != null)
         {
             GameManager.Instance.DisableGameplay();
-            
-            // Congelar todas las tropas en el campo para evitar errores
             GameManager.Instance.FreezeAllTroops();
         }
 
-        // Reproducir efecto de explosión/fractura si está disponible
         if (fractureObject != null)
         {
             fractureObject.Explode();
         }
-        else
-        {
-            Debug.LogWarning($"[Tower] No hay FractureObject asignado, omitiendo explosión");
-        }
 
-        // Esperar el tiempo configurado (usa WaitForSeconds normal porque Time.timeScale no está afectado)
         yield return new WaitForSeconds(explosionDelay);
 
-        // Transicionar a LoseScene
         SceneBridge.LoadLoseScene();
     }
 
     private IEnumerator VictorySequence()
     {
-        // Desactivar gameplay para evitar que el jugador o la IA hagan acciones
-        // (sin afectar Time.timeScale para que la física de la explosión funcione)
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayEnemyTowerDestroyed();
+        }
+
         if (GameManager.Instance != null)
         {
             GameManager.Instance.DisableGameplay();
-            
-            // Congelar todas las tropas en el campo para evitar errores
             GameManager.Instance.FreezeAllTroops();
         }
 
-        // Reproducir efecto de explosión/fractura si está disponible
         if (fractureObject != null)
         {
             fractureObject.Explode();
         }
-        else
-        {
-            Debug.LogWarning($"[Tower] No hay FractureObject asignado, omitiendo explosión");
-        }
 
-        // Esperar el tiempo configurado (usa WaitForSeconds normal porque Time.timeScale no está afectado)
         yield return new WaitForSeconds(explosionDelay);
 
-        // Transicionar a WinScene
         SceneBridge.LoadWinScene();
     }
 }

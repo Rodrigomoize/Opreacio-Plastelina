@@ -43,6 +43,12 @@ public class AudioManagerBridge : MonoBehaviour
             AudioManager.Instance.PlayTowerDestroyed();
     }
 
+    public void PlayEnemyTowerDestroyed()
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayEnemyTowerDestroyed();
+    }
+
     public void PlayTimer5Seconds()
     {
         if (AudioManager.Instance != null)

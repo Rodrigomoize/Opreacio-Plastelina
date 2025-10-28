@@ -539,11 +539,11 @@ MonoBehaviour:
   nextButton: {fileID: 224094835}
   previousButton: {fileID: 822255209}
   screenSprites:
-  - {fileID: 21300000, guid: ce483da3dcb1ecc45a02c3f368fd508c, type: 3}
-  - {fileID: 21300000, guid: a921824248955424ca805e41cfa6b8ae, type: 3}
-  - {fileID: 21300000, guid: cd24652134d4c8c42bcc71d39688611e, type: 3}
+  - {fileID: 21300000, guid: 5c5759f0837f43049b3057090bb0981b, type: 3}
+  - {fileID: 21300000, guid: e9b82236474cf644880ed9c6eb7d5dde, type: 3}
+  - {fileID: 21300000, guid: 4fdb61f3dbc442a4ca57ecabe03961cc, type: 3}
   - {fileID: 21300000, guid: 9e92a3b346e22c24799a891f66997df2, type: 3}
-  - {fileID: 21300000, guid: 6f9777322540fcc479b980beef62b145, type: 3}
+  - {fileID: 21300000, guid: c8df38443f2745c4cb1a5125ca59485e, type: 3}
   onNextButtonClick:
     m_PersistentCalls:
       m_Calls: []
@@ -1002,7 +1002,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: ce483da3dcb1ecc45a02c3f368fd508c, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 5c5759f0837f43049b3057090bb0981b, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

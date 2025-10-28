@@ -27,6 +27,7 @@ public class AudioManager : MonoBehaviour
     [Header("Gameplay Sound Effects")]
     [SerializeField] private AudioClip cardSelectedSFX;
     [SerializeField] private AudioClip towerDestroyedSFX;
+    [SerializeField] private AudioClip enemyTowerDestroyedSFX;
     [SerializeField] private AudioClip timer5SecondsSFX;
     [SerializeField] private AudioClip operatorSelectedSFX;
     [SerializeField] private AudioClip attackDefenseCollisionSFX;
@@ -300,6 +301,11 @@ public class AudioManager : MonoBehaviour
     public void PlayTowerDestroyed()
     {
         PlaySFX(towerDestroyedSFX);
+    }
+
+    public void PlayEnemyTowerDestroyed()
+    {
+        PlaySFX(enemyTowerDestroyedSFX);
     }
 
     public void PlayTimer5Seconds()
