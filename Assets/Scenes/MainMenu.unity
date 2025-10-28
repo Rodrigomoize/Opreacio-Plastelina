@@ -1031,6 +1031,8 @@ MonoBehaviour:
   operatorSelectedSFX: {fileID: 8300000, guid: fb2ca457b80d19442a7bcde0e694a1b6, type: 3}
   attackDefenseCollisionSFX: {fileID: 8300000, guid: 8a61b9cd738697745aeb3452568d0e70, type: 3}
   towerHitSFX: {fileID: 8300000, guid: 5a94d68238540ae43a11e22e263df27c, type: 3}
+  slowTimePowerUpSFX: {fileID: 8300000, guid: f8919f5f5a2284848878bf82940ee3f2, type: 3}
+  healPowerUpSFX: {fileID: 8300000, guid: bb1c06dcdbd8bfd499caa83d33fc3036, type: 3}
   operationCreatedSFX:
   - {fileID: 8300000, guid: c86b3325b5a647344ab57e995e65f106, type: 3}
   - {fileID: 8300000, guid: 5a95837a7f4ff5943ab610fc69cbc64c, type: 3}

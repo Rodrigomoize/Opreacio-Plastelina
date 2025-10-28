@@ -61,6 +61,18 @@ public class AudioManagerBridge : MonoBehaviour
             AudioManager.Instance.PlayTowerHit();
     }
 
+    public void PlaySlowTimePowerUpSFX()
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySlowTimePowerUpSFX();
+    }
+
+    public void PlayHealPowerUpSFX()
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayHealPowerUpSFX();
+    }
+
     // ===== MÉTODOS PARA SPAWN (6 TIPOS) =====
 
     public void PlayOperationCreated()
@@ -113,7 +125,6 @@ public class AudioManagerBridge : MonoBehaviour
             AudioManager.Instance.PlayGameplayMusic();
     }
 
-    // CAMBIADO: Ahora son métodos SFX en lugar de música
     public void PlayVictorySFX()
     {
         if (AudioManager.Instance != null)

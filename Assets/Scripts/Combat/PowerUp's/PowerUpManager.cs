@@ -257,6 +257,11 @@ public class PowerUpManager : MonoBehaviour
             return;
         }
 
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySlowTimePowerUpSFX();
+        }
+
         int affected = GameSpeedManager.Instance.ApplyTagSpeedMultiplier(p.targetTeam, p.slowMultiplier);
         Debug.Log($"[PowerUpManager] SlowTime activado para tag '{p.targetTeam}' (objetos afectados: {affected})");
 
@@ -344,6 +349,11 @@ public class PowerUpManager : MonoBehaviour
 
     private void ActivateHealthPowerUp(PowerUpData p)
     {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayHealPowerUpSFX();
+        }
+        
         // Preferimos TowerManager
         TowerHealthBar target = null;
         if (TowerManager.Instance != null)
