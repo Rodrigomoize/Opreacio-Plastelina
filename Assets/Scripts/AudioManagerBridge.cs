@@ -73,6 +73,18 @@ public class AudioManagerBridge : MonoBehaviour
             AudioManager.Instance.PlayHealPowerUpSFX();
     }
 
+    public void PlayInsufficientIntellectSFX()
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayInsufficientIntellectSFX();
+    }
+
+    public void PlayIntellectGainSFX()
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayIntellectGainSFX();
+    }
+
     // ===== MÉTODOS PARA SPAWN (6 TIPOS) =====
 
     public void PlayOperationCreated()

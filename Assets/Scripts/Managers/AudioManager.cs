@@ -33,6 +33,8 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip towerHitSFX;
     [SerializeField] private AudioClip slowTimePowerUpSFX;
     [SerializeField] private AudioClip healPowerUpSFX;
+    [SerializeField] private AudioClip insufficientIntellectSFX;
+    [SerializeField] private AudioClip intellectGainSFX;
 
     [Header("Spawn SFX - 6 Tipos de Unidades")]
     [Tooltip("Sonidos cuando se crea un CAMIÓN/OPERACIÓN (se elige uno aleatorio)")]
@@ -322,26 +324,23 @@ public class AudioManager : MonoBehaviour
 
     public void PlaySlowTimePowerUpSFX()
     {
-        if (slowTimePowerUpSFX != null)
-        {
-            PlaySFX(slowTimePowerUpSFX);
-        }
-        else
-        {
-            Debug.LogWarning("[AudioManager] slowTimePowerUpSFX no asignado");
-        }
+        PlaySFX(slowTimePowerUpSFX);
     }
 
     public void PlayHealPowerUpSFX()
     {
-        if (healPowerUpSFX != null)
-        {
-            PlaySFX(healPowerUpSFX);
-        }
-        else
-        {
-            Debug.LogWarning("[AudioManager] healPowerUpSFX no asignado");
-        }
+        PlaySFX(healPowerUpSFX);
+    }
+
+    public void PlayInsufficientIntellectSFX()
+    {
+        PlaySFX(insufficientIntellectSFX);
+    }
+
+        public void PlayIntellectGainSFX()
+    {
+
+        PlaySFX(intellectGainSFX);
     }
 
     // ===== SONIDOS DE SPAWN (6 TIPOS) =====

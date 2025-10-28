@@ -1,9 +1,7 @@
 using UnityEngine;
 
-/// <summary>
 /// Script de TEST para verificar que el shake de IntelectBar funciona.
 /// Añadir a un objeto con IntelectBar y presionar ESPACIO para probar el shake.
-/// </summary>
 public class TestIntelectBarShake : MonoBehaviour
 {
     private IntelectBar intelectBar;

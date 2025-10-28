@@ -11,7 +11,7 @@ public class CardDisplay : MonoBehaviour, IPointerClickHandler, IPointerEnterHan
     [HideInInspector] public bool isSelected = false;
 
     public Image artworkImage;
-    public GameObject selectionHighlight; // opcional: un objeto UI que marca selección
+    public GameObject selectionHighlight;
     
     [Header("Visual Effects")]
     [Tooltip("Escala cuando el ratón está encima (hover)")]

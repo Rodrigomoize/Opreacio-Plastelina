@@ -4,19 +4,15 @@ using UnityEngine.Events;
 
 public class SceneBridge : MonoBehaviour
 {
-    [Header("Multi-Screen Configuration (Optional)")]
+    [Header("Multi-Screen Configuration")]
     [SerializeField] private Image screenImage;
     [SerializeField] private Button nextButton;
+    [SerializeField] private Button previousButton;
     [SerializeField] private Sprite[] screenSprites;
 
-    [Header("Button Sprites (Optional)")]
-    [SerializeField] private Sprite normalButtonSprite;
-    [SerializeField] private Sprite finalButtonSprite;
-
-    [Header("Button Audio Events (Optional)")]
-    [Tooltip("Evento que se ejecuta cuando se presiona el bot�n en pantallas intermedias")]
-    [SerializeField] private UnityEvent onNormalButtonClick;
-    [Tooltip("Evento que se ejecuta cuando se presiona el bot�n en la �ltima pantalla")]
+    [Header("Button Audio Events")]
+    [SerializeField] private UnityEvent onNextButtonClick;
+    [SerializeField] private UnityEvent onPreviousButtonClick;
     [SerializeField] private UnityEvent onFinalButtonClick;
 
     [Header("Next Scene After Screens")]
@@ -27,14 +23,15 @@ public class SceneBridge : MonoBehaviour
 
     private void Start()
     {
-        // Solo activar modo multipantalla si hay sprites configurados
-        if (screenSprites != null && screenSprites.Length > 0 && screenImage != null && nextButton != null)
+        if (screenSprites != null && screenSprites.Length > 0 && screenImage != null && nextButton != null && previousButton != null)
         {
             isMultiScreenMode = true;
 
-            // Limpia todos los listeners anteriores del bot�n
             nextButton.onClick.RemoveAllListeners();
             nextButton.onClick.AddListener(OnNextButtonClicked);
+
+            previousButton.onClick.RemoveAllListeners();
+            previousButton.onClick.AddListener(OnPreviousButtonClicked);
 
             ShowCurrentScreen();
         }
@@ -47,65 +44,56 @@ public class SceneBridge : MonoBehaviour
             screenImage.sprite = screenSprites[currentScreenIndex];
         }
 
-        UpdateButtonSprite();
+        UpdateButtonsState();
     }
 
-    private void UpdateButtonSprite()
+    private void UpdateButtonsState()
     {
+        if (previousButton != null)
+        {
+            previousButton.interactable = currentScreenIndex > 0;
+        }
+
         if (nextButton != null)
         {
-            Image buttonImage = nextButton.GetComponent<Image>();
-            if (buttonImage != null)
-            {
-                if (currentScreenIndex == screenSprites.Length - 1 && finalButtonSprite != null)
-                {
-                    buttonImage.sprite = finalButtonSprite;
-                }
-                else if (normalButtonSprite != null)
-                {
-                    buttonImage.sprite = normalButtonSprite;
-                }
-            }
+            nextButton.interactable = true;
         }
     }
 
     private void OnNextButtonClicked()
     {
-
-        // Reproducir el evento de audio apropiado seg�n si es la �ltima pantalla o no
-        PlayAppropriateAudioEvent();
-
         if (currentScreenIndex < screenSprites.Length - 1)
         {
-            // No estamos en la �ltima pantalla, avanzar
+            if (onNextButtonClick != null && onNextButtonClick.GetPersistentEventCount() > 0)
+            {
+                onNextButtonClick.Invoke();
+            }
+
             currentScreenIndex++;
             ShowCurrentScreen();
         }
         else
         {
-            // En la �ltima pantalla, cargar la siguiente escena
-            LoadSceneByName(nextSceneAfterScreens);
-        }
-    }
-
-    /// Invoca el UnityEvent apropiado seg�n si estamos en la �ltima pantalla o no
-    private void PlayAppropriateAudioEvent()
-    {
-        if (currentScreenIndex == screenSprites.Length - 1)
-        {
-            // �ltima pantalla: invocar evento final
             if (onFinalButtonClick != null && onFinalButtonClick.GetPersistentEventCount() > 0)
             {
                 onFinalButtonClick.Invoke();
             }
+
+            LoadSceneByName(nextSceneAfterScreens);
         }
-        else
+    }
+
+    private void OnPreviousButtonClicked()
+    {
+        if (currentScreenIndex > 0)
         {
-            // Pantallas intermedias: invocar evento normal
-            if (onNormalButtonClick != null && onNormalButtonClick.GetPersistentEventCount() > 0)
+            if (onPreviousButtonClick != null && onPreviousButtonClick.GetPersistentEventCount() > 0)
             {
-                onNormalButtonClick.Invoke();
+                onPreviousButtonClick.Invoke();
             }
+
+            currentScreenIndex--;
+            ShowCurrentScreen();
         }
     }
 
@@ -135,12 +123,10 @@ public class SceneBridge : MonoBehaviour
                 LoadLoseScene();
                 break;
             default:
-                Debug.LogWarning($"[SceneBridge] Escena '{sceneName}' no reconocida");
                 break;
         }
     }
 
-    // M�todos est�ticos (SIN audio, se a�adir� desde Unity)
     public static void LoadMainMenu()
     {
         GameManager.GoToMainMenu();
@@ -178,9 +164,17 @@ public class SceneBridge : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (nextButton != null && isMultiScreenMode)
+        if (isMultiScreenMode)
         {
-            nextButton.onClick.RemoveListener(OnNextButtonClicked);
+            if (nextButton != null)
+            {
+                nextButton.onClick.RemoveListener(OnNextButtonClicked);
+            }
+
+            if (previousButton != null)
+            {
+                previousButton.onClick.RemoveListener(OnPreviousButtonClicked);
+            }
         }
     }
 }

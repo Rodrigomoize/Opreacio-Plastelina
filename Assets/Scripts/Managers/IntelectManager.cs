@@ -2,10 +2,8 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 
-/// <summary>
 /// Sistema de regeneración de Intelecto (Elixir) estilo Clash Royale
 /// Valores por defecto: 1 punto cada 2.8s (velocidad normal de CR)
-/// </summary>
 public class IntelectManager : MonoBehaviour
 {
 
@@ -77,9 +75,7 @@ public class IntelectManager : MonoBehaviour
         return currentIntelect >= cost;
     }
 
-    /// <summary>
     /// Obtiene el valor actual interpolado del intelecto (para UI suave)
-    /// </summary>
     public float GetCurrentIntelectFloat()
     {
         return currentIntelectFloat;
@@ -132,7 +128,4 @@ public class IntelectManager : MonoBehaviour
             //UnityEngine.Debug.LogWarning("[IntelectManager] intelectSlider no asignado.");
         }
     }
-
-
-
 }

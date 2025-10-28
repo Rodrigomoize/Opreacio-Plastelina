@@ -28,9 +28,7 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler, IPointerEnter
         if (zoneFeedback == null) Debug.LogWarning("[PlayableAreaUI] zoneFeedback no asignado - no habrá feedback visual de zonas.");
     }
     
-    /// <summary>
     /// Muestra las zonas de despliegue (llamado desde PlayerCardManager cuando hay cartas seleccionadas)
-    /// </summary>
     public void ShowDeploymentZones()
     {
         if (zoneFeedback != null)
@@ -39,9 +37,7 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler, IPointerEnter
         }
     }
     
-    /// <summary>
     /// Oculta las zonas de despliegue (llamado cuando no hay cartas listas para desplegar)
-    /// </summary>
     public void HideDeploymentZones()
     {
         if (zoneFeedback != null)
@@ -71,9 +67,7 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler, IPointerEnter
         }
     }
     
-    /// <summary>
     /// Actualiza el feedback de hover según la posición del cursor
-    /// </summary>
     private void UpdateHoverFeedback(PointerEventData eventData)
     {
         if (zoneFeedback == null) return;
@@ -82,9 +76,7 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler, IPointerEnter
         zoneFeedback.UpdateHoverFeedback(normalized.x);
     }
     
-    /// <summary>
     /// Calcula la posición normalizada (0-1) del cursor dentro del área
-    /// </summary>
     private Vector2 GetNormalizedPosition(PointerEventData eventData)
     {
         if (mapRawImage == null) return new Vector2(0.5f, 0.5f);
@@ -258,8 +250,6 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler, IPointerEnter
 
         if (playAreaCollider != null) spawnPos = playAreaCollider.ClosestPoint(spawnPos);
 
-
-        // 5) Llamar al manager con la posici�n calculada
         playerManager?.HandlePlayAreaClick(spawnPos);
     }
 }

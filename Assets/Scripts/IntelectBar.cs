@@ -2,10 +2,8 @@
 using UnityEngine.UI;
 using TMPro; // Añadido para TextMeshPro
 
-/// <summary>
 /// Barra de Intelecto que escala la altura en lugar de usar fillAmount
 /// Perfecto para sprites con formas redondeadas tipo "polo"
-/// </summary>
 public class IntelectBar : MonoBehaviour
 {
     [Header("Referencias - Método de Escala")]
@@ -42,6 +40,7 @@ public class IntelectBar : MonoBehaviour
     private float targetHeight = 0f;
     private float currentPreviewCost = 0f;
     private float lastIntellectValue = -1f; // Cache para evitar updates innecesarios
+    private Coroutine shakeCoroutine;
 
     void Start()
     {
@@ -137,9 +136,7 @@ public class IntelectBar : MonoBehaviour
         }
     }
 
-    /// <summary>
     /// Actualiza el texto que muestra el valor numérico del intelecto
-    /// </summary>
     private void UpdateIntelectText(float currentValue)
     {
         int currentInt = Mathf.FloorToInt(currentValue);
@@ -179,9 +176,7 @@ public class IntelectBar : MonoBehaviour
         }
     }
 
-    /// <summary>
     /// Muestra preview de cuánto intelecto quedaría después de gastar el costo especificado
-    /// </summary>
     /// <param name="cost">Costo de la carta u operación seleccionada (0 si no hay selección)</param>
     public void ShowPreview(int cost)
     {
@@ -209,9 +204,7 @@ public class IntelectBar : MonoBehaviour
         }
     }
 
-    /// <summary>
     /// Oculta el preview (cuando no hay carta seleccionada)
-    /// </summary>
     public void HidePreview()
     {
         currentPreviewCost = 0;
@@ -233,37 +226,35 @@ public class IntelectBar : MonoBehaviour
         UpdateBar();
     }
 
-    /// <summary>
     /// Ajusta la altura máxima manualmente
-    /// </summary>
     public void SetMaxHeight(float height)
     {
         maxHeight = height;
     }
-
-    /// <summary>
-    /// Shake visual de la barra para indicar intelecto insuficiente
-    /// </summary>
+    
+    /// Shake visual de la barra con parámetros personalizados
     public void ShakeBar()
     {
+        // Reproducir sonido de error
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayInsufficientIntellectSFX();
+        }
+        
+        // Llamar al shake con parámetros configurados en el Inspector
         ShakeBar(shakeDuration, shakeMagnitude);
     }
-    
-    /// <summary>
-    /// Shake visual de la barra con parámetros personalizados
-    /// </summary>
+
     public void ShakeBar(float duration, float magnitude)
     {
-        Debug.LogWarning($"[IntelectBar] ShakeBar llamado - duration={duration}, magnitude={magnitude}, activeInHierarchy={gameObject.activeInHierarchy}"); // DEBUG
+        // Detener shake anterior si existe
+        if (shakeCoroutine != null)
+        {
+            StopCoroutine(shakeCoroutine);
+        }
         
-        if (gameObject.activeInHierarchy)
-        {
-            StartCoroutine(ShakeCoroutine(duration, magnitude));
-        }
-        else
-        {
-            Debug.LogWarning("[IntelectBar] ShakeBar NO ejecutado - gameObject no está activo en jerarquía"); // DEBUG
-        }
+        // Iniciar nueva corrutina de shake
+        shakeCoroutine = StartCoroutine(ShakeCoroutine(duration, magnitude));
     }
 
     private System.Collections.IEnumerator ShakeCoroutine(float duration, float magnitude)
@@ -318,6 +309,6 @@ public class IntelectBar : MonoBehaviour
             normalTransform.localPosition = originalPosition;
         }
         
-        Debug.LogWarning("[IntelectBar] Shake completado"); // DEBUG
+        shakeCoroutine = null;
     }
 }

@@ -1,13 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-/// <summary>
 /// Controla el efecto de despawn (muerte) de tropas cuando cruzan el río.
 /// Efecto inverso al spawn: la tropa se reduce de tamaño mientras aparece un charco en el suelo.
-/// 
 /// IMPORTANTE: Este componente debe estar PRE-CONFIGURADO en el prefab de cada tropa.
 /// Asignar un VFX de charco específico para cada tipo de tropa.
-/// </summary>
 public class TroopDespawnController : MonoBehaviour
 {
     [Header("Despawn Settings")]
@@ -35,9 +32,7 @@ public class TroopDespawnController : MonoBehaviour
 
     public bool IsDespawning => isDespawning;
 
-    /// <summary>
     /// Inicia el proceso de despawn
-    /// </summary>
     public void StartDespawn()
     {
         if (isDespawning) return; // Ya está en proceso de despawn
@@ -127,9 +122,7 @@ public class TroopDespawnController : MonoBehaviour
         Destroy(gameObject);
     }
 
-    /// <summary>
     /// Verifica si la tropa puede atacar (no puede si está en despawn)
-    /// </summary>
     public bool CanAttack()
     {
         return !isDespawning;

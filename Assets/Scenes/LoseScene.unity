@@ -689,7 +689,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 543879376}
         m_TargetAssemblyTypeName: SceneBridge, Assembly-CSharp
-        m_MethodName: LoadPlayScene
+        m_MethodName: LoadLevelScene
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

@@ -589,6 +589,11 @@ public class CharacterManager : MonoBehaviour
         if (targetManager != null)
         {
             targetManager.AddIntelect(1);
+            
+            if (teamTag == "PlayerTeam" && AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayIntellectGainSFX();
+            }
         }
         else
         {

@@ -5,17 +5,15 @@ public class UIManager : MonoBehaviour
 {
     [Header("Pause System")]
     [SerializeField] private GameObject pausePanel;
+    [SerializeField] private GameObject pauseMenuGroup;  
     [SerializeField] private Button pauseButton;
-    [SerializeField] private Image pauseButtonImage;
-
-    [Header("Pause Icons")]
-    [SerializeField] private Sprite pauseIcon;
-    [SerializeField] private Sprite resumeIcon;
+    [SerializeField] private Button resumeButton;
 
     [Header("Instructions System")]
-    [SerializeField] private GameObject instructionsPanel;
-    [SerializeField] private Image instructionsImage;
+    [SerializeField] private GameObject instructionPauseGroup; 
+
     [SerializeField] private Sprite[] instructionSprites;
+    [SerializeField] private Image instructionsImage;
     [SerializeField] private Button nextInstructionButton;
     [SerializeField] private Button previousInstructionButton;
     [SerializeField] private Button closeInstructionsButton;
@@ -29,10 +27,8 @@ public class UIManager : MonoBehaviour
         Initialize();
     }
 
-    // ⭐ NUEVO: Método de inicialización separado
     private void Initialize()
     {
-        
         // Resetear estado
         isPaused = false;
         currentInstructionIndex = 0;
@@ -43,34 +39,36 @@ public class UIManager : MonoBehaviour
             pausePanel.SetActive(false);
         }
 
-        // Panel de instrucciones oculto al inicio
-        if (instructionsPanel != null)
+        if (pauseMenuGroup != null)
         {
-            instructionsPanel.SetActive(false);
+            pauseMenuGroup.SetActive(true);
         }
 
-        if (pauseButtonImage != null && pauseIcon != null)
+        if (instructionPauseGroup != null)
         {
-            pauseButtonImage.sprite = pauseIcon;
+            instructionPauseGroup.SetActive(false);
         }
 
-        // Conecta el botón de pausa automáticamente
+        // Configurar botón de pausa
         if (pauseButton != null)
         {
+            pauseButton.gameObject.SetActive(true);
             pauseButton.onClick.RemoveAllListeners();
-            pauseButton.onClick.AddListener(TogglePause);
+            pauseButton.onClick.AddListener(PauseGame);
         }
-        else
+
+        // Configurar botón de reanudar (oculto al inicio)
+        if (resumeButton != null)
         {
-            Debug.LogWarning("[UIManager] ⚠️ pauseButton es NULL");
+            resumeButton.gameObject.SetActive(false);
+            resumeButton.onClick.RemoveAllListeners();
+            resumeButton.onClick.AddListener(ResumeGame);
         }
 
-        // Conecta los botones de instrucciones
+        // Configurar botones de instrucciones
         SetupInstructionButtons();
-
     }
 
-    // ⭐ NUEVO: Método público para reinicializar desde GameManager
     public void Reinitialize()
     {
         Initialize();
@@ -78,15 +76,10 @@ public class UIManager : MonoBehaviour
 
     private void SetupInstructionButtons()
     {
-        
         if (showInstructionsButton != null)
         {
             showInstructionsButton.onClick.RemoveAllListeners();
             showInstructionsButton.onClick.AddListener(ShowInstructions);
-        }
-        else
-        {
-            Debug.LogWarning("[UIManager] ⚠️ showInstructionsButton es NULL");
         }
 
         if (closeInstructionsButton != null)
@@ -94,19 +87,11 @@ public class UIManager : MonoBehaviour
             closeInstructionsButton.onClick.RemoveAllListeners();
             closeInstructionsButton.onClick.AddListener(CloseInstructions);
         }
-        else
-        {
-            Debug.LogWarning("[UIManager] ⚠️ closeInstructionsButton es NULL");
-        }
 
         if (nextInstructionButton != null)
         {
             nextInstructionButton.onClick.RemoveAllListeners();
             nextInstructionButton.onClick.AddListener(NextInstruction);
-        }
-        else
-        {
-            Debug.LogWarning("[UIManager] ⚠️ nextInstructionButton es NULL");
         }
 
         if (previousInstructionButton != null)
@@ -114,35 +99,37 @@ public class UIManager : MonoBehaviour
             previousInstructionButton.onClick.RemoveAllListeners();
             previousInstructionButton.onClick.AddListener(PreviousInstruction);
         }
-        else
-        {
-            Debug.LogWarning("[UIManager] ⚠️ previousInstructionButton es NULL");
-        }
     }
 
-    public void TogglePause()
-    {
-        if (isPaused)
-        {
-            ResumeGame();
-        }
-        else
-        {
-            PauseGame();
-        }
-    }
-
-    private void PauseGame()
+    public void PauseGame()
     {
         isPaused = true;
 
+        // Mostrar panel de pausa
         if (pausePanel != null)
         {
             pausePanel.SetActive(true);
         }
-        if (pauseButtonImage != null && resumeIcon != null)
+
+        if (pauseMenuGroup != null)
         {
-            pauseButtonImage.sprite = resumeIcon;
+            pauseMenuGroup.SetActive(true);
+        }
+
+        if (instructionPauseGroup != null)
+        {
+            instructionPauseGroup.SetActive(false);
+        }
+
+        // Ocultar botón de pausa, mostrar botón de reanudar
+        if (pauseButton != null)
+        {
+            pauseButton.gameObject.SetActive(false);
+        }
+
+        if (resumeButton != null)
+        {
+            resumeButton.gameObject.SetActive(true);
         }
 
         if (AudioManager.Instance != null)
@@ -157,23 +144,28 @@ public class UIManager : MonoBehaviour
         else
         {
             Time.timeScale = 0f;
-            Debug.LogWarning("[UIManager] GameManager no encontrado, pausando directamente");
         }
-
     }
 
-    private void ResumeGame()
+    public void ResumeGame()
     {
         isPaused = false;
 
+        // Ocultar panel de pausa
         if (pausePanel != null)
         {
             pausePanel.SetActive(false);
         }
 
-        if (pauseButtonImage != null && pauseIcon != null)
+        // Mostrar botón de pausa, ocultar botón de reanudar
+        if (pauseButton != null)
         {
-            pauseButtonImage.sprite = pauseIcon;
+            pauseButton.gameObject.SetActive(true);
+        }
+
+        if (resumeButton != null)
+        {
+            resumeButton.gameObject.SetActive(false);
         }
 
         if (AudioManager.Instance != null)
@@ -188,56 +180,56 @@ public class UIManager : MonoBehaviour
         else
         {
             Time.timeScale = 1f;
-            Debug.LogWarning("[UIManager] GameManager no encontrado, reanudando directamente");
         }
-
     }
 
     // ===== SISTEMA DE INSTRUCCIONES =====
 
     public void ShowInstructions()
     {
-        
-        if (instructionsPanel == null)
+        if (instructionPauseGroup == null || instructionSprites == null || instructionSprites.Length == 0)
         {
-            Debug.LogError("[UIManager] ❌ instructionsPanel es NULL");
-            return;
-        }
-        
-        if (instructionSprites == null || instructionSprites.Length == 0)
-        {
-            Debug.LogError("[UIManager] ❌ instructionSprites vacío o NULL");
             return;
         }
 
-        // Resetear al inicio
         currentInstructionIndex = 0;
 
-        // Ocultar menú de pausa y mostrar panel de instrucciones
-        if (pausePanel != null)
+        if (pauseMenuGroup != null)
         {
-            pausePanel.SetActive(false);
+            pauseMenuGroup.SetActive(false);
         }
 
-        instructionsPanel.SetActive(true);
-        UpdateInstructionDisplay();
+        if (instructionPauseGroup != null)
+        {
+            instructionPauseGroup.SetActive(true);
+        }
 
+        // Ocultar botón de reanudar mientras se ven las instrucciones
+        if (resumeButton != null)
+        {
+            resumeButton.gameObject.SetActive(false);
+        }
+
+        UpdateInstructionDisplay();
     }
 
     public void CloseInstructions()
     {
-        
-        if (instructionsPanel != null)
+        if (instructionPauseGroup != null)
         {
-            instructionsPanel.SetActive(false);
+            instructionPauseGroup.SetActive(false);
         }
 
-        // Volver a mostrar el menú de pausa
-        if (pausePanel != null)
+        if (pauseMenuGroup != null)
         {
-            pausePanel.SetActive(true);
+            pauseMenuGroup.SetActive(true);
         }
 
+        // Volver a mostrar el botón de reanudar
+        if (resumeButton != null)
+        {
+            resumeButton.gameObject.SetActive(true);
+        }
     }
 
     private void NextInstruction()
@@ -269,7 +261,6 @@ public class UIManager : MonoBehaviour
             instructionsImage.sprite = instructionSprites[currentInstructionIndex];
         }
 
-        // Activar/desactivar botones según la posición
         if (previousInstructionButton != null)
         {
             previousInstructionButton.interactable = currentInstructionIndex > 0;
@@ -283,13 +274,16 @@ public class UIManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        
         if (pauseButton != null)
         {
-            pauseButton.onClick.RemoveListener(TogglePause);
+            pauseButton.onClick.RemoveListener(PauseGame);
         }
 
-        // Limpiar listeners de instrucciones
+        if (resumeButton != null)
+        {
+            resumeButton.onClick.RemoveListener(ResumeGame);
+        }
+
         if (showInstructionsButton != null)
         {
             showInstructionsButton.onClick.RemoveListener(ShowInstructions);

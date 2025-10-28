@@ -1026,13 +1026,15 @@ MonoBehaviour:
   buttonClaySFX: {fileID: 8300000, guid: a661ece449edd194c9e57e47f025830b, type: 3}
   turnThePageSFX: {fileID: 8300000, guid: 1db48f9eb85cb44448c384aa2d4bede1, type: 3}
   cardSelectedSFX: {fileID: 8300000, guid: c8fedade8769601448e784a337488fa0, type: 3}
-  towerDestroyedSFX: {fileID: 8300000, guid: 65aec844a64b75a4daf61d5381eb5bda, type: 3}
+  towerDestroyedSFX: {fileID: 8300000, guid: 8b1cd5ec01df09f478af17159fc7025f, type: 3}
   timer5SecondsSFX: {fileID: 8300000, guid: 1ab18cf77b78b5340b3ca7d67a0deaef, type: 3}
   operatorSelectedSFX: {fileID: 8300000, guid: fb2ca457b80d19442a7bcde0e694a1b6, type: 3}
   attackDefenseCollisionSFX: {fileID: 8300000, guid: 8a61b9cd738697745aeb3452568d0e70, type: 3}
   towerHitSFX: {fileID: 8300000, guid: 5a94d68238540ae43a11e22e263df27c, type: 3}
   slowTimePowerUpSFX: {fileID: 8300000, guid: f8919f5f5a2284848878bf82940ee3f2, type: 3}
   healPowerUpSFX: {fileID: 8300000, guid: bb1c06dcdbd8bfd499caa83d33fc3036, type: 3}
+  insufficientIntellectSFX: {fileID: 8300000, guid: f3b5c9132ad4f2d46b6a8cd4d0351e19, type: 3}
+  intellectGainSFX: {fileID: 8300000, guid: 6eb1b80771b71774abf3ae2b56032bc7, type: 3}
   operationCreatedSFX:
   - {fileID: 8300000, guid: c86b3325b5a647344ab57e995e65f106, type: 3}
   - {fileID: 8300000, guid: 5a95837a7f4ff5943ab610fc69cbc64c, type: 3}
@@ -1218,13 +1220,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
   pausePanel: {fileID: 0}
+  pauseMenuGroup: {fileID: 0}
   pauseButton: {fileID: 0}
-  pauseButtonImage: {fileID: 0}
-  pauseIcon: {fileID: 0}
-  resumeIcon: {fileID: 0}
-  instructionsPanel: {fileID: 0}
-  instructionsImage: {fileID: 0}
+  resumeButton: {fileID: 0}
+  instructionPauseGroup: {fileID: 0}
   instructionSprites: []
+  instructionsImage: {fileID: 0}
   nextInstructionButton: {fileID: 0}
   previousInstructionButton: {fileID: 0}
   closeInstructionsButton: {fileID: 0}
