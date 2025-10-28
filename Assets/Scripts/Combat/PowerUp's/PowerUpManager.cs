@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 
@@ -116,7 +116,6 @@ public class PowerUpManager : MonoBehaviour
                 if (p.powerUpButton.GetComponent<PowerUpButtonHover>() == null)
                 {
                     p.powerUpButton.gameObject.AddComponent<PowerUpButtonHover>();
-                    Debug.Log($"[PowerUpManager] Añadido PowerUpButtonHover a {p.powerUpName}");
                 }
             }
             UpdatePowerUpUI(p);
@@ -174,7 +173,6 @@ public class PowerUpManager : MonoBehaviour
 
         if (p.isOnCooldown || p.isActive)
         {
-            Debug.Log($"PowerUp '{powerUpName}' no está disponible!");
             return;
         }
 
@@ -208,7 +206,6 @@ public class PowerUpManager : MonoBehaviour
         if (TutorialManager.Instance != null)
         {
             TutorialManager.Instance.OnPowerUpActivated(powerUpName);
-            Debug.Log($"[PowerUpManager] ✅ Notificado al Tutorial: PowerUp '{powerUpName}' activado");
         }
     }
 
@@ -263,7 +260,6 @@ public class PowerUpManager : MonoBehaviour
         }
 
         int affected = GameSpeedManager.Instance.ApplyTagSpeedMultiplier(p.targetTeam, p.slowMultiplier);
-        Debug.Log($"[PowerUpManager] SlowTime activado para tag '{p.targetTeam}' (objetos afectados: {affected})");
 
         // Filtro azul constante durante toda la duración del powerup
         if (ScreenFlashEffect.Instance != null && p.duration > 0f)
@@ -344,7 +340,6 @@ public class PowerUpManager : MonoBehaviour
         }
 
         int restored = GameSpeedManager.Instance.RemoveTagSpeedMultiplier(p.targetTeam);
-        Debug.Log($"[PowerUpManager] SlowTime desactivado para tag '{p.targetTeam}' (restauradas: {restored})");
     }
 
     private void ActivateHealthPowerUp(PowerUpData p)
@@ -382,7 +377,6 @@ public class PowerUpManager : MonoBehaviour
         }
 
         target.Heal(p.healAmount);
-        Debug.Log($"[PowerUpManager] HealthPowerUp: curados {p.healAmount} en {target.gameObject.name}");
 
         // Flash verde para healing
         if (ScreenFlashEffect.Instance != null)

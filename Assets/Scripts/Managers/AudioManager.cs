@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
@@ -78,7 +78,6 @@ public class AudioManager : MonoBehaviour
 
         SetupAudioSources();
 
-        Debug.Log("[AudioManager] Inicializado correctamente");
     }
 
     private void Start()
@@ -90,7 +89,6 @@ public class AudioManager : MonoBehaviour
     if (System.Array.Exists(menuScenes, s => s == currentScene))
     {
         PlayMainMenuMusic();
-        Debug.Log($"[AudioManager] Música de menú iniciada automáticamente en {currentScene}");
     }
 }
 
@@ -111,7 +109,6 @@ public class AudioManager : MonoBehaviour
                 musicSource = musicObj.AddComponent<AudioSource>();
                 musicSource.loop = true;
                 musicSource.playOnAwake = false;
-                Debug.Log("[AudioManager] MusicSource creado automáticamente");
             }
         }
 
@@ -130,7 +127,6 @@ public class AudioManager : MonoBehaviour
                 sfxSource = sfxObj.AddComponent<AudioSource>();
                 sfxSource.loop = false;
                 sfxSource.playOnAwake = false;
-                Debug.Log("[AudioManager] SFXSource creado automáticamente");
             }
         }
 
@@ -185,7 +181,6 @@ public class AudioManager : MonoBehaviour
         if (victorySFX != null)
         {
             PlaySFX(victorySFX);
-            Debug.Log("[AudioManager] 🎉 SFX de victoria reproducido (una vez)");
         }
         else
         {
@@ -198,7 +193,6 @@ public class AudioManager : MonoBehaviour
         if (defeatSFX != null)
         {
             PlaySFX(defeatSFX);
-            Debug.Log("[AudioManager] 💀 SFX de derrota reproducido (una vez)");
         }
         else
         {
@@ -235,7 +229,6 @@ public class AudioManager : MonoBehaviour
         musicSource.clip = null;
         musicSource.volume = musicVolume;
 
-        Debug.Log("[AudioManager] Música detenida y reseteada completamente");
     }
 
     public void PauseMusic()
@@ -332,7 +325,6 @@ public class AudioManager : MonoBehaviour
         if (slowTimePowerUpSFX != null)
         {
             PlaySFX(slowTimePowerUpSFX);
-            Debug.Log("[AudioManager] 🕒 Sonido de SlowTime PowerUp reproducido");
         }
         else
         {
@@ -345,7 +337,6 @@ public class AudioManager : MonoBehaviour
         if (healPowerUpSFX != null)
         {
             PlaySFX(healPowerUpSFX);
-            Debug.Log("[AudioManager] 💚 Sonido de Heal PowerUp reproducido");
         }
         else
         {
@@ -375,7 +366,6 @@ public class AudioManager : MonoBehaviour
                 AudioClip selectedClip = validClips[randomIndex];
                 
                 sfxSource.PlayOneShot(selectedClip, sfxVolume);
-                Debug.Log($"[AudioManager] 🚛 Sonido de camión reproducido (variante {randomIndex + 1}/{validClips.Count})");
             }
             else
             {
@@ -393,7 +383,6 @@ public class AudioManager : MonoBehaviour
         if (troopValue1CreatedSFX != null)
         {
             sfxSource.PlayOneShot(troopValue1CreatedSFX, sfxVolume);
-            Debug.Log("[AudioManager] 1️⃣ Sonido de tropa valor 1 reproducido");
         }
         else
         {
@@ -406,7 +395,6 @@ public class AudioManager : MonoBehaviour
         if (troopValue2CreatedSFX != null)
         {
             sfxSource.PlayOneShot(troopValue2CreatedSFX, sfxVolume);
-            Debug.Log("[AudioManager] 2️⃣ Sonido de tropa valor 2 reproducido");
         }
         else
         {
@@ -419,7 +407,6 @@ public class AudioManager : MonoBehaviour
         if (troopValue3CreatedSFX != null)
         {
             sfxSource.PlayOneShot(troopValue3CreatedSFX, sfxVolume);
-            Debug.Log("[AudioManager] 3️⃣ Sonido de tropa valor 3 reproducido");
         }
         else
         {
@@ -432,7 +419,6 @@ public class AudioManager : MonoBehaviour
         if (troopValue4CreatedSFX != null)
         {
             sfxSource.PlayOneShot(troopValue4CreatedSFX, sfxVolume);
-            Debug.Log("[AudioManager] 4️⃣ Sonido de tropa valor 4 reproducido");
         }
         else
         {
@@ -445,7 +431,6 @@ public class AudioManager : MonoBehaviour
         if (troopValue5CreatedSFX != null)
         {
             sfxSource.PlayOneShot(troopValue5CreatedSFX, sfxVolume);
-            Debug.Log("[AudioManager] 5️⃣ Sonido de tropa valor 5 reproducido");
         }
         else
         {

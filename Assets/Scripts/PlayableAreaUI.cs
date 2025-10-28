@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -121,7 +121,6 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler, IPointerEnter
         // Verificar si el gameplay está desactivado (ej: durante secuencia de victoria)
         if (GameManager.Instance != null && GameManager.Instance.IsGameplayDisabled)
         {
-            Debug.Log("[PlayableAreaUI] 🚫 Click bloqueado: gameplay desactivado");
             return;
         }
 
@@ -167,7 +166,6 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler, IPointerEnter
                 }
                 else
                 {
-                    Debug.Log($"[PlayableAreaUI] No hit con ViewportRay (normalized={normalized}). Comprueba colliders y cullingMask de worldCamera.");
                 }
             }
             else
@@ -192,7 +190,6 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler, IPointerEnter
                 }
                 else
                 {
-                    Debug.Log("[PlayableAreaUI] ScreenPointToRay no golpe� nada. Intentando fallback plano.");
                 }
             }
             else
@@ -261,7 +258,6 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler, IPointerEnter
 
         if (playAreaCollider != null) spawnPos = playAreaCollider.ClosestPoint(spawnPos);
 
-        Debug.Log($"[PlayableAreaUI] Final spawnPos usado: {spawnPos}  (normalized.x={normalized.x})");
 
         // 5) Llamar al manager con la posici�n calculada
         playerManager?.HandlePlayAreaClick(spawnPos);

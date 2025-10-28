@@ -51,7 +51,6 @@ public class CharacterCombined : MonoBehaviour
             if (torreAI != null) AITower = torreAI.transform;
             if (torrePlayer != null) PlayerTower = torrePlayer.transform;
 
-            Debug.Log("[CharacterCombined] Start(): fallback towers loaded.");
         }
     }
 
@@ -60,7 +59,6 @@ public class CharacterCombined : MonoBehaviour
         combinedValue = value;
         velocity = speed;
 
-        Debug.Log($"[CharacterCombined] Inicializado: valor={combinedValue}, velocidad={velocity}");
     }
 
     public void SetOperationValues(int valA, int valB, char op)
@@ -89,12 +87,10 @@ public class CharacterCombined : MonoBehaviour
         if (agent != null)
         {
             UpdateSpeed();
-            Debug.Log($"[CharacterCombined] {gameObject.name} - NavMeshAgent.speed configurado a {agent.speed}");
 
             if (targetBridge != null)
             {
                 agent.SetDestination(targetBridge.position);
-                Debug.Log($"[CharacterCombined] Navegando hacia puente: {targetBridge.name}");
             }
             else
             {
@@ -115,7 +111,6 @@ public class CharacterCombined : MonoBehaviour
         if (agent != null && agent.enabled && targetBridge != null)
         {
             agent.SetDestination(targetBridge.position);
-            Debug.Log($"[CharacterCombined] {gameObject.name} - Movimiento reanudado hacia {targetBridge.name}");
         }
     }
 
@@ -181,7 +176,6 @@ public class CharacterCombined : MonoBehaviour
                 if (enemyTower != null)
                 {
                     agent.SetDestination(enemyTower.position);
-                    Debug.Log($"[CharacterCombined] {gameObject.name} cruzó el puente, yendo a {enemyTower.name}");
                 }
                 else
                 {
@@ -218,7 +212,6 @@ public class CharacterCombined : MonoBehaviour
 
             if (isTowerEnemy)
             {
-                Debug.Log($"[CharacterCombined] {gameObject.name} llegó a torre enemiga {other.name}, causando {combinedValue} de daño!");
 
                 // Marcar que está atacando la torre (no puede ser atacado durante esto)
                 isAttackingTower = true;
@@ -290,24 +283,25 @@ public class CharacterCombined : MonoBehaviour
         if (towerComp != null)
         {
             towerComp.TakeDamage(combinedValue);
-            Debug.Log($"[CharacterCombined] Aplicado {combinedValue} de daño a {tower.name}");
         }
         else if (manager != null)
         {
             manager.DamageTower(tower, combinedValue);
-            Debug.Log($"[CharacterCombined] Fallback - Aplicado {combinedValue} de daño a {tower.name}");
         }
 
         // Instanciar VFX de impacto en la torre
         if (towerImpactVFXPrefab != null)
         {
             Instantiate(towerImpactVFXPrefab, impactPosition, Quaternion.identity);
-            Debug.Log($"[CharacterCombined] 💥 VFX de impacto en torre instanciado en {impactPosition}");
+            DebugHelper.Log($"[CharacterCombined] 💥 VFX de impacto en torre instanciado en {impactPosition}");
         }
         else
         {
-            Debug.LogWarning("[CharacterCombined] towerImpactVFXPrefab no asignado!");
+            DebugHelper.LogWarning("[CharacterCombined] towerImpactVFXPrefab no asignado!");
         }
+
+        // OPTIMIZACIÓN: Desactivar Update() antes de destruir
+        enabled = false;
 
         // Destruir el Combined
         Destroy(gameObject);

@@ -67,7 +67,6 @@ public class TutorialManager : MonoBehaviour
         if (aiController != null)
         {
             aiController.enabled = false;
-            Debug.Log("[TutorialManager] IA desactivada durante tutorial");
         }
 
         StartCoroutine(RunTutorial());
@@ -89,7 +88,6 @@ public class TutorialManager : MonoBehaviour
             int currentAITroops = CountTroopsByTag("AITeam");
             int currentPlayerTroops = CountTroopsByTag("PlayerTeam");
             
-            Debug.Log($"[TutorialManager] 🔍 Contando tropas - AI: {currentAITroops} (inicial: {aiTroopCount}), Player: {currentPlayerTroops} (inicial: {playerTroopCount})");
         }
 
         // Detectar cuando las tropas se destruyen automáticamente
@@ -101,7 +99,6 @@ public class TutorialManager : MonoBehaviour
             // SOLO comparar con los valores INICIALES guardados
             if (currentAITroops < aiTroopCount || currentPlayerTroops < playerTroopCount)
             {
-                Debug.Log($"[TutorialManager] 💥 Tropas destruidas! AI: {aiTroopCount}->{currentAITroops}, Player: {playerTroopCount}->{currentPlayerTroops}");
                 waitingForTroopsDestroyed = false;
             }
             
@@ -124,12 +121,10 @@ public class TutorialManager : MonoBehaviour
 
     private void OnContinueButtonClicked()
     {
-        Debug.Log("[TutorialManager] Botón Continue presionado");
 
         if (waitingForContinue)
         {
             waitingForContinue = false;
-            Debug.Log("[TutorialManager] ✅ Espera interrumpida, continuando...");
         }
     }
 
@@ -183,7 +178,6 @@ public class TutorialManager : MonoBehaviour
         ShowTutorial("¡Cuidado! La IA te está atacando con 2+3=5...");
         yield return StartCoroutine(WaitForSecondsOrContinue(2f));
 
-        Debug.Log("[TutorialManager] 🎯 Generando ataque de IA: 2+3=5");
 
         var card2 = cardManager.GetCardByIndex(1);
         var card3 = cardManager.GetCardByIndex(2);
@@ -194,7 +188,6 @@ public class TutorialManager : MonoBehaviour
 
         if (success)
         {
-            Debug.Log("[TutorialManager] ✅ Ataque de IA generado con éxito");
         }
 
         yield return StartCoroutine(WaitForSecondsOrContinue(1.5f));
@@ -218,11 +211,9 @@ public class TutorialManager : MonoBehaviour
         }
 
         waitingForPlayerAction = true;
-        Debug.Log("[TutorialManager] ⏳ ESPERANDO: Jugador debe jugar la carta 5...");
 
         yield return new WaitUntil(() => !waitingForPlayerAction);
 
-        Debug.Log("[TutorialManager] ✅ ¡Jugador jugó la carta 5!");
 
         ClearHighlight();
         ShowTutorial("¡Bien hecho! Ahora observa cómo las tropas chocan...");
@@ -236,7 +227,6 @@ public class TutorialManager : MonoBehaviour
     {
         currentStep = 3;
 
-        Debug.Log("[TutorialManager] ⏳ ESPERANDO: Tropas se destruyan...");
 
         // Esperar 1s para que las tropas se muevan y colisionen
         yield return new WaitForSeconds(1f);
@@ -245,12 +235,10 @@ public class TutorialManager : MonoBehaviour
         aiTroopCount = CountTroopsByTag("AITeam");
         playerTroopCount = CountTroopsByTag("PlayerTeam");
         
-        Debug.Log($"[TutorialManager] Conteo INICIAL guardado - AI: {aiTroopCount}, Player: {playerTroopCount}");
         
         // Si no hay tropas, saltar espera
         if (aiTroopCount == 0 && playerTroopCount == 0)
         {
-            Debug.Log("[TutorialManager] ⚠️ No hay tropas para esperar, continuando...");
             yield return StartCoroutine(WaitForSecondsOrContinue(1.5f));
             PauseGame();
             yield break;
@@ -275,7 +263,6 @@ public class TutorialManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("[TutorialManager] ✅ ¡Tropas destruidas detectadas!");
         }
 
         yield return StartCoroutine(WaitForSecondsOrContinue(1.5f));
@@ -303,11 +290,9 @@ public class TutorialManager : MonoBehaviour
         }
 
         waitingForPlayerAction = true;
-        Debug.Log("[TutorialManager] ⏳ ESPERANDO: Jugador debe hacer una operación...");
 
         yield return new WaitUntil(() => !waitingForPlayerAction);
 
-        Debug.Log("[TutorialManager] ✅ ¡Jugador lanzó operación!");
 
         ClearHighlight();
         ShowTutorial("¡Excelente! Observa cómo tu ataque avanza hacia la torre enemiga.");
@@ -377,11 +362,9 @@ public class TutorialManager : MonoBehaviour
         }
 
         waitingForPlayerAction = true;
-        Debug.Log("[TutorialManager] ⏳ ESPERANDO: Jugador use PowerUp de curación...");
 
         yield return new WaitUntil(() => !waitingForPlayerAction);
 
-        Debug.Log("[TutorialManager] ✅ ¡PowerUp de curación usado!");
 
         ClearHighlight();
         ShowTutorial("¡Perfecto! Tu torre se ha curado. ¡Sigamos!");
@@ -430,11 +413,9 @@ public class TutorialManager : MonoBehaviour
         }
 
         waitingForPlayerAction = true;
-        Debug.Log("[TutorialManager] ⏳ ESPERANDO: Jugador use PowerUp de ralentización...");
 
         yield return new WaitUntil(() => !waitingForPlayerAction);
 
-        Debug.Log("[TutorialManager] ✅ ¡PowerUp de ralentización usado!");
 
         ClearHighlight();
         ShowTutorial("¡Genial! Los enemigos ahora se mueven más lento.");
@@ -452,7 +433,6 @@ public class TutorialManager : MonoBehaviour
             if (troop.CompareTag("AITeam"))
             {
                 Destroy(troop.gameObject);
-                Debug.Log("[TutorialManager] 💥 Tropa enemiga destruida");
             }
         }
 
@@ -474,11 +454,9 @@ public class TutorialManager : MonoBehaviour
         }
 
         waitingForPlayerAction = true;
-        Debug.Log("[TutorialManager] ⏳ ESPERANDO: Jugador lance ataque final...");
 
         yield return new WaitUntil(() => !waitingForPlayerAction);
 
-        Debug.Log("[TutorialManager] ✅ ¡Ataque final lanzado!");
 
         ShowTutorial("¡EXCELENTE! Has completado el ataque final.");
         yield return StartCoroutine(WaitForSecondsOrContinue(3f));
@@ -502,7 +480,6 @@ public class TutorialManager : MonoBehaviour
     /// </summary>
     private void PauseGame()
     {
-        Debug.Log("[TutorialManager] ⏸️ PAUSANDO JUEGO COMPLETO...");
 
         isTutorialPaused = true;
 
@@ -510,7 +487,6 @@ public class TutorialManager : MonoBehaviour
         if (GameSpeedManager.Instance != null)
         {
             GameSpeedManager.Instance.GameSpeedMultiplier = 0f; // PAUSA TOTAL
-            Debug.Log("[TutorialManager] GameSpeedMultiplier = 0 (PAUSA TOTAL)");
         }
         else
         {
@@ -528,7 +504,6 @@ public class TutorialManager : MonoBehaviour
             }
         }
 
-        Debug.Log($"[TutorialManager] ✅ Juego pausado completamente");
     }
 
     /// <summary>
@@ -536,7 +511,6 @@ public class TutorialManager : MonoBehaviour
     /// </summary>
     private void ResumeGame()
     {
-        Debug.Log("[TutorialManager] ▶️ REANUDANDO JUEGO...");
 
         isTutorialPaused = false;
 
@@ -544,7 +518,6 @@ public class TutorialManager : MonoBehaviour
         if (GameSpeedManager.Instance != null)
         {
             GameSpeedManager.Instance.GameSpeedMultiplier = 1f; // VELOCIDAD NORMAL
-            Debug.Log("[TutorialManager] GameSpeedMultiplier = 1 (VELOCIDAD NORMAL)");
         }
 
         // REANUDAR NavMeshAgents
@@ -559,7 +532,6 @@ public class TutorialManager : MonoBehaviour
         }
 
         ClearHighlight();
-        Debug.Log($"[TutorialManager] ✅ Juego reanudado");
     }
 
     /// <summary>
@@ -567,21 +539,18 @@ public class TutorialManager : MonoBehaviour
     /// </summary>
     private void BlockPlayer()
     {
-        Debug.Log("[TutorialManager] 🔒🔒🔒 BLOQUEANDO JUGADOR COMPLETAMENTE...");
         isPlayerBlocked = true;
 
         // 1. DESACTIVAR PlayerCardManager
         if (playerCardManager != null)
         {
             playerCardManager.enabled = false;
-            Debug.Log("[TutorialManager] ✅ PlayerCardManager DESACTIVADO");
         }
 
         // 2. DESACTIVAR PlayableAreaUI
         if (playableAreaUI != null)
         {
             playableAreaUI.enabled = false;
-            Debug.Log("[TutorialManager] ✅ PlayableAreaUI DESACTIVADO");
         }
 
         // 4. DESHABILITAR BOTONES DE OPERADORES
@@ -597,7 +566,6 @@ public class TutorialManager : MonoBehaviour
             }
         }
 
-        Debug.Log("[TutorialManager] 🔒 JUGADOR BLOQUEADO TOTALMENTE - IMPOSIBLE INTERACTUAR");
     }
 
     /// <summary>
@@ -605,21 +573,18 @@ public class TutorialManager : MonoBehaviour
     /// </summary>
     private void UnblockPlayer()
     {
-        Debug.Log("[TutorialManager] 🔓🔓🔓 DESBLOQUEANDO JUGADOR COMPLETAMENTE...");
         isPlayerBlocked = false;
 
         // 1. REACTIVAR PlayerCardManager
         if (playerCardManager != null)
         {
             playerCardManager.enabled = true;
-            Debug.Log("[TutorialManager] ✅ PlayerCardManager REACTIVADO");
         }
 
         // 2. REACTIVAR PlayableAreaUI
         if (playableAreaUI != null)
         {
             playableAreaUI.enabled = true;
-            Debug.Log("[TutorialManager] ✅ PlayableAreaUI REACTIVADO");
         }
 
         // 4. REHABILITAR BOTONES DE OPERADORES
@@ -635,7 +600,6 @@ public class TutorialManager : MonoBehaviour
             }
         }
 
-        Debug.Log("[TutorialManager] 🔓 JUGADOR DESBLOQUEADO - PUEDE INTERACTUAR NORMALMENTE");
     }
 
     /// <summary>
@@ -643,25 +607,21 @@ public class TutorialManager : MonoBehaviour
     /// </summary>
     private void UnblockPlayerForPowerUps()
     {
-        Debug.Log("[TutorialManager] 🔓 DESBLOQUEO PARCIAL - Solo PowerUps...");
         isPlayerBlocked = false; // Técnicamente desbloqueado pero limitado
 
         // MANTENER PlayerCardManager DESACTIVADO
         if (playerCardManager != null)
         {
             playerCardManager.enabled = false;
-            Debug.Log("[TutorialManager] PlayerCardManager sigue DESACTIVADO");
         }
 
         // MANTENER PlayableAreaUI DESACTIVADO
         if (playableAreaUI != null)
         {
             playableAreaUI.enabled = false;
-            Debug.Log("[TutorialManager] PlayableAreaUI sigue DESACTIVADO");
         }
 
 
-        Debug.Log("[TutorialManager] 🔓 DESBLOQUEO PARCIAL - Solo PowerUps accesibles");
     }
 
     // ========== UTILIDADES DE UI ==========
@@ -670,7 +630,6 @@ public class TutorialManager : MonoBehaviour
     {
         tutorialPanel.SetActive(true);
         tutorialText.text = message;
-        Debug.Log($"[TutorialManager] 📝 Mostrando: {message}");
     }
 
     private void HideTutorial()
@@ -685,7 +644,6 @@ public class TutorialManager : MonoBehaviour
             highlightOverlay.gameObject.SetActive(true);
             highlightRect.position = cardSlot.position;
             highlightRect.sizeDelta = cardSlot.GetComponent<RectTransform>().sizeDelta;
-            Debug.Log($"[TutorialManager] 🔆 Resaltando carta en slot: {cardSlot.name}");
         }
     }
 
@@ -696,7 +654,6 @@ public class TutorialManager : MonoBehaviour
             highlightOverlay.gameObject.SetActive(true);
             highlightRect.position = element.position;
             highlightRect.sizeDelta = element.sizeDelta;
-            Debug.Log($"[TutorialManager] 🔆 Resaltando elemento: {element.name}");
         }
     }
 
@@ -705,7 +662,6 @@ public class TutorialManager : MonoBehaviour
         if (highlightOverlay != null)
         {
             highlightOverlay.gameObject.SetActive(false);
-            Debug.Log($"[TutorialManager] 🔆 Highlight limpiado");
         }
     }
 
@@ -723,39 +679,32 @@ public class TutorialManager : MonoBehaviour
 
     public void OnPlayerPlaysCard(int cardValue)
     {
-        Debug.Log($"[TutorialManager] 📥 OnPlayerPlaysCard: valor={cardValue}, step={currentStep}, waiting={waitingForPlayerAction}");
 
         if (currentStep == 2 && cardValue == 5 && waitingForPlayerAction)
         {
             waitingForPlayerAction = false;
-            Debug.Log("[TutorialManager] ✅ CARTA 5 JUGADA - Continuando tutorial");
         }
     }
 
     public void OnPlayerPlaysOperation()
     {
-        Debug.Log($"[TutorialManager] 📥 OnPlayerPlaysOperation: step={currentStep}, waiting={waitingForPlayerAction}");
 
         if ((currentStep == 4 || currentStep == 8) && waitingForPlayerAction)
         {
             waitingForPlayerAction = false;
-            Debug.Log($"[TutorialManager] ✅ OPERACIÓN JUGADA en Step {currentStep} - Continuando tutorial");
         }
     }
 
     public void OnPowerUpActivated(string powerUpName)
     {
-        Debug.Log($"[TutorialManager] 📥 OnPowerUpActivated: powerUp={powerUpName}, step={currentStep}, waiting={waitingForPlayerAction}");
 
         if (currentStep == 6 && powerUpName == "Health" && waitingForPlayerAction)
         {
             waitingForPlayerAction = false;
-            Debug.Log("[TutorialManager] ✅ POWERUP HEALTH ACTIVADO - Continuando tutorial");
         }
         else if (currentStep == 7 && powerUpName == "SlowTime" && waitingForPlayerAction)
         {
             waitingForPlayerAction = false;
-            Debug.Log("[TutorialManager] ✅ POWERUP SLOWTIME ACTIVADO - Continuando tutorial");
         }       
     }
 }

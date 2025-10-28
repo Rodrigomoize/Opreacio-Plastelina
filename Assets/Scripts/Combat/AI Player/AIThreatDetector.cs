@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -54,7 +54,6 @@ public class AIThreatDetector
             // 🔧 SKIP: Si esta amenaza ya está siendo defendida, no la incluir
             if (EstaAmenazaDefendida(obj))
             {
-                Debug.Log($"[AIThreatDetector] Saltando amenaza {obj.name} - ya está siendo defendida");
                 continue;
             }
             
@@ -70,7 +69,6 @@ public class AIThreatDetector
 
                 amenazas.Add(amenaza);
 
-                Debug.Log($"[AIThreatDetector] Detecté amenaza: {amenaza}");
             }
         }
 
@@ -110,18 +108,15 @@ public class AIThreatDetector
             return null;
         }
 
-        Debug.Log($"[AIThreatDetector] Detectadas {amenazas.Count} amenazas totales");
 
         // 🔧 FIX: Filtrar amenazas ya defendidas
         int amenazasDefendidas = 0;
         foreach (Amenaza amenaza in amenazas)
         {
             bool estaDefendida = EstaAmenazaDefendida(amenaza.objeto);
-            Debug.Log($"[AIThreatDetector]   - Amenaza valor {amenaza.valor} a {amenaza.distancia:F1}m: {(estaDefendida ? "YA DEFENDIDA ❌" : "SIN DEFENDER ✅")}");
             
             if (!estaDefendida)
             {
-                Debug.Log($"[AIThreatDetector] ⭐ Amenaza más peligrosa SIN DEFENDER: valor {amenaza.valor}, dist={amenaza.distancia:F1}m");
                 return amenaza; // Primera amenaza NO defendida
             }
             else
@@ -131,7 +126,6 @@ public class AIThreatDetector
         }
 
         // Si todas están defendidas, devolver null
-        Debug.Log($"[AIThreatDetector] ⚠️ Todas las {amenazasDefendidas} amenazas ya están defendidas");
         return null;
     }
 
@@ -165,7 +159,6 @@ public class AIThreatDetector
         if (amenaza != null)
         {
             amenazasDefendidas[amenaza] = Time.time;
-            Debug.Log($"[AIThreatDetector] ✅ Amenaza {amenaza.name} marcada como defendida");
         }
     }
     
@@ -203,7 +196,6 @@ public class AIThreatDetector
             amenazasDefendidas.Remove(amenaza);
             if (amenaza != null)
             {
-                Debug.Log($"[AIThreatDetector] ⏱️ Marca de defensa expirada para {amenaza.name}");
             }
         }
     }

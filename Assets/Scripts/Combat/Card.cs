@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -113,8 +113,6 @@ public class CardDisplay : MonoBehaviour, IPointerClickHandler, IPointerEnterHan
         isSelected = on;
         if (selectionHighlight != null)
             selectionHighlight.SetActive(on);
-        else
-            Debug.Log($"[CardDisplay] Visual select {cardData?.cardName} = {on}");
     }
 
     public CardManager.Card GetCardData() => cardData;

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using static CharacterManager;
 
@@ -53,7 +53,6 @@ public class Tower : MonoBehaviour
             BoxCollider box = gameObject.AddComponent<BoxCollider>();
             box.size = new Vector3(2f, 3f, 2f);
             box.isTrigger = true;
-            Debug.Log($"[Tower] Añadido BoxCollider trigger a {gameObject.name}");
         }
         else
         {
@@ -89,7 +88,6 @@ public class Tower : MonoBehaviour
             healthBarInstance.Initialize(transform, maxHealth, teamTag);
         }
 
-        Debug.Log($"[Tower] {gameObject.name} vida configurada a {maxHealth}");
     }
 
     public void TakeDamage(int damage)
@@ -102,7 +100,6 @@ public class Tower : MonoBehaviour
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PlayTowerHit();
-            Debug.Log($"[Tower] 💥 Sonido de impacto en torre reproducido");
         }
         else
         {
@@ -113,7 +110,6 @@ public class Tower : MonoBehaviour
         if (animator != null)
         {
             animator.SetTrigger("hit");
-            Debug.Log($"[Tower] {gameObject.name} - Trigger 'hit' activado");
         }
 
         // Actualizar la barra de vida
@@ -122,7 +118,6 @@ public class Tower : MonoBehaviour
             healthBarInstance.SetHealth(currentHealth);
         }
 
-        Debug.Log($"[Tower] {gameObject.name} recibió {damage} de daño. Vida: {currentHealth}/{maxHealth}");
 
         // Verificar si la torre fue destruida
         if (currentHealth <= 0)
@@ -138,7 +133,6 @@ public class Tower : MonoBehaviour
         {
             healthBarInstance.SetHealth(currentHealth);
         }
-        Debug.Log($"[Tower] {gameObject.name} curada por {amount}. Vida: {currentHealth}/{maxHealth}");
     }
 
     public int GetCurrentHealth() => currentHealth;
@@ -149,16 +143,13 @@ public class Tower : MonoBehaviour
         if (isDestroyed) return; // Evitar llamadas múltiples
         isDestroyed = true;
         
-        Debug.Log($"[Tower] {gameObject.name} destruida!");
 
         if (!isEnemyTower) // Si NO es torre enemiga = es torre del jugador
         {
-            Debug.Log($"[Tower] 💀 Torre del jugador destruida - Iniciando secuencia de derrota");
             StartCoroutine(DefeatSequence());
         }
         else // Si es torre enemiga = el jugador gana
         {
-            Debug.Log($"[Tower] 🎉 Torre enemiga destruida - Iniciando secuencia de victoria");
             StartCoroutine(VictorySequence());
         }
     }
@@ -169,7 +160,6 @@ public class Tower : MonoBehaviour
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PlayTowerDestroyed();
-            Debug.Log($"[Tower] 💀 Sonido de torre destruida reproducido (torre del jugador)");
         }
 
         // Desactivar gameplay para evitar que el jugador o la IA hagan acciones
@@ -177,18 +167,15 @@ public class Tower : MonoBehaviour
         if (GameManager.Instance != null)
         {
             GameManager.Instance.DisableGameplay();
-            Debug.Log($"[Tower] 🚫 Gameplay desactivado para secuencia de derrota (física continúa)");
             
             // Congelar todas las tropas en el campo para evitar errores
             GameManager.Instance.FreezeAllTroops();
-            Debug.Log($"[Tower] ❄️ Tropas congeladas para secuencia de derrota");
         }
 
         // Reproducir efecto de explosión/fractura si está disponible
         if (fractureObject != null)
         {
             fractureObject.Explode();
-            Debug.Log($"[Tower] 💥 Explosión de torre del jugador reproducida");
         }
         else
         {
@@ -196,11 +183,9 @@ public class Tower : MonoBehaviour
         }
 
         // Esperar el tiempo configurado (usa WaitForSeconds normal porque Time.timeScale no está afectado)
-        Debug.Log($"[Tower] ⏳ Esperando {explosionDelay} segundos antes de ir a LoseScene...");
         yield return new WaitForSeconds(explosionDelay);
 
         // Transicionar a LoseScene
-        Debug.Log($"[Tower] ✅ Cargando LoseScene...");
         SceneBridge.LoadLoseScene();
     }
 
@@ -211,18 +196,15 @@ public class Tower : MonoBehaviour
         if (GameManager.Instance != null)
         {
             GameManager.Instance.DisableGameplay();
-            Debug.Log($"[Tower] 🚫 Gameplay desactivado para secuencia de victoria (física continúa)");
             
             // Congelar todas las tropas en el campo para evitar errores
             GameManager.Instance.FreezeAllTroops();
-            Debug.Log($"[Tower] ❄️ Tropas congeladas para secuencia de victoria");
         }
 
         // Reproducir efecto de explosión/fractura si está disponible
         if (fractureObject != null)
         {
             fractureObject.Explode();
-            Debug.Log($"[Tower] 💥 Explosión de torre reproducida");
         }
         else
         {
@@ -230,11 +212,9 @@ public class Tower : MonoBehaviour
         }
 
         // Esperar el tiempo configurado (usa WaitForSeconds normal porque Time.timeScale no está afectado)
-        Debug.Log($"[Tower] ⏳ Esperando {explosionDelay} segundos antes de ir a WinScene...");
         yield return new WaitForSeconds(explosionDelay);
 
         // Transicionar a WinScene
-        Debug.Log($"[Tower] ✅ Cargando WinScene...");
         SceneBridge.LoadWinScene();
     }
 }

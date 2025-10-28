@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -63,7 +63,6 @@ public class GameTimer : MonoBehaviour
                 if (AudioManager.Instance != null)
                 {
                     AudioManager.Instance.PlayTimer5Seconds();
-                    Debug.Log($"[GameTimer] ⏰ Sonido de advertencia reproducido - Quedan {remaining:F1} segundos");
                 }
                 else
                 {

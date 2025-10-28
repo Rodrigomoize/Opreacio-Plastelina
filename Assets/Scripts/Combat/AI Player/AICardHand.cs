@@ -27,7 +27,6 @@ public class AICardHand
             }
         }
 
-        Debug.Log($"[AICardHand] Mano inicial ordenada (5 cartas): {ObtenerDescripcionMano()}");
     }
 
     // Robar carta específica por su valor (índice en availableCards)
@@ -39,7 +38,6 @@ public class AICardHand
         if (nueva != null)
         {
             mano.Add(cardManager.CloneCard(nueva));
-            Debug.Log($"[AICardHand] Robé carta específica: {nueva.cardName} (valor {nueva.cardValue})");
         }
         else
         {
@@ -55,7 +53,6 @@ public class AICardHand
         if (nueva != null)
         {
             mano.Add(nueva);
-            Debug.Log($"[AICardHand] Robé carta aleatoria: {nueva.cardName} (valor {nueva.cardValue})");
         }
         else
         {
@@ -81,7 +78,6 @@ public class AICardHand
         if (mano.Contains(carta))
         {
             mano.Remove(carta);
-            Debug.Log($"[AICardHand] Removí carta: {carta.cardName}");
         }
     }
 
@@ -92,7 +88,6 @@ public class AICardHand
         {
             int valorJugado = carta.cardValue;
             mano.Remove(carta);
-            Debug.Log($"[AICardHand] Removí carta: {carta.cardName}");
 
             // Robar la misma carta
             RobarCartaPorValor(valorJugado);
@@ -111,7 +106,6 @@ public class AICardHand
         RobarCartaPorValor(valorA);
         RobarCartaPorValor(valorB);
 
-        Debug.Log($"[AICardHand] Reemplacé dos cartas. Nueva mano: {ObtenerDescripcionMano()}");
     }
 
     public int CantidadCartas()
@@ -166,7 +160,6 @@ public class AICardHand
 
         if (mejorCombo != null)
         {
-            Debug.Log($"[AICardHand] Mejor combo suma: {mejorCombo}");
         }
 
         return mejorCombo;
@@ -254,7 +247,6 @@ public class AICardHand
 
         if (mejorCombo != null)
         {
-            Debug.Log($"[AICardHand] Mejor combo resta: {mejorCombo}");
         }
 
         return mejorCombo;

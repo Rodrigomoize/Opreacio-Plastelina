@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -23,14 +23,12 @@ public class TowerManager : MonoBehaviour
     {
         if (bar == null) return;
         if (!towers.Contains(bar)) towers.Add(bar);
-        Debug.Log($"[TowerManager] Registrada torre: {bar.gameObject.name} (team: {bar.teamTag})");
     }
 
     public void UnregisterTower(TowerHealthBar bar)
     {
         if (bar == null) return;
         towers.Remove(bar);
-        Debug.Log($"[TowerManager] Unregistered tower: {bar.gameObject.name}");
     }
 
     public TowerHealthBar GetTowerByTeam(string teamTag)

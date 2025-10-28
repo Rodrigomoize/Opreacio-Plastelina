@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
@@ -63,7 +63,6 @@ public class UICreatorUtility : MonoBehaviour
         PrefabUtility.SaveAsPrefabAsset(root, path);
         DestroyImmediate(root);
         
-        Debug.Log($"TroopUI prefab creado en: {path}");
         AssetDatabase.Refresh();
     }
     
@@ -119,7 +118,6 @@ public class UICreatorUtility : MonoBehaviour
         PrefabUtility.SaveAsPrefabAsset(root, path);
         DestroyImmediate(root);
         
-        Debug.Log($"OperationUI prefab creado en: {path}");
         AssetDatabase.Refresh();
     }
     
@@ -198,7 +196,6 @@ public class UICreatorUtility : MonoBehaviour
         PrefabUtility.SaveAsPrefabAsset(root, path);
         DestroyImmediate(root);
         
-        Debug.Log($"TowerHealthBar prefab creado en: {path}");
         AssetDatabase.Refresh();
     }
     
@@ -209,7 +206,6 @@ public class UICreatorUtility : MonoBehaviour
         CreateOperationUIPrefab();
         CreateTowerHealthBarPrefab();
         
-        Debug.Log("Todos los prefabs de UI han sido creados!");
     }
 #endif
 }

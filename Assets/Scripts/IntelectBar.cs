@@ -34,16 +34,26 @@ public class IntelectBar : MonoBehaviour
     private float currentHeight = 0f;
     private float targetHeight = 0f;
     private float currentPreviewCost = 0f;
+    private float lastIntellectValue = -1f; // Cache para evitar updates innecesarios
 
     void Start()
     {
         SetupBar();
-        UpdateBar();
+        // UpdateBar() se llama en Update() de todas formas
     }
 
     void Update()
     {
-        UpdateBar();
+        // Optimización: solo actualizar si el valor cambió
+        if (intelectManager != null)
+        {
+            float currentValue = intelectManager.GetCurrentIntelectFloat();
+            if (!Mathf.Approximately(lastIntellectValue, currentValue))
+            {
+                lastIntellectValue = currentValue;
+                UpdateBar();
+            }
+        }
     }
 
     private void SetupBar()

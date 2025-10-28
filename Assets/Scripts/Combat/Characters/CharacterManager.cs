@@ -148,7 +148,6 @@ public class CharacterManager : MonoBehaviour
         // puedes usar agent.SetDestination(...) desde el código que la creó.
         charScript.SetupMovement(agent, targetBridge, enemyForThisTeam, true);
 
-        Debug.Log($"[CharacterManager] ✓ {cardData.cardName} (valor:{cardData.cardValue}, velocidad:{cardData.cardVelocity}) creado como DEFENDER con tag {teamTag}");
 
         return instance;
     }
@@ -178,7 +177,6 @@ public class CharacterManager : MonoBehaviour
             result = partA.cardValue - partB.cardValue;
             if (result < 0)
             {
-                Debug.Log($"[CharacterManager] Resta negativa detectada ({partA.cardValue} - {partB.cardValue}). Intercambiando para intentar corregir.");
                 var tmp = partA; partA = partB; partB = tmp;
                 result = partA.cardValue - partB.cardValue;
             }
@@ -281,7 +279,6 @@ public class CharacterManager : MonoBehaviour
             backSlot = b.transform;
         }
         
-        Debug.Log($"[CharacterManager] Slots encontrados - Front: {frontSlot.name}, Back: {backSlot.name}");
 
 
         Transform GetSlotAnchor(Transform slotTransform, string anchorName)
@@ -550,7 +547,6 @@ public class CharacterManager : MonoBehaviour
             Debug.LogWarning("[CharacterManager] leftBridge/rightBridge/playerTower/enemyTower no asignados correctamente, el camión puede no tener ruta.");
         }
 
-        Debug.Log($"[CharacterManager] ✓ Camión combinado creado: {partA.cardName}({partA.cardValue}) {opSymbol} {partB.cardName}({partB.cardValue}) = {result}, velocidad promedio={combinedVelocity}{combinedValue}");
 
         return instance;
     }
@@ -577,7 +573,6 @@ public class CharacterManager : MonoBehaviour
             if (ScoreManager.Instance != null)
             {
                 ScoreManager.Instance.RegisterCorrectOperation(1);
-                Debug.Log($"[CharacterManager] Operación correcta registrada. Total: {ScoreManager.Instance.CorrectOperations}");
             }
         }
         else if (teamTag == "AITeam")
@@ -593,9 +588,7 @@ public class CharacterManager : MonoBehaviour
 
         if (targetManager != null)
         {
-            Debug.Log($"[CharacterManager] ResolveOperation - Equipo: {teamTag} - Dando +1 intelecto. Intelecto actual: {targetManager.currentIntelect}");
             targetManager.AddIntelect(1);
-            Debug.Log($"[CharacterManager] Después de AddIntelect(1) - Equipo: {teamTag} - Intelecto: {targetManager.currentIntelect}");
         }
         else
         {
@@ -609,7 +602,6 @@ public class CharacterManager : MonoBehaviour
         if (towerComp != null)
         {
             towerComp.TakeDamage(damage);
-            Debug.Log($"[CharacterManager] DamageTower: {towerTransform.name} recibió {damage} de daño vía CharacterManager.");
         }
         else
         {

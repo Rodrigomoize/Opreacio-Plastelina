@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using Unity.VisualScripting;
 using UnityEngine.InputSystem.XR;
@@ -159,7 +159,6 @@ public class GameManager : MonoBehaviour
             }
             
             int timeBonus = ScoreManager.Instance.FinalizeScoreWithTime(elapsedSeconds);
-            Debug.Log($"[GameManager] Victoria! Tiempo: {elapsedSeconds:F1}s, Bonus: {timeBonus}, Score final: {ScoreManager.Instance.CurrentScore}");
         }
 
         SceneManager.LoadScene("WinScene");
@@ -190,7 +189,6 @@ public class GameManager : MonoBehaviour
         {
             isPaused = true;
             Time.timeScale = 0f;
-            Debug.Log("[GameManager] Juego pausado (Time.timeScale = 0)");
         }
     }
 
@@ -200,7 +198,6 @@ public class GameManager : MonoBehaviour
         {
             isPaused = false;
             Time.timeScale = 1f;
-            Debug.Log("[GameManager] Juego reanudado (Time.timeScale = 1)");
         }
     }
 
@@ -217,20 +214,17 @@ public class GameManager : MonoBehaviour
     public void DisableGameplay()
     {
         gameplayDisabled = true;
-        Debug.Log("[GameManager] 🚫 Gameplay desactivado (IA y Player bloqueados, física continúa)");
     }
 
     public void EnableGameplay()
     {
         gameplayDisabled = false;
-        Debug.Log("[GameManager] ✅ Gameplay activado");
     }
 
     /// Detiene todas las tropas en el campo durante la secuencia de victoria.
     /// Congela su movimiento y desactiva su capacidad de combate/interacción.
     public void FreezeAllTroops()
     {
-        Debug.Log("[GameManager] ❄️ Congelando todas las tropas en el campo...");
         
         // Buscar todos los Characters (tropas individuales)
         Character[] characters = FindObjectsByType<Character>(FindObjectsSortMode.None);
@@ -249,7 +243,6 @@ public class GameManager : MonoBehaviour
                 // Marcar como en combate para evitar nuevas interacciones
                 character.isInCombat = true;
                 
-                Debug.Log($"[GameManager] Congelado Character: {character.gameObject.name}");
             }
         }
         
@@ -270,11 +263,9 @@ public class GameManager : MonoBehaviour
                 // Marcar como en combate para evitar nuevas interacciones
                 combined.isInCombat = true;
                 
-                Debug.Log($"[GameManager] Congelado CharacterCombined: {combined.gameObject.name}");
             }
         }
         
-        Debug.Log($"[GameManager] ✅ Congeladas {characters.Length} tropas individuales y {combinedCharacters.Length} operaciones");
     }
 
     public void BackToMainMenu()
@@ -317,7 +308,6 @@ public class GameManager : MonoBehaviour
     public void SetDificultad(IAController.AIDificultad dificultad)
     {
         currentSelectedDifficulty = dificultad;
-        Debug.Log($"[GameManager] ✅ Dificultad establecida en GameManager: {dificultad}");
         
         if (DifficultyManager.Instance != null)
         {
@@ -359,7 +349,6 @@ public class GameManager : MonoBehaviour
     {
         // Resetear estado de gameplay al cambiar de escena
         gameplayDisabled = false;
-        Debug.Log($"[GameManager] Estado de gameplay reseteado al cargar {scene.name}");
 
         AssignSceneManagers(scene);
 
@@ -371,7 +360,6 @@ public class GameManager : MonoBehaviour
             if (AudioManager.Instance != null)
             {
                 AudioManager.Instance.PlayMainMenuMusic();
-                Debug.Log($"[GameManager] Música de menú iniciada/continuada en {scene.name}");
             }
 
             UnsubscribeFromTimer();
@@ -387,7 +375,6 @@ public class GameManager : MonoBehaviour
             if (ScoreManager.Instance != null)
             {
                 ScoreManager.Instance.ResetScore();
-                Debug.Log("[GameManager] Score reseteado para nueva partida");
             }
 
             if (gameTimerManager != null)
@@ -400,14 +387,12 @@ public class GameManager : MonoBehaviour
                     ? DifficultyManager.Instance.CurrentDifficulty.ToString()
                     : currentSelectedDifficulty.ToString();
 
-                Debug.Log($"[GameManager] Timer reseteado y arrancado con duración de {duracion}s para dificultad {dificultadActual}");
             }
 
             // Reproducir música de gameplay
             if (AudioManager.Instance != null)
             {
                 AudioManager.Instance.PlayGameplayMusic();
-                Debug.Log("[GameManager] Música de gameplay iniciada desde el principio");
             }
 
             if (aiCardManager != null)
@@ -428,7 +413,6 @@ public class GameManager : MonoBehaviour
             {
                 AudioManager.Instance.StopAndResetMusic();
                 AudioManager.Instance.PlayVictorySFX();
-                Debug.Log("[GameManager] 🎉 SFX de VICTORIA reproducido al cargar WinScene");
             }
             UnsubscribeFromTimer();
         }
@@ -438,7 +422,6 @@ public class GameManager : MonoBehaviour
             {
                 AudioManager.Instance.StopAndResetMusic();
                 AudioManager.Instance.PlayDefeatSFX();
-                Debug.Log("[GameManager] 💀 SFX de DERROTA reproducido al cargar LoseScene");
             }
             UnsubscribeFromTimer();
         }
@@ -453,7 +436,6 @@ public class GameManager : MonoBehaviour
         if (gameTimerManager != null)
         {
             gameTimerManager.OnCountdownCompleted += HandleTimeoutLose;
-            Debug.Log("[GameManager] Suscrito al evento de timeout del timer");
         }
         else
         {
@@ -471,7 +453,6 @@ public class GameManager : MonoBehaviour
 
     private void HandleTimeoutLose()
     {
-        Debug.Log("[GameManager] Tiempo agotado. Cargando escena de derrota...");
         LoadLoseScene();
     }
 
@@ -484,7 +465,6 @@ public class GameManager : MonoBehaviour
             if (uiManager != null)
             {
                 uiManager.Reinitialize();
-                Debug.Log("[GameManager] ✅ UIManager reinicializado para nueva partida");
             }
             else
             {
@@ -515,7 +495,6 @@ public class GameManager : MonoBehaviour
         
         difficultyManager = difficultyManager ?? FindInScene<DifficultyManager>(scene);
 
-        Debug.Log($"[GameManager] Managers asignados -> UI:{(uiManager != null)} Audio:{(audioManager != null)} Card:{(combatManager != null)} AI:{(aiCardManager != null)} PlayerCard:{(playerCardManager != null)} Timer:{(gameTimerManager != null)} Difficulty:{(difficultyManager != null)}");
     }
 
     private T FindInScene<T>(Scene scene) where T : MonoBehaviour

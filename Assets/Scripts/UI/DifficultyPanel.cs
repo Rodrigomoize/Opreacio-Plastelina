@@ -46,21 +46,18 @@ public class DifficultyPanel : MonoBehaviour
 
     public void IniciarJuegoFacil()
     {
-        Debug.Log("[DifficultyPanel] Dificultad seleccionada: FÁCIL");
         GameManager.Instance.SetDificultad(IAController.AIDificultad.Facil);
         GameManager.GoToPlayScene();
     }
 
     public void IniciarJuegoMedio()
     {
-        Debug.Log("[DifficultyPanel] Dificultad seleccionada: MEDIA");
         GameManager.Instance.SetDificultad(IAController.AIDificultad.Media);
         GameManager.GoToPlayScene();
     }
 
     public void IniciarJuegoDificil()
     {
-        Debug.Log("[DifficultyPanel] Dificultad seleccionada: DIFÍCIL");
         GameManager.Instance.SetDificultad(IAController.AIDificultad.Dificil);
         GameManager.GoToPlayScene();
     }

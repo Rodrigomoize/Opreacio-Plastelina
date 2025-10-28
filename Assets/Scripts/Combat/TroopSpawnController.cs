@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
 
@@ -84,7 +84,6 @@ public class TroopSpawnController : MonoBehaviour
         if (characterCombined != null)
         {
             soundType = SpawnSoundType.Operation;
-            Debug.Log($"[TroopSpawn] Auto-detectado como CAMIÓN");
             return;
         }
 
@@ -116,7 +115,6 @@ public class TroopSpawnController : MonoBehaviour
                 soundType = SpawnSoundType.TroopValue5;
             }
 
-            Debug.Log($"[TroopSpawn] Auto-detectado como TROPA valor {soundType} (prefab: {prefabName}, valor: {troopValue})");
         }
     }
 
@@ -135,7 +133,6 @@ public class TroopSpawnController : MonoBehaviour
         if (navAgent != null)
         {
             navAgent.enabled = false;
-            Debug.Log($"[TroopSpawn] NavMeshAgent deshabilitado durante spawn para {gameObject.name}");
         }
 
         if (spawnVFXPrefab != null)
@@ -144,7 +141,6 @@ public class TroopSpawnController : MonoBehaviour
             spawnVFXInstance.transform.SetParent(transform);
             spawnVFXInstance.transform.localScale = Vector3.one;
 
-            Debug.Log($"[TroopSpawn] VFX de spawn instanciado para {gameObject.name}");
         }
         else
         {
@@ -182,14 +178,12 @@ public class TroopSpawnController : MonoBehaviour
         {
             StopCoroutine(spawnSequenceCoroutine);
             spawnSequenceCoroutine = null;
-            Debug.Log($"[TroopSpawn] ❌ {gameObject.name} destruido ANTES de completar spawn - sonido NO reproducido");
         }
     }
 
     /// Secuencia de spawn: espera el tiempo definido y luego activa la tropa
     private IEnumerator SpawnSequence()
     {
-        Debug.Log($"[TroopSpawn] {gameObject.name} iniciando spawn por {spawnDuration} segundos");
 
         yield return new WaitForSeconds(spawnDuration);
 
@@ -220,7 +214,6 @@ public class TroopSpawnController : MonoBehaviour
         if (navAgent != null)
         {
             navAgent.enabled = true;
-            Debug.Log($"[TroopSpawn] NavMeshAgent habilitado, {gameObject.name} puede moverse ahora");
         }
 
         if (characterScript != null)
@@ -250,7 +243,6 @@ public class TroopSpawnController : MonoBehaviour
             operationUI.HideSpawnTimer();
         }
 
-        Debug.Log($"[TroopSpawn] ✅ {gameObject.name} spawn completado");
     }
 
     /// Reproduce el sonido correspondiente al tipo de unidad
@@ -275,32 +267,26 @@ public class TroopSpawnController : MonoBehaviour
         {
             case SpawnSoundType.Operation:
                 AudioManager.Instance.PlayOperationCreated();
-                Debug.Log($"[TroopSpawn] 🚛 Sonido de CAMIÓN reproducido");
                 break;
 
             case SpawnSoundType.TroopValue1:
                 AudioManager.Instance.PlayTroopValue1Created();
-                Debug.Log($"[TroopSpawn] 1️⃣ Sonido de TROPA valor 1 reproducido");
                 break;
 
             case SpawnSoundType.TroopValue2:
                 AudioManager.Instance.PlayTroopValue2Created();
-                Debug.Log($"[TroopSpawn] 2️⃣ Sonido de TROPA valor 2 reproducido");
                 break;
 
             case SpawnSoundType.TroopValue3:
                 AudioManager.Instance.PlayTroopValue3Created();
-                Debug.Log($"[TroopSpawn] 3️⃣ Sonido de TROPA valor 3 reproducido");
                 break;
 
             case SpawnSoundType.TroopValue4:
                 AudioManager.Instance.PlayTroopValue4Created();
-                Debug.Log($"[TroopSpawn] 4️⃣ Sonido de TROPA valor 4 reproducido");
                 break;
 
             case SpawnSoundType.TroopValue5:
                 AudioManager.Instance.PlayTroopValue5Created();
-                Debug.Log($"[TroopSpawn] 5️⃣ Sonido de TROPA valor 5 reproducido");
                 break;
 
             default:

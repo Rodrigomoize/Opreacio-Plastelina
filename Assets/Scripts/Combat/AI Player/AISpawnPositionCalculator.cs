@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI; // Agregar para NavMesh
 
 /// <summary>
@@ -52,7 +52,6 @@ public class AISpawnPositionCalculator
         // ⚡ PROYECTAR AL NAVMESH
         posicionFinal = ProyectarAlNavMesh(posicionFinal);
 
-        Debug.Log($"[AI Spawn] Defensa: Amenaza en {posicionAmenaza}, spawn en {posicionFinal}");
         
         return posicionFinal;
     }
@@ -104,7 +103,6 @@ public class AISpawnPositionCalculator
         // ⚡ PROYECTAR AL NAVMESH
         mejorPosicion = ProyectarAlNavMesh(mejorPosicion);
         
-        Debug.Log($"[AI Spawn] Ataque: Mejor posición {mejorPosicion} con score {mejorScore:F2}");
         
         return mejorPosicion;
     }
@@ -250,7 +248,6 @@ public class AISpawnPositionCalculator
         if (NavMesh.SamplePosition(posicion, out hit, 50f, NavMesh.AllAreas))
         {
             // Usar la posición del NavMesh encontrada
-            Debug.Log($"[AI Spawn] ✅ Posición proyectada al NavMesh: {posicion} → {hit.position} (distancia: {hit.distance:F2})");
             return hit.position;
         }
         else
@@ -261,7 +258,6 @@ public class AISpawnPositionCalculator
             // Intentar proyectar desde el centro del área de spawn
             if (NavMesh.SamplePosition(spawnArea.position, out hit, 50f, NavMesh.AllAreas))
             {
-                Debug.Log($"[AI Spawn] ✅ Usando centro de spawn área: {hit.position}");
                 return hit.position;
             }
             

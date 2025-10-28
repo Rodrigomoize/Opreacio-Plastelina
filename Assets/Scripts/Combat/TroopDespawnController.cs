@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 
 /// <summary>
@@ -86,7 +86,6 @@ public class TroopDespawnController : MonoBehaviour
             // El charco permanece un poco más que la tropa
             Destroy(puddleVFXInstance, despawnDuration + 0.5f);
             
-            Debug.Log($"[TroopDespawn] VFX de charco creado para {gameObject.name}");
         }
         else
         {
@@ -96,7 +95,6 @@ public class TroopDespawnController : MonoBehaviour
         // Iniciar corrutina de despawn
         StartCoroutine(DespawnSequence());
 
-        Debug.Log($"[TroopDespawn] {gameObject.name} iniciando despawn - duración {despawnDuration}s");
     }
 
     private IEnumerator DespawnSequence()
@@ -126,7 +124,6 @@ public class TroopDespawnController : MonoBehaviour
         }
 
         // Destruir la tropa
-        Debug.Log($"[TroopDespawn] {gameObject.name} despawn completado - destruyendo objeto");
         Destroy(gameObject);
     }
 

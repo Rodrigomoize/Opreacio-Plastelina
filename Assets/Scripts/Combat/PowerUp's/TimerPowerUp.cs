@@ -15,13 +15,11 @@ public class TimerPowerUp : MonoBehaviour
     {
         if (isActive)
         {
-            Log("Slow Time ya está activo");
             return;
         }
 
         if (GameSpeedManager.Instance == null)
         {
-            Log("GameSpeedManager no encontrado en la escena");
             return;
         }
 
@@ -29,11 +27,6 @@ public class TimerPowerUp : MonoBehaviour
         if (affected > 0)
         {
             isActive = true;
-            Log($"✅ Slow Time activado: {affected} objetos ralentizados (tag '{aiTeamTag}') con multiplicador x{speedMultiplier}");
-        }
-        else
-        {
-            Log("⚠️ No se aplicó Slow Time (objetos afectados = 0)");
         }
     }
 
@@ -50,7 +43,6 @@ public class TimerPowerUp : MonoBehaviour
 
         int restored = GameSpeedManager.Instance.RemoveTagSpeedMultiplier(aiTeamTag);
         isActive = false;
-        Log($"✅ Slow Time desactivado - {restored} objetos restaurados");
     }
 
     public bool IsActive() => isActive;
@@ -59,12 +51,6 @@ public class TimerPowerUp : MonoBehaviour
     {
         if (isActive)
             Deactivate();
-    }
-
-    private void Log(string message)
-    {
-        if (showLogs)
-            Debug.Log($"[TimerPowerUp] {message}");
     }
 
     // Métodos de prueba para editor

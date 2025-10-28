@@ -103,19 +103,16 @@ public class AccionEsperar : AIAction
         if (intelectManager.currentIntelect < 1)
         {
             scoreFinal = 0.8f; // Forzar esperar
-            Debug.Log($"[AccionEsperar] Sin intelecto, forzando espera (score: {scoreFinal:F3})");
         }
         // 🔧 FIX: Si NO puedo hacer nada por falta de intelecto, score moderado
         else if (noPuedoHacerNada && intelectManager.currentIntelect >= 1)
         {
             scoreFinal = 0.25f;
-            Debug.Log($"[AccionEsperar] Sin intelecto suficiente para acciones, espera sugerida (score: {scoreFinal:F3})");
         }
         // 🔧 SIMPLIFICADO: Si tengo intelecto para atacar (≥2) pero bajo intelecto, penalizar espera
         else if (tiengoIntelectoParaAtacar && intelectManager.currentIntelect < 4)
         {
             scoreFinal *= 0.7f; // Penalizar esperar si tengo opciones
-            Debug.Log($"[AccionEsperar] Tengo intelecto para atacar, penalizando espera (score: {scoreFinal:F3})");
         }
 
         // PENALIZACIÓN CRÍTICA: Si hay amenaza MUY cerca, normalmente no esperar
@@ -127,13 +124,11 @@ public class AccionEsperar : AIAction
                 // 🔧 FIX CRÍTICO: Si hay amenaza crítica PERO no puedo defender (sin intelecto), 
                 // DEBO esperar (es mi única opción)
                 scoreFinal = 0.6f; // Score alto para forzar espera
-                Debug.Log($"[AccionEsperar] Amenaza crítica PERO sin intelecto para defenderla → Forzando espera (score: {scoreFinal:F3})");
             }
             else
             {
                 // Puedo defender, así que NO esperar
                 scoreFinal = 0f;
-                Debug.Log($"[AccionEsperar] Amenaza crítica y SÍ puedo defender → Cancelando espera");
             }
         }
         
@@ -141,10 +136,8 @@ public class AccionEsperar : AIAction
         if (amenazasActivas == 0 && intelectManager.currentIntelect >= 3)
         {
             scoreFinal *= 0.5f; // Reducir score cuando pueda atacar sin presión
-            Debug.Log($"[AccionEsperar] Sin amenazas pero con recursos, penalizando espera (score: {scoreFinal:F3})");
         }
 
-        Debug.Log($"[AccionEsperar] Score FINAL: {scoreFinal:F3}");
 
         return scoreFinal;
     }
@@ -152,7 +145,6 @@ public class AccionEsperar : AIAction
     public override void Ejecutar()
     {
         // No hacer nada, solo esperar
-        Debug.Log("[AccionEsperar] ⏸️ Esperando... regenerando intelecto");
 
         // Opcional: Podrías añadir lógica adicional aquí
         // Por ejemplo: descartar una carta mala y robar otra

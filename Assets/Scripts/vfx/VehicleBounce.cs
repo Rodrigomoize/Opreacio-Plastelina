@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 
 /// <summary>
@@ -113,7 +113,6 @@ public class VehicleBounce : MonoBehaviour
             if (child != null)
             {
                 originalChildScales[child] = child.localScale;
-                Debug.Log($"[VehicleBounce] Guardada escala de {childName}: {child.localScale}");
             }
         }
     }

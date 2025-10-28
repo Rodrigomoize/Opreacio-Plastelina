@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
@@ -32,7 +32,6 @@ public class UIManager : MonoBehaviour
     // ⭐ NUEVO: Método de inicialización separado
     private void Initialize()
     {
-        Debug.Log("[UIManager] ===== INICIALIZANDO UIManager =====");
         
         // Resetear estado
         isPaused = false;
@@ -60,7 +59,6 @@ public class UIManager : MonoBehaviour
         {
             pauseButton.onClick.RemoveAllListeners();
             pauseButton.onClick.AddListener(TogglePause);
-            Debug.Log("[UIManager] Botón de pausa configurado");
         }
         else
         {
@@ -70,25 +68,21 @@ public class UIManager : MonoBehaviour
         // Conecta los botones de instrucciones
         SetupInstructionButtons();
 
-        Debug.Log("[UIManager] Inicializado correctamente");
     }
 
     // ⭐ NUEVO: Método público para reinicializar desde GameManager
     public void Reinitialize()
     {
-        Debug.Log("[UIManager] 🔄 Reinicializando UIManager...");
         Initialize();
     }
 
     private void SetupInstructionButtons()
     {
-        Debug.Log("[UIManager] Configurando botones de instrucciones...");
         
         if (showInstructionsButton != null)
         {
             showInstructionsButton.onClick.RemoveAllListeners();
             showInstructionsButton.onClick.AddListener(ShowInstructions);
-            Debug.Log("[UIManager] ✅ Botón 'Mostrar Instrucciones' configurado");
         }
         else
         {
@@ -99,7 +93,6 @@ public class UIManager : MonoBehaviour
         {
             closeInstructionsButton.onClick.RemoveAllListeners();
             closeInstructionsButton.onClick.AddListener(CloseInstructions);
-            Debug.Log("[UIManager] ✅ Botón 'Cerrar Instrucciones' configurado");
         }
         else
         {
@@ -110,7 +103,6 @@ public class UIManager : MonoBehaviour
         {
             nextInstructionButton.onClick.RemoveAllListeners();
             nextInstructionButton.onClick.AddListener(NextInstruction);
-            Debug.Log("[UIManager] ✅ Botón 'Siguiente' configurado");
         }
         else
         {
@@ -121,7 +113,6 @@ public class UIManager : MonoBehaviour
         {
             previousInstructionButton.onClick.RemoveAllListeners();
             previousInstructionButton.onClick.AddListener(PreviousInstruction);
-            Debug.Log("[UIManager] ✅ Botón 'Anterior' configurado");
         }
         else
         {
@@ -169,7 +160,6 @@ public class UIManager : MonoBehaviour
             Debug.LogWarning("[UIManager] GameManager no encontrado, pausando directamente");
         }
 
-        Debug.Log("[UIManager] Juego pausado - Panel visible");
     }
 
     private void ResumeGame()
@@ -201,14 +191,12 @@ public class UIManager : MonoBehaviour
             Debug.LogWarning("[UIManager] GameManager no encontrado, reanudando directamente");
         }
 
-        Debug.Log("[UIManager] Juego reanudado - Panel oculto");
     }
 
     // ===== SISTEMA DE INSTRUCCIONES =====
 
     public void ShowInstructions()
     {
-        Debug.Log("[UIManager] ShowInstructions() llamado");
         
         if (instructionsPanel == null)
         {
@@ -234,12 +222,10 @@ public class UIManager : MonoBehaviour
         instructionsPanel.SetActive(true);
         UpdateInstructionDisplay();
 
-        Debug.Log("[UIManager] ✅ Instrucciones mostradas correctamente");
     }
 
     public void CloseInstructions()
     {
-        Debug.Log("[UIManager] CloseInstructions() llamado");
         
         if (instructionsPanel != null)
         {
@@ -252,7 +238,6 @@ public class UIManager : MonoBehaviour
             pausePanel.SetActive(true);
         }
 
-        Debug.Log("[UIManager] Instrucciones cerradas");
     }
 
     private void NextInstruction()
@@ -264,7 +249,6 @@ public class UIManager : MonoBehaviour
 
         currentInstructionIndex++;
         UpdateInstructionDisplay();
-        Debug.Log($"[UIManager] Siguiente instrucción: {currentInstructionIndex + 1}/{instructionSprites.Length}");
     }
 
     private void PreviousInstruction()
@@ -276,7 +260,6 @@ public class UIManager : MonoBehaviour
 
         currentInstructionIndex--;
         UpdateInstructionDisplay();
-        Debug.Log($"[UIManager] Instrucción anterior: {currentInstructionIndex + 1}/{instructionSprites.Length}");
     }
 
     private void UpdateInstructionDisplay()
@@ -300,7 +283,6 @@ public class UIManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        Debug.Log("[UIManager] OnDestroy llamado - Limpiando listeners");
         
         if (pauseButton != null)
         {

@@ -35,20 +35,17 @@ public class AccionDefender : AIAction
 
         if (amenaza == null)
         {
-            Debug.Log("[AccionDefender] No hay amenazas o todas están defendidas");
             scoreFinal = 0f;
             return 0f;
         }
 
         int valorNecesario = amenaza.valor;
         
-        Debug.Log($"[AccionDefender] Evaluando defensa contra amenaza valor {valorNecesario}, dist={amenaza.distancia:F1}m");
 
         CardManager.Card cartaDefensora = aiHand.ObtenerCartaPorValor(valorNecesario);
 
         if (cartaDefensora == null)
         {
-            Debug.Log($"[AccionDefender] No tengo carta de valor {valorNecesario}");
             scoreFinal = 0f;
             return 0f;
         }
@@ -57,7 +54,6 @@ public class AccionDefender : AIAction
 
         if (intelectManager.currentIntelect < costeIntelecto)
         {
-            Debug.Log($"[AccionDefender] No tengo intelecto suficiente ({intelectManager.currentIntelect}/{costeIntelecto})");
             scoreFinal = 0f;
             return 0f;
         }
@@ -87,7 +83,6 @@ public class AccionDefender : AIAction
         if (amenaza.distancia < 5f)
         {
             scoreFinal = Mathf.Min(1f, scoreFinal * 1.5f);
-            Debug.Log($"[AccionDefender] AMENAZA CRÍTICA! Score: {scoreFinal:F3}");
         }
         
         // Boost múltiples amenazas
@@ -96,10 +91,8 @@ public class AccionDefender : AIAction
         {
             float boost = 1.0f + (totalAmenazas * 0.1f);
             scoreFinal *= boost;
-            Debug.Log($"[AccionDefender] {totalAmenazas} amenazas, boost x{boost:F2}");
         }
 
-        Debug.Log($"[AccionDefender] Score FINAL: {scoreFinal:F3}");
         return scoreFinal;
     }
 
@@ -133,7 +126,6 @@ public class AccionDefender : AIAction
 
         if (exito)
         {
-            Debug.Log($"[AccionDefender] Defendí ataque valor {valorNecesario} con {carta.cardName}");
         }
         else
         {

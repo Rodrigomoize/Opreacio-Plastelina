@@ -129,7 +129,6 @@ public class CardManager : MonoBehaviour
         {
             if (!intelectToUse.CanConsume(costToUse))
             {
-                Debug.Log($"[CardManager] No hay intelecto suficiente para {cardData.cardName} (coste {costToUse})");
                 result = GenerateResult.InsufficientIntellect;
                 return null;
             }
@@ -147,7 +146,6 @@ public class CardManager : MonoBehaviour
 
         if (spawnedCharacter != null)
         {
-            Debug.Log($"[CardManager] ✓ Personaje {cardData.cardName} instanciado en {spawnPosition} con tag {teamTag} (coste={costToUse})");
             result = GenerateResult.Success;
             return spawnedCharacter;
         }
@@ -194,7 +192,6 @@ public class CardManager : MonoBehaviour
         {
             if (!intelectToUse.CanConsume(totalCost))
             {
-                Debug.Log($"[CardManager] No hay intelecto suficiente para operación (coste {totalCost})");
                 result = GenerateResult.InsufficientIntellect;
                 return false;
             }
@@ -240,7 +237,6 @@ public class CardManager : MonoBehaviour
         // Buscar el punto más cercano en el NavMesh (radio: 50 unidades)
         if (NavMesh.SamplePosition(position, out hit, 50f, NavMesh.AllAreas))
         {
-            Debug.Log($"[CardManager] ✅ Posición proyectada al NavMesh: {position} → {hit.position} (dist: {hit.distance:F2}m)");
             return hit.position;
         }
         else

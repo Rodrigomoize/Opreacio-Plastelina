@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// Gestiona centralmente TODOS los ajustes de dificultad del juego.
@@ -51,7 +51,6 @@ public class DifficultyManager : MonoBehaviour
     public void SetDifficulty(IAController.AIDificultad difficulty)
     {
         currentDifficulty = difficulty;
-        Debug.Log($"[DifficultyManager] Dificultad establecida: {difficulty}");
         
         ApplyDifficultySettings();
     }
@@ -82,7 +81,6 @@ public class DifficultyManager : MonoBehaviour
             aiController.SetDificultad(currentDifficulty);
         }
 
-        Debug.Log($"[DifficultyManager] ✅ Todos los ajustes aplicados:\n{GetCurrentSettingsInfo()}");
     }
 
     /// <summary>

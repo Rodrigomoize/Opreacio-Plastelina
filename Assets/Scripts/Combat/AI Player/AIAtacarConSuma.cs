@@ -48,7 +48,6 @@ public class AccionAtacarConSuma : AIAction
         float mejorScore = 0f;
         AICardHand.ComboAtaque mejorCombo = null;
 
-        Debug.Log($"[AccionAtacarSuma] Evaluando {todosCombos.Count} combos posibles...");
 
         foreach (var combo in todosCombos)
         {
@@ -128,7 +127,6 @@ public class AccionAtacarConSuma : AIAction
                 scoreCombo *= 0.05f; // Aumentado de 0.5 a 0.05 (reducción del 95%)
             }
 
-            Debug.Log($"[AccionAtacarSuma]   Combo {combo}: potencia={scorePotencia:F2} → score={scoreCombo:F3}");
 
             // ¿Es el mejor hasta ahora?
             if (scoreCombo > mejorScore)
@@ -150,7 +148,6 @@ public class AccionAtacarConSuma : AIAction
         mejorComboEvaluado = mejorCombo;
         scoreFinal = mejorScore;
 
-        Debug.Log($"[AccionAtacarSuma] ⭐ Mejor combo seleccionado: {mejorCombo} → score={mejorScore:F3}");
         return mejorScore;
     }
 
@@ -182,7 +179,6 @@ public class AccionAtacarConSuma : AIAction
 
         if (exito)
         {
-            Debug.Log($"[AccionAtacarSuma] ✅ Ataqué con {combo} en posición {posicionSpawn}");
             // 🔧 FIX: NO remover cartas - la IA siempre tiene 1-5 disponibles
             // La única limitación es el intelecto
             // aiHand.RemoverCarta(combo.cartaA);  // REMOVIDO

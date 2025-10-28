@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
@@ -44,13 +44,11 @@ public class WinResultUI : MonoBehaviour
 
     private void Start()
     {
-        Debug.Log("[WinResultUI] Iniciando pantalla de victoria...");
         
         // Cargar datos del ScoreManager
         if (ScoreManager.Instance != null)
         {
             var sm = ScoreManager.Instance;
-            Debug.Log($"[WinResultUI] ScoreManager encontrado - Score: {sm.CurrentScore}, Ops: {sm.CorrectOperations}, Tiempo: {sm.LastElapsedSeconds}s");
             
             // Operaciones resueltas correctamente
             string operacionesStr = $"Operacions resoltes: {sm.CorrectOperations}";
@@ -67,7 +65,6 @@ public class WinResultUI : MonoBehaviour
             // Puntuación total
             string puntuacionStr = $"Puntuació total: {sm.CurrentScore} pts";
             SetText(puntuacionText, tmpPuntuacionText, puntuacionStr);
-            Debug.Log($"[WinResultUI] Puntuación establecida: {puntuacionStr}");
             
             // Nota final
             string grade = sm.GetGrade();
@@ -138,7 +135,6 @@ public class WinResultUI : MonoBehaviour
 
     private void OnMainMenuClicked()
     {
-        Debug.Log("[WinResultUI] Volviendo a MainMenuScene...");
         GameManager.GoToMainMenu();
     }
 }

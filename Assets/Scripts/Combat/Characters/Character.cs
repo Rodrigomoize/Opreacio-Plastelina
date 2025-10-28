@@ -54,7 +54,6 @@ public class Character : MonoBehaviour
         {
             sphereCol = gameObject.AddComponent<SphereCollider>();
             sphereCol.radius = 0.5f;
-            Debug.Log($"[Character] Añadido SphereCollider a {gameObject.name}");
         }
 
         sphereCol.isTrigger = true;
@@ -63,13 +62,11 @@ public class Character : MonoBehaviour
         if (rb == null)
         {
             rb = gameObject.AddComponent<Rigidbody>();
-            Debug.Log($"[Character] Añadido Rigidbody a {gameObject.name}");
         }
 
         rb.isKinematic = true;
         rb.useGravity = false;
 
-        Debug.Log($"[Character] {gameObject.name} - Collider configurado: trigger={sphereCol.isTrigger}, radius={sphereCol.radius}");
     }
 
     public void InitializeCharacter(int val, int hp, float spd, bool defender)
@@ -79,7 +76,6 @@ public class Character : MonoBehaviour
         speed = spd;
         isDefender = defender;
 
-        Debug.Log($"[Character] Inicializado: {gameObject.name}, valor={value}, velocidad={speed}, tag={gameObject.tag}");
     }
 
     public void SetupMovement(NavMeshAgent navAgent, Transform bridge, Transform tower, bool isDefenderUnit)
@@ -92,12 +88,10 @@ public class Character : MonoBehaviour
         if (agent != null)
         {
             UpdateSpeed();
-            Debug.Log($"[Character] {gameObject.name} - NavMeshAgent.speed configurado a {agent.speed}");
 
             if (targetBridge != null)
             {
                 agent.SetDestination(targetBridge.position);
-                Debug.Log($"[Character] {gameObject.name} navegando hacia puente {targetBridge.name}");
             }
         }
 
@@ -111,7 +105,6 @@ public class Character : MonoBehaviour
         if (agent != null && agent.enabled && targetBridge != null)
         {
             agent.SetDestination(targetBridge.position);
-            Debug.Log($"[Character] {gameObject.name} - Movimiento reanudado hacia {targetBridge.name}");
         }
     }
 
@@ -144,7 +137,6 @@ public class Character : MonoBehaviour
             {
                 // Pasar el tag del equipo para que use el sprite correcto
                 troopUIInstance.Initialize(transform, value, gameObject.tag);
-                Debug.Log($"[Character] UI creada para {gameObject.name} con valor {value}, equipo: {gameObject.tag}");
             }
         }
         else
@@ -178,7 +170,6 @@ public class Character : MonoBehaviour
             {
                 reachedBridge = true;
                 agent.SetDestination(enemyTower.position);
-                Debug.Log($"[Character] {gameObject.name} cruzó el puente, yendo a torre");
             }
         }
     }    void OnTriggerEnter(Collider other)
@@ -192,7 +183,6 @@ public class Character : MonoBehaviour
         
         if (isInCombat) return; // Ya está en combate
 
-        Debug.Log($"[Character] {gameObject.name} (tag:{gameObject.tag}, valor:{value}) TRIGGER con {other.gameObject.name} (tag:{other.tag})");
 
         // Verificar si llegó a una torre enemiga
         Tower tower = other.GetComponent<Tower>();
@@ -203,7 +193,6 @@ public class Character : MonoBehaviour
             if (isTowerEnemy)
             {
                 // Character llega a torre enemiga y se destruye completamente
-                Debug.Log($"[Character] {gameObject.name} llegó a torre enemiga y se destruye");
                 
                 // Destruir UI antes de destruir la tropa
                 if (troopUIInstance != null)
@@ -221,7 +210,6 @@ public class Character : MonoBehaviour
         {
             if (other.tag == gameObject.tag)
             {
-                Debug.Log($"[Character] Mismo equipo, ignorando");
                 return;
             }
 
@@ -231,12 +219,10 @@ public class Character : MonoBehaviour
             // Character SOLO ataca a Combined, NO a otros Characters
             if (otherChar != null)
             {
-                Debug.Log($"[Character] Detectado otro Character pero Character solo ataca Combined, ignorando");
                 return;
             }            // Solo procesar si es un Combined
             if (otherCombined == null)
             {
-                Debug.Log($"[Character] El otro objeto no es CharacterCombined, ignorando");
                 return;
             }
 
@@ -244,14 +230,12 @@ public class Character : MonoBehaviour
             TroopSpawnController enemySpawnController = other.GetComponent<TroopSpawnController>();
             if (enemySpawnController != null && !enemySpawnController.CanBeAttacked())
             {
-                Debug.Log($"[Character] El Combined está en spawn, no se puede atacar");
                 return;
             }
 
             // Verificar si el Combined está atacando la torre
             if (otherCombined.isAttackingTower)
             {
-                Debug.Log($"[Character] El Combined está atacando la torre, no se puede atacar");
                 return;
             }
 
@@ -259,11 +243,9 @@ public class Character : MonoBehaviour
             if (otherCombined.isInCombat) return;
 
             int otherValue = otherCombined.GetValue();
-            Debug.Log($"[Character] Detectado CharacterCombined con valor {otherValue}");
 
             if (value == otherValue)
             {
-                Debug.Log($"[Character] ⚔️ COMBATE: {value} == {otherValue} - Iniciando animación!");
 
                 // Marcar ambos como en combate
                 isInCombat = true;
@@ -274,7 +256,6 @@ public class Character : MonoBehaviour
             }
             else
             {
-                Debug.Log($"[Character] Valores diferentes ({value} vs {otherValue}), continúan su camino");
             }
         }
     }
@@ -297,7 +278,6 @@ public class Character : MonoBehaviour
         {
             originalSpeed = agent.speed;
             agent.speed = originalSpeed * combatSpeedMultiplier;
-            Debug.Log($"[Character] {gameObject.name} velocidad reducida: {originalSpeed} → {agent.speed}");
         }
 
         // Reducir velocidad del Combined
@@ -307,7 +287,6 @@ public class Character : MonoBehaviour
         {
             float enemyOriginalSpeed = enemyAgent.speed;
             enemyAgent.speed = enemyOriginalSpeed * combatSpeedMultiplier;
-            Debug.Log($"[Character] {enemy.name} velocidad reducida: {enemyOriginalSpeed} → {enemyAgent.speed}");
         }
 
         // Orientar el Character hacia el Combined
@@ -321,20 +300,17 @@ public class Character : MonoBehaviour
             // Combined mantiene su orientación hacia la torre (no rotamos al enemigo)
         }
 
-        Debug.Log($"[Character] ⚔️ Combate iniciado entre {gameObject.name} y {enemy.name} - {combatDuration} segundo(s) de animación con velocidad reducida");
 
         // Reproducir animación de ataque (SOLO LA TROPA ataca, no las operaciones)
         if (animator != null)
         {
             animator.SetTrigger("Attack");
             animator.SetBool("isWalking", false); // Asegurar que no esté en estado de caminar
-            Debug.Log($"[Character] Trigger 'Attack' activado en {gameObject.name}");
         }
 
         // Esperar el tiempo de combate (1.1 segundos para completar la animación de ataque)
         yield return new WaitForSeconds(combatDuration);
 
-        Debug.Log($"[Character] ⚔️ Combate finalizado - Iniciando implosión");
 
         // Detectar si se resolvió correctamente una operación
         // Si un Character derrota a un Combined enemigo = operación resuelta correctamente
@@ -347,7 +323,6 @@ public class Character : MonoBehaviour
         {
             string attackerTag = gameObject.tag; // El que atacó es quien gana el intelecto
             manager.ResolveOperation(attackerTag);
-            Debug.Log($"[Character] Intelecto otorgado al atacante (quien resolvió): {attackerTag}");
         }
 
         // Destruir UIs antes de la implosión
@@ -405,7 +380,6 @@ public class Character : MonoBehaviour
         if (vfxImpactPrefab != null)
         {
             Instantiate(vfxImpactPrefab, midPoint, Quaternion.identity);
-            Debug.Log($"[Character] 💥 VFX de impacto instanciado en {midPoint}");
         }
         else
         {
@@ -417,7 +391,14 @@ public class Character : MonoBehaviour
         {
             Vector3 feedbackPosition = midPoint + Vector3.up * feedbackYOffset;
             IntellectFeedback.Create(intellectFeedbackPrefab, feedbackPosition);
-            Debug.Log($"[Character] ✅ ¡Operación resuelta correctamente! Mostrando feedback +1 Intelecto");
+            DebugHelper.Log($"[Character] ✅ ¡Operación resuelta correctamente! Mostrando feedback +1 Intelecto");
+        }
+
+        // OPTIMIZACIÓN: Desactivar Update() antes de destruir
+        enabled = false;
+        if (enemy != null && enemy.TryGetComponent<MonoBehaviour>(out var enemyBehaviour))
+        {
+            enemyBehaviour.enabled = false;
         }
 
         // Destruir ambas unidades

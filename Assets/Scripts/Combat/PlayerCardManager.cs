@@ -151,7 +151,6 @@ public class PlayerCardManager : MonoBehaviour
         // Verificar si el gameplay está desactivado (ej: durante secuencia de victoria)
         if (GameManager.Instance != null && GameManager.Instance.IsGameplayDisabled)
         {
-            Debug.Log("[PlayerCardManager] 🚫 Acción bloqueada: gameplay desactivado");
             return;
         }
 
@@ -161,7 +160,6 @@ public class PlayerCardManager : MonoBehaviour
             return;
         }
 
-        Debug.Log($"[PlayerCardManager] Click en carta. InstanceID: {display.GetInstanceID()}, Valor: {display.cardData?.cardValue}, Cartas seleccionadas: {selectedDisplays.Count}, Operador: '{currentOperator}'");
 
         // PRIMERA SELECCIÓN
         if (selectedDisplays.Count == 0)
@@ -171,7 +169,6 @@ public class PlayerCardManager : MonoBehaviour
 
             AudioManager.Instance?.PlayCardSelected();
 
-            Debug.Log($"[PlayerCardManager] ✓ Primera carta seleccionada: {display.cardData.cardName} (ID: {display.GetInstanceID()})");
             UpdateVisualFeedback(); // Actualizar feedback visual
             return;
         }
@@ -182,7 +179,6 @@ public class PlayerCardManager : MonoBehaviour
             var first = selectedDisplays[0];
             bool isSameCard = ReferenceEquals(display, first);
 
-            Debug.Log($"[PlayerCardManager] Comparando: First ID={first.GetInstanceID()}, Current ID={display.GetInstanceID()}, Same={isSameCard}");
 
             // Si es LA MISMA carta física
             if (isSameCard)
@@ -190,7 +186,6 @@ public class PlayerCardManager : MonoBehaviour
                 // Si NO hay operador: deseleccionar
                 if (currentOperator == '\0')
                 {
-                    Debug.Log($"[PlayerCardManager] ✗ Deseleccionando carta (mismo GameObject, sin operador)");
                     SetCardElevation(first, false);
                     selectedDisplays.Clear();
                     UpdateVisualFeedback();
@@ -210,19 +205,16 @@ public class PlayerCardManager : MonoBehaviour
                         
                         if (!isValidResult)
                         {
-                            Debug.Log($"[PlayerCardManager] ✗ Auto-combinación inválida: {cardValue}+{cardValue}={result} (>5)");
                         }
                     }
                     else if (currentOperator == '-')
                     {
                         // Carta consigo misma siempre da 0, que NO es válido (debe ser >0)
                         isValidResult = false;
-                        Debug.Log($"[PlayerCardManager] ✗ Auto-combinación inválida: {cardValue}-{cardValue}=0 (debe ser >0)");
                     }
                     
                     if (isValidResult)
                     {
-                        Debug.Log($"[PlayerCardManager] ✓ Auto-combinación válida: usando la misma carta dos veces con operador '{currentOperator}'");
                         selectedDisplays.Add(display); // Añadir la misma carta otra vez
                         // No elevamos más porque ya está elevada
                         UpdateVisualFeedback();
@@ -230,7 +222,6 @@ public class PlayerCardManager : MonoBehaviour
                     }
                     else
                     {
-                        Debug.Log($"[PlayerCardManager] ✗ Auto-combinación bloqueada: resultado inválido");
                         // No hacer nada, la carta ya está seleccionada y el operador activo
                         return;
                     }
@@ -238,7 +229,6 @@ public class PlayerCardManager : MonoBehaviour
                 // Si HAY operador pero NO permitimos auto-combinación: deseleccionar
                 else
                 {
-                    Debug.Log($"[PlayerCardManager] ✗ Auto-combinación no permitida");
                     SetCardElevation(first, false);
                     selectedDisplays.Clear();
                     currentOperator = '\0';
@@ -251,7 +241,6 @@ public class PlayerCardManager : MonoBehaviour
             // Si NO hay operador, reemplazar selección
             if (currentOperator == '\0')
             {
-                Debug.Log($"[PlayerCardManager] ⚠ Cambiando selección (sin operador activo)");
                 SetCardElevation(first, false);
                 selectedDisplays.Clear();
                 selectedDisplays.Add(display);
@@ -276,7 +265,6 @@ public class PlayerCardManager : MonoBehaviour
                     
                     if (!isValidCombination)
                     {
-                        Debug.Log($"[PlayerCardManager] ✗ Combinación inválida: {firstValue}+{secondValue}={result} (>5)");
                     }
                 }
                 else if (currentOperator == '-')
@@ -286,14 +274,12 @@ public class PlayerCardManager : MonoBehaviour
                     
                     if (!isValidCombination)
                     {
-                        Debug.Log($"[PlayerCardManager] ✗ Combinación inválida: {firstValue}-{secondValue}={result} (debe ser >0 y ≤5)");
                     }
                 }
                 
                 if (isValidCombination)
                 {
                     // Combinación válida, añadir segunda carta
-                    Debug.Log($"[PlayerCardManager] ✓ Segunda carta seleccionada: {display.cardData.cardName} (ID: {display.GetInstanceID()}) con operador '{currentOperator}'");
                     selectedDisplays.Add(display);
                     SetCardElevation(display, true);
 
@@ -305,7 +291,6 @@ public class PlayerCardManager : MonoBehaviour
                 else
                 {
                     // Combinación inválida, no hacer nada
-                    Debug.Log($"[PlayerCardManager] ✗ Combinación bloqueada");
                     return;
                 }
             }
@@ -314,7 +299,6 @@ public class PlayerCardManager : MonoBehaviour
         // YA HAY DOS CARTAS - reiniciar selección
         if (selectedDisplays.Count >= 2)
         {
-            Debug.Log($"[PlayerCardManager] ⚠ Ya hay 2 cartas seleccionadas, reiniciando");
             foreach (var d in selectedDisplays) SetCardElevation(d, false);
             selectedDisplays.Clear();
             currentOperator = '\0';
@@ -377,7 +361,6 @@ public class PlayerCardManager : MonoBehaviour
         // Verificar si el gameplay está desactivado (ej: durante secuencia de victoria)
         if (GameManager.Instance != null && GameManager.Instance.IsGameplayDisabled)
         {
-            Debug.Log("[PlayerCardManager] 🚫 Acción bloqueada: gameplay desactivado");
             return;
         }
 
@@ -396,14 +379,12 @@ public class PlayerCardManager : MonoBehaviour
         // Si la operación está completa (2 cartas), no permitir cambiar operador
         if (selectedDisplays.Count >= 2)
         {
-            Debug.Log("[PlayerCardManager] Operación completa: no se puede cambiar operador");
             return;
         }
 
         if (currentOperator == op)
         {
             currentOperator = '\0';
-            Debug.Log("[PlayerCardManager] Operador desactivado");
             if (selectedDisplays.Count == 2)
             {
                 var second = selectedDisplays[1];
@@ -424,7 +405,6 @@ public class PlayerCardManager : MonoBehaviour
     {
         if (selectedDisplays.Count == 0)
         {
-            Debug.Log("[PlayerCardManager] PlayArea clic: nada seleccionado.");
             return;
         }
 
@@ -477,7 +457,6 @@ public class PlayerCardManager : MonoBehaviour
         {
             if (currentOperator == '\0')
             {
-                Debug.Log("[PlayerCardManager] Dos cartas seleccionadas pero sin operador: se deseleccionan.");
                 DeselectAll();
                 return;
             }
@@ -504,7 +483,6 @@ public class PlayerCardManager : MonoBehaviour
                 operationResult = a.cardValue + b.cardValue;
                 if (operationResult > 5)
                 {
-                    Debug.Log($"[PlayerCardManager] Suma inválida: {a.cardValue} + {b.cardValue} = {operationResult} (>5). Cancela selección.");
                     DeselectAll();
                     return;
                 }
@@ -513,7 +491,6 @@ public class PlayerCardManager : MonoBehaviour
             {
                 if (a.cardValue < b.cardValue)
                 {
-                    Debug.Log($"[PlayerCardManager] Intercambiando cartas para que la primera sea mayor: {a.cardValue} < {b.cardValue}");
 
                     selectedDisplays[0] = secondDisplay;
                     selectedDisplays[1] = firstDisplay;
@@ -528,7 +505,6 @@ public class PlayerCardManager : MonoBehaviour
                 operationResult = a.cardValue - b.cardValue;
                 if (operationResult <= 0 || operationResult > 5)
                 {
-                    Debug.Log($"[PlayerCardManager] Resta inválida: {a.cardValue} - {b.cardValue} = {operationResult}. Debe estar en (0..5]. Cancela selección.");
                     DeselectAll();
                     return;
                 }
@@ -556,7 +532,6 @@ public class PlayerCardManager : MonoBehaviour
                 // Si es auto-combo, solo guardamos UNA carta y UN slot
                 if (isAutoCombo)
                 {
-                    Debug.Log("[PlayerCardManager] Auto-combo jugado: removiendo UNA carta y reponiendo UNA");
                     int valueUsed = a.cardValue;
                     Transform slotToRefill = firstDisplay.transform.parent;
 
@@ -617,7 +592,6 @@ public class PlayerCardManager : MonoBehaviour
             }
             else
             {
-                Debug.Log("[PlayerCardManager] No se pudo jugar la combinación.");
             }
 
             currentOperator = '\0';
@@ -633,13 +607,11 @@ public class PlayerCardManager : MonoBehaviour
             {
                 int cardValue = selectedDisplays[0].cardData.cardValue;
                 TutorialManager.Instance.OnPlayerPlaysCard(cardValue);
-                Debug.Log($"[PlayerCardManager] ✅ Notificado al Tutorial: carta {cardValue} jugada");
             }
             // Si jugó una operación (2 cartas)
             else if (selectedDisplays.Count == 2)
             {
                 TutorialManager.Instance.OnPlayerPlaysOperation();
-                Debug.Log($"[PlayerCardManager] ✅ Notificado al Tutorial: operación jugada");
             }
         }
         
@@ -883,7 +855,6 @@ public class PlayerCardManager : MonoBehaviour
     /// </summary>
     private void UpdateVisualFeedback()
     {
-        Debug.Log($"[UpdateVisualFeedback] Cartas seleccionadas: {selectedDisplays.Count}, Operador actual: '{currentOperator}'");
         
         // Actualizar feedback de zonas de despliegue
         UpdateDeploymentZoneFeedback();
@@ -916,14 +887,12 @@ public class PlayerCardManager : MonoBehaviour
                 if (isAutoCombination && ReferenceEquals(display, selectedDisplays[0]))
                 {
                     cardImage.color = doubleSelectedCardColor; // Color especial rosa/magenta
-                    Debug.Log($"[UpdateVisualFeedback] Carta {display.cardData.cardValue} seleccionada 2 veces - color MAGENTA");
                 }
                 // CASO ESPECIAL: Carta seleccionada pero bloqueada (ej: 2- y quieres seleccionar 2 otra vez)
                 else if (isSelected && !isValid && selectedDisplays.Count == 1 && currentOperator != '\0')
                 {
                     // La carta está seleccionada, hay operador activo, pero no es válida para segunda selección
                     cardImage.color = selectedButBlockedCardColor; // Color amarillo oscuro/grisáceo
-                    Debug.Log($"[UpdateVisualFeedback] Carta {display.cardData.cardValue} seleccionada pero BLOQUEADA - color GRIS-AMARILLO");
                 }
                 // Caso normal: carta seleccionada
                 else if (isSelected)
@@ -949,7 +918,6 @@ public class PlayerCardManager : MonoBehaviour
             bool sumaSelected = (currentOperator == '+');
             bool operationComplete = (selectedDisplays.Count >= 2);
             
-            Debug.Log($"[UpdateVisualFeedback] Botón +: Selected={sumaSelected}, Complete={operationComplete}");
             
             Image btnImage = SumaButton.GetComponent<Image>();
             if (btnImage != null)
@@ -958,7 +926,6 @@ public class PlayerCardManager : MonoBehaviour
                 if (sumaSelected)
                 {
                     btnImage.color = selectedOperatorColor;
-                    Debug.Log($"[UpdateVisualFeedback] Botón + usando selectedOperatorColor: {selectedOperatorColor}");
                 }
                 else
                 {
@@ -1041,7 +1008,6 @@ public class PlayerCardManager : MonoBehaviour
             Debug.LogWarning("[PlayerCardManager] ScreenFlashEffect.Instance no encontrado");
         }
         
-        Debug.Log("[PlayerCardManager] ⚠ Intelecto insuficiente - Feedback visual mostrado");
     }
 
     /// <summary>

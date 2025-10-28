@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// Zona de trigger que detecta cuando las tropas individuales (Character) cruzan el río
@@ -63,7 +63,6 @@ public class RiverCrossingZone : MonoBehaviour
     {
         if (showLogs)
         {
-            Debug.Log($"[RiverCrossing] {message}");
         }
     }
 }

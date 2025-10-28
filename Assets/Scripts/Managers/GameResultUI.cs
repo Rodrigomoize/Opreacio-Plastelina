@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
@@ -41,7 +41,6 @@ public class GameResultUI : MonoBehaviour
 
     private void OnMainMenuClicked()
     {
-        Debug.Log("[GameResultUI] Volviendo a MainMenuScene...");
         GameManager.GoToMainMenu();
     }
 }

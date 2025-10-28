@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class GameSpeedManager : MonoBehaviour
@@ -45,7 +45,6 @@ public class GameSpeedManager : MonoBehaviour
     private void OnGameSpeedChanged()
     {
         UpdateAllCharacterSpeeds();
-        Debug.Log($"[GameSpeedManager] Velocidad global actual: {gameSpeedMultiplier}");
     }
 
     private void UpdateAllCharacterSpeeds()
@@ -56,7 +55,6 @@ public class GameSpeedManager : MonoBehaviour
         CharacterCombined[] combined = FindObjectsByType<CharacterCombined>(FindObjectsSortMode.None);
         foreach (var cc in combined) cc.UpdateSpeed();
 
-        Debug.Log($"[GameSpeedManager] Recalculadas velocidades. chars:{characters.Length} combined:{combined.Length}");
     }
 
     public float GetAgentMultiplier(GameObject obj)
@@ -90,12 +88,10 @@ public class GameSpeedManager : MonoBehaviour
         
         // Guardar el multiplicador activo para este tag (afectará a nuevas tropas)
         activeTagMultipliers[tag] = multiplier;
-        Debug.Log($"[GameSpeedManager] Multiplicador {multiplier} activado para tag '{tag}' (afectará nuevas tropas)");
         
         GameObject[] objs = GameObject.FindGameObjectsWithTag(tag);
         if (objs == null || objs.Length == 0) 
         { 
-            Debug.Log($"[GameSpeedManager] No hay objetos activos con tag {tag} ahora, pero afectará a futuros"); 
             return 0; 
         }
 
@@ -118,7 +114,6 @@ public class GameSpeedManager : MonoBehaviour
         
         // Remover el multiplicador activo del tag
         activeTagMultipliers.Remove(tag);
-        Debug.Log($"[GameSpeedManager] Multiplicador removido para tag '{tag}'");
         
         if (!tagToObjects.TryGetValue(tag, out var list)) return 0;
         int removed = 0;
@@ -142,15 +137,12 @@ public class GameSpeedManager : MonoBehaviour
         {
             case GameDifficulty.Facil:
                 GameSpeedMultiplier = easySpeed;
-                Debug.Log($"[GameSpeedManager] Velocidad establecida a FÁCIL: {easySpeed}x");
                 break;
             case GameDifficulty.Media:
                 GameSpeedMultiplier = mediumSpeed;
-                Debug.Log($"[GameSpeedManager] Velocidad establecida a MEDIA: {mediumSpeed}x");
                 break;
             case GameDifficulty.Dificil:
                 GameSpeedMultiplier = hardSpeed;
-                Debug.Log($"[GameSpeedManager] Velocidad establecida a DIFÍCIL: {hardSpeed}x");
                 break;
         }
     }
