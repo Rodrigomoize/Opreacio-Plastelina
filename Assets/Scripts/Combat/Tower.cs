@@ -6,7 +6,7 @@ public class Tower : MonoBehaviour
 {
     [Header("Health")]
     public int maxHealth = 10;
-    private int currentHealth;
+    public int currentHealth;
 
     [Header("UI")]
     public GameObject healthBarPrefab; // prefab debe contener TowerHealthBar

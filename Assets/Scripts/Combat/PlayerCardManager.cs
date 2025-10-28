@@ -517,7 +517,7 @@ public class PlayerCardManager : MonoBehaviour
             }
 
             CardManager.GenerateResult result;
-            bool played = cardManager.GenerateCombinedCharacter(a, b, spawnPosition, operationResult, currentOperator, "PlayerTeam", out result, null);
+            bool success = cardManager.GenerateCombinedCharacter(a, b, spawnPosition, operationResult, currentOperator, "PlayerTeam", out result, null);
 
             if (result == CardManager.GenerateResult.InsufficientIntellect)
             {
@@ -527,7 +527,7 @@ public class PlayerCardManager : MonoBehaviour
                 return;
             }
 
-            if (played)
+            if (success)
             {
                 // Si es auto-combo, solo guardamos UNA carta y UN slot
                 if (isAutoCombo)
@@ -588,6 +588,7 @@ public class PlayerCardManager : MonoBehaviour
                 if (TutorialManager.Instance != null)
                 {
                     TutorialManager.Instance.OnPlayerPlaysOperation();
+                    Debug.Log($"[PlayerCardManager] 🔔 Notificando tutorial: operación {currentOperator}");
                 }
             }
             else
@@ -651,6 +652,13 @@ public class PlayerCardManager : MonoBehaviour
                 {
                     CreateCard(cardManager.CloneCard(newCard), slotOfCard);
                 }
+            }
+
+            // 🔔 NOTIFICAR AL TUTORIAL
+            if (TutorialManager.Instance != null)
+            {
+                TutorialManager.Instance.OnPlayerPlaysCard(cardData.cardValue);
+                Debug.Log($"[PlayerCardManager] 🔔 Notificando tutorial: carta {cardData.cardValue}");
             }
 
             return true;

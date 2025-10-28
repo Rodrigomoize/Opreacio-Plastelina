@@ -4,13 +4,13 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// Gestiona todo el flujo del tutorial paso a paso de forma TOTALMENTE INTERACTIVA
+/// Tutorial jugable simplificado con ayudas visuales para niños 6-8 años
 /// </summary>
 public class TutorialManager : MonoBehaviour
 {
     public static TutorialManager Instance { get; private set; }
 
-    [Header("Referencias")]
+    [Header("Referencias de Juego")]
     public PlayerCardManager playerCardManager;
     public CardManager cardManager;
     public IntelectManager playerIntelect;
@@ -20,34 +20,40 @@ public class TutorialManager : MonoBehaviour
     public Transform playerSpawnPoint;
     public Tower playerTower;
     public Tower aiTower;
-
-    [Header("Referencias de IA (para desactivar durante tutorial)")]
     public MonoBehaviour aiController;
-
-    [Header("Referencias de PlayableArea (para bloquear clics)")]
     public PlayableAreaUI playableAreaUI;
 
-    [Header("UI del Tutorial")]
+    [Header("Nueva UI del Tutorial")]
     public GameObject tutorialPanel;
-    public TextMeshProUGUI tutorialText;
+    public Image characterImage;
+    public Image speechBubble;
+    public TextMeshProUGUI dialogText;
+    public Image optionalImage;
+    public Button continueButton;
+    
+    [Header("Sprites Contextuales")]
+    public Sprite card5Sprite;
+    public Sprite card2Sprite;
+    public Sprite healthPowerUpSprite;
+    public Sprite slowTimePowerUpSprite;
+    public Sprite intelectBarSprite;
+
+    [Header("UI de Highlight")]
     public Image highlightOverlay;
     public RectTransform highlightRect;
-    public Button continueButton;
-
-    [Header("Configuración")]
-    public float pauseDelay = 0.5f;
 
     private int currentStep = 0;
     private bool waitingForPlayerAction = false;
     private bool waitingForContinue = false;
-    private GameObject currentAIAttack;
     private bool isTutorialPaused = false;
-    private bool isPlayerBlocked = false; // NUEVO: bloqueo del jugador
-
-    // Detectar cuando las tropas se destruyen
+    private bool isPlayerBlocked = false;
     private bool waitingForTroopsDestroyed = false;
     private int aiTroopCount = 0;
     private int playerTroopCount = 0;
+    
+    // Para detectar daño a la torre
+    private bool waitingForTowerDamage = false;
+    private int playerTowerHealthBeforeAttack = 0;
 
     void Awake()
     {
@@ -61,12 +67,16 @@ public class TutorialManager : MonoBehaviour
         {
             continueButton.onClick.AddListener(OnContinueButtonClicked);
             continueButton.gameObject.SetActive(false);
-        }           
+        }
 
-        // Desactivar IA durante el tutorial
         if (aiController != null)
         {
             aiController.enabled = false;
+        }
+
+        if (optionalImage != null)
+        {
+            optionalImage.gameObject.SetActive(false);
         }
 
         StartCoroutine(RunTutorial());
@@ -82,29 +92,25 @@ public class TutorialManager : MonoBehaviour
 
     void Update()
     {
-        // LOG CONTINUO para debugging
-        if (waitingForTroopsDestroyed && Time.frameCount % 30 == 0) // Cada 0.5s
-        {
-            int currentAITroops = CountTroopsByTag("AITeam");
-            int currentPlayerTroops = CountTroopsByTag("PlayerTeam");
-            
-        }
-
-        // Detectar cuando las tropas se destruyen automáticamente
         if (waitingForTroopsDestroyed)
         {
             int currentAITroops = CountTroopsByTag("AITeam");
             int currentPlayerTroops = CountTroopsByTag("PlayerTeam");
 
-            // SOLO comparar con los valores INICIALES guardados
             if (currentAITroops < aiTroopCount || currentPlayerTroops < playerTroopCount)
             {
                 waitingForTroopsDestroyed = false;
             }
-            
-            // ❌ NO actualizar los conteos aquí - deben mantenerse como referencia inicial
-            // aiTroopCount = currentAITroops; // <-- ESTO ESTABA MAL
-            // playerTroopCount = currentPlayerTroops; // <-- ESTO ESTABA MAL
+        }
+        
+        // Detectar cuando la torre recibe daño
+        if (waitingForTowerDamage && playerTower != null)
+        {
+            if (playerTower.currentHealth < playerTowerHealthBeforeAttack)
+            {
+                Debug.Log($"[Tutorial] 💥 Torre dañada! Salud: {playerTowerHealthBeforeAttack} → {playerTower.currentHealth}");
+                waitingForTowerDamage = false;
+            }
         }
     }
 
@@ -121,7 +127,6 @@ public class TutorialManager : MonoBehaviour
 
     private void OnContinueButtonClicked()
     {
-
         if (waitingForContinue)
         {
             waitingForContinue = false;
@@ -155,44 +160,34 @@ public class TutorialManager : MonoBehaviour
 
     private IEnumerator RunTutorial()
     {
-        // FLUJO COMPLETO E INTERACTIVO
         yield return StartCoroutine(Tutorial_AIAttacks());
         yield return StartCoroutine(Tutorial_PlayerDefends());
         yield return StartCoroutine(Tutorial_WaitForDestruction());
         yield return StartCoroutine(Tutorial_TeachAttack());
         yield return StartCoroutine(Tutorial_PlayerAttacks());
-
-        // ========== NUEVA SECCIÓN: POWERUPS ==========
         yield return StartCoroutine(Tutorial_HealthPowerUp());
         yield return StartCoroutine(Tutorial_SlowTimePowerUp());
         yield return StartCoroutine(Tutorial_FinalAttack());
-
         yield return StartCoroutine(Tutorial_Completion());
     }
 
-    // ========== PASO 1: LA IA ATACA CON 2+3 ==========
+    // ========== PASO 1: IA ATACA ==========
     private IEnumerator Tutorial_AIAttacks()
     {
         currentStep = 1;
 
-        ShowTutorial("¡Cuidado! La IA te está atacando con 2+3=5...");
-        yield return StartCoroutine(WaitForSecondsOrContinue(2f));
-
+        ShowDialog("¡Te atacan con 2+3!", showImage: false);
+        yield return StartCoroutine(WaitForSecondsOrContinue(2.5f)); // ✅ +0.5s más lento
 
         var card2 = cardManager.GetCardByIndex(1);
         var card3 = cardManager.GetCardByIndex(2);
-
         Vector3 spawnPos = aiSpawnPoint.position;
         CardManager.GenerateResult result;
-        bool success = cardManager.GenerateCombinedCharacter(card2, card3, spawnPos, 5, '+', "AITeam", out result, aiIntelect);
+        cardManager.GenerateCombinedCharacter(card2, card3, spawnPos, 5, '+', "AITeam", out result, aiIntelect);
 
-        if (success)
-        {
-        }
+        yield return StartCoroutine(WaitForSecondsOrContinue(2f)); // ✅ +0.5s más lento
 
-        yield return StartCoroutine(WaitForSecondsOrContinue(1.5f));
-
-        PauseGame(); // USAR PAUSADO COMPLETO
+        PauseGame();
     }
 
     // ========== PASO 2: JUGADOR DEFIENDE CON 5 ==========
@@ -200,10 +195,12 @@ public class TutorialManager : MonoBehaviour
     {
         currentStep = 2;
 
-        ShowTutorial("¡Usa tu carta 5 para defenderte!");
-
+        ShowDialog("¡Defiende con la carta 5!", showImage: true, contextSprite: card5Sprite);
+        
         HighlightCard(playerCardManager.cardSlots[4]);
-        UnblockPlayer(); // DESBLOQUEAR para que pueda jugar
+        StartHighlightEffect(playerCardManager.cardSlots[4].gameObject);
+        
+        UnblockPlayer();
 
         if (continueButton != null)
         {
@@ -212,41 +209,59 @@ public class TutorialManager : MonoBehaviour
 
         waitingForPlayerAction = true;
 
+        Debug.Log("[Tutorial] ⏳ Esperando carta 5...");
         yield return new WaitUntil(() => !waitingForPlayerAction);
+        Debug.Log("[Tutorial] ✅ Carta 5 jugada!");
 
-
+        StopHighlightEffect(playerCardManager.cardSlots[4].gameObject);
         ClearHighlight();
-        ShowTutorial("¡Bien hecho! Ahora observa cómo las tropas chocan...");
-        yield return StartCoroutine(WaitForSecondsOrContinue(2f));
+        HideOptionalImage();
+        
+        PauseGame();
+        
+        ShowDialog("¡Muy bien! La carta 5 cuesta 5 de energía.", showImage: true, contextSprite: intelectBarSprite);
+        
+        if (playerIntelect != null && playerIntelect.intelectSlider != null)
+        {
+            HighlightElement(playerIntelect.intelectSlider.GetComponent<RectTransform>());
+            StartHighlightEffect(playerIntelect.intelectSlider.gameObject);
+        }
+        
+        yield return StartCoroutine(WaitForSecondsOrContinue(4f)); // ✅ +1s más lento
+        
+        if (playerIntelect != null && playerIntelect.intelectSlider != null)
+        {
+            StopHighlightEffect(playerIntelect.intelectSlider.gameObject);
+        }
+        ClearHighlight();
+        HideOptionalImage();
+        
+        ShowDialog("¡Mira cómo chocan!", showImage: false);
+        yield return StartCoroutine(WaitForSecondsOrContinue(2.5f)); // ✅ +0.5s más lento
 
-        ResumeGame(); // REANUDAR JUEGO AQUÍ (ANTES de esperar destrucción)
+        HideTutorialPanel(); // ✅ OCULTAR UI
+        ResumeGame();
     }
 
-    // ========== PASO 3: ESPERAR DESTRUCCIÓN DE TROPAS ==========
+    // ========== PASO 3: ESPERAR DESTRUCCIÓN ==========
     private IEnumerator Tutorial_WaitForDestruction()
     {
         currentStep = 3;
 
+        yield return new WaitForSeconds(1.5f); // ✅ +0.5s más lento
 
-        // Esperar 1s para que las tropas se muevan y colisionen
-        yield return new WaitForSeconds(1f);
-
-        // GUARDAR conteo INICIAL (solo una vez)
         aiTroopCount = CountTroopsByTag("AITeam");
         playerTroopCount = CountTroopsByTag("PlayerTeam");
         
-        
-        // Si no hay tropas, saltar espera
         if (aiTroopCount == 0 && playerTroopCount == 0)
         {
-            yield return StartCoroutine(WaitForSecondsOrContinue(1.5f));
+            yield return new WaitForSeconds(2.5f); // ✅ +0.5s más lento
             PauseGame();
             yield break;
         }
 
         waitingForTroopsDestroyed = true;
 
-        // Timeout de seguridad: máximo 15 segundos esperando
         float timeout = 15f;
         float elapsed = 0f;
 
@@ -258,16 +273,30 @@ public class TutorialManager : MonoBehaviour
 
         if (elapsed >= timeout)
         {
-            Debug.LogWarning("[TutorialManager] ⚠️ Timeout esperando destrucción de tropas (15s)");
             waitingForTroopsDestroyed = false;
         }
-        else
+
+        yield return new WaitForSeconds(2.5f); // ✅ +0.5s más lento
+
+        PauseGame();
+        
+        ShowDialog("¡Ganaste +1 de energía!", showImage: true, contextSprite: intelectBarSprite);
+        
+        if (playerIntelect != null && playerIntelect.intelectSlider != null)
         {
+            HighlightElement(playerIntelect.intelectSlider.GetComponent<RectTransform>());
+            StartHighlightEffect(playerIntelect.intelectSlider.gameObject);
         }
-
-        yield return StartCoroutine(WaitForSecondsOrContinue(1.5f));
-
-        PauseGame(); // PAUSAR OTRA VEZ
+        
+        yield return StartCoroutine(WaitForSecondsOrContinue(4f)); // ✅ +1s más lento
+        
+        if (playerIntelect != null && playerIntelect.intelectSlider != null)
+        {
+            StopHighlightEffect(playerIntelect.intelectSlider.gameObject);
+        }
+        ClearHighlight();
+        HideOptionalImage();
+        HideTutorialPanel(); // ✅ OCULTAR UI
     }
 
     // ========== PASO 4: ENSEÑAR A ATACAR ==========
@@ -275,14 +304,11 @@ public class TutorialManager : MonoBehaviour
     {
         currentStep = 4;
 
-        ShowTutorial("¡Perfecto! Ahora aprende a ATACAR:\n\n1️⃣ Selecciona 2 cartas\n2️⃣ Elige un operador (+ o -)\n3️⃣ Colócalas en el campo");
+        ShowDialog("Ahora ataca:\n1. Elige carta\n2. Presiona +/-\n3. Elige otra\n4. ¡Tira!", showImage: false);
+        yield return StartCoroutine(WaitForSecondsOrContinue(5f)); // ✅ +2s MÁS LENTO (era 3f)
 
-        HighlightElement(playerCardManager.SumaButton.GetComponent<RectTransform>());
-
-        yield return StartCoroutine(WaitForSecondsOrContinue(4f));
-
-        ShowTutorial("¡Hazlo ahora! Crea una combinación y ataca.");
-        UnblockPlayer(); // DESBLOQUEAR
+        ShowDialog("¡Hazlo ahora!", showImage: false);
+        UnblockPlayer();
 
         if (continueButton != null)
         {
@@ -293,68 +319,72 @@ public class TutorialManager : MonoBehaviour
 
         yield return new WaitUntil(() => !waitingForPlayerAction);
 
-
         ClearHighlight();
-        ShowTutorial("¡Excelente! Observa cómo tu ataque avanza hacia la torre enemiga.");
-        yield return StartCoroutine(WaitForSecondsOrContinue(2f));
+        ShowDialog("¡Bien! Tu ataque va a la torre.", showImage: false);
+        yield return StartCoroutine(WaitForSecondsOrContinue(2.5f)); // ✅ +0.5s más lento
 
-        ResumeGame(); // REANUDAR
+        HideTutorialPanel(); // ✅ OCULTAR UI
+        ResumeGame();
     }
 
-    // ========== PASO 5: JUGADOR ATACA ==========
+    // ========== PASO 5: JUGADOR ATACA (ESPERAR QUE LLEGUE) ==========
     private IEnumerator Tutorial_PlayerAttacks()
     {
         currentStep = 5;
 
-        yield return StartCoroutine(WaitForSecondsOrContinue(6f));
-
-        ShowTutorial("¡Bien hecho! Ya sabes cómo atacar y defender.");
-        yield return StartCoroutine(WaitForSecondsOrContinue(3f));
+        // ✅ ESPERAR A QUE EL ATAQUE LLEGUE Y DAÑE LA TORRE ENEMIGA
+        yield return new WaitForSeconds(10f); // ✅ Tiempo para que llegue el ataque
     }
 
-    // ========== PASO 6: POWERUP DE CURACIÓN ==========
+    // ========== PASO 6: POWERUP HEALTH (ESPERAR DAÑO A LA TORRE) ==========
     private IEnumerator Tutorial_HealthPowerUp()
     {
         currentStep = 6;
 
-        ShowTutorial("Ahora aprenderás sobre los PowerUps. ¡Presta atención!");
-        yield return StartCoroutine(WaitForSecondsOrContinue(3f));
-
-        ShowTutorial("¡La IA te ataca con 2+1=3! NO PUEDES DEFENDER esta vez.");
+        BlockPlayer();
         
-        BlockPlayer(); // 🔒 BLOQUEAR JUGADOR COMPLETAMENTE
+        // GUARDAR salud actual de la torre ANTES del ataque
+        if (playerTower != null)
+        {
+            playerTowerHealthBeforeAttack = playerTower.currentHealth;
+            Debug.Log($"[Tutorial] 💚 Salud de torre ANTES del ataque: {playerTowerHealthBeforeAttack}");
+        }
         
-        yield return StartCoroutine(WaitForSecondsOrContinue(2f));
-
-        // Forzar ataque de IA con 2+1=3
         var card2 = cardManager.GetCardByIndex(1);
         var card1 = cardManager.GetCardByIndex(0);
-
         Vector3 spawnPos = aiSpawnPoint.position;
         CardManager.GenerateResult result;
         cardManager.GenerateCombinedCharacter(card2, card1, spawnPos, 3, '+', "AITeam", out result, aiIntelect);
 
-        yield return StartCoroutine(WaitForSecondsOrContinue(2f));
+        // ✅ Esperar a que la tropa LLEGUE y DAÑE la torre
+        waitingForTowerDamage = true;
+        Debug.Log("[Tutorial] ⏳ Esperando que la torre reciba daño...");
+        
+        float timeout = 15f; // ✅ Aumentado timeout
+        float elapsed = 0f;
+        
+        while (waitingForTowerDamage && elapsed < timeout)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        if (elapsed >= timeout)
+        {
+            Debug.LogWarning("[Tutorial] ⚠️ TIMEOUT esperando daño a la torre");
+        }
 
-        // Esperar a que el ataque llegue a la torre (sin pausa)
-        yield return new WaitForSeconds(4f);
+        PauseGame();
+        ShowDialog("¡Te dañaron! Usa el corazón ❤️", showImage: true, contextSprite: healthPowerUpSprite);
 
-        PauseGame(); // PAUSAR DESPUÉS DEL DAÑO
-
-        ShowTutorial("¡El ataque llegó a tu torre! Has perdido 3 puntos de vida.");
-        yield return StartCoroutine(WaitForSecondsOrContinue(3f));
-
-        // EXPLICAR POWERUP DE CURACIÓN
-        ShowTutorial("💚 POWERUP DE CURACIÓN 💚\n\nEl icono del CORAZÓN ❤️ restaura 3 puntos de vida a tu torre.\n\n¡Úsalo ahora!");
-
-        // Resaltar botón de curación
         var healPowerUp = powerUpManager.GetPowerUpButton("Health");
         if (healPowerUp != null)
         {
             HighlightElement(healPowerUp.GetComponent<RectTransform>());
+            StartHighlightEffect(healPowerUp.gameObject);
         }
 
-        UnblockPlayerForPowerUps(); // 🔓 DESBLOQUEAR SOLO POWERUPS
+        UnblockPlayerForPowerUps();
 
         if (continueButton != null)
         {
@@ -365,47 +395,45 @@ public class TutorialManager : MonoBehaviour
 
         yield return new WaitUntil(() => !waitingForPlayerAction);
 
-
+        if (healPowerUp != null)
+        {
+            StopHighlightEffect(healPowerUp.gameObject);
+        }
         ClearHighlight();
-        ShowTutorial("¡Perfecto! Tu torre se ha curado. ¡Sigamos!");
-        yield return StartCoroutine(WaitForSecondsOrContinue(2f));
+        HideOptionalImage();
         
-        ResumeGame(); // REANUDAR JUEGO
+        ShowDialog("¡Curado!", showImage: false);
+        yield return StartCoroutine(WaitForSecondsOrContinue(2.5f)); // ✅ +0.5s más lento
+        
+        HideTutorialPanel(); // ✅ OCULTAR UI
+        ResumeGame();
     }
 
-    // ========== PASO 7: POWERUP DE RALENTIZACIÓN ==========
+    // ========== PASO 7: POWERUP SLOWTIME (SIMPLIFICADO - SOLO ENSEÑAR POWERUP) ==========
     private IEnumerator Tutorial_SlowTimePowerUp()
     {
         currentStep = 7;
 
-        ShowTutorial("¡La IA lanza otro ataque! Esta vez es 1+1=2.");
-        yield return StartCoroutine(WaitForSecondsOrContinue(2f));
-
-        // Forzar ataque de IA con 1+1=2
+        ShowDialog("¡Usa el reloj 🕐 para hacer lentos a los enemigos!", showImage: true, contextSprite: slowTimePowerUpSprite);
+        
         var card1A = cardManager.GetCardByIndex(0);
         var card1B = cardManager.GetCardByIndex(0);
-
         Vector3 spawnPos = aiSpawnPoint.position;
         CardManager.GenerateResult result;
-        currentAIAttack = cardManager.GenerateCombinedCharacter(card1A, card1B, spawnPos, 2, '+', "AITeam", out result, aiIntelect)
-            ? FindObjectOfType<Character>()?.gameObject
-            : null;
+        cardManager.GenerateCombinedCharacter(card1A, card1B, spawnPos, 2, '+', "AITeam", out result, aiIntelect);
 
-        yield return StartCoroutine(WaitForSecondsOrContinue(1f));
+        yield return StartCoroutine(WaitForSecondsOrContinue(3f)); // ✅ +1s más lento
 
-        PauseGame(); // PAUSAR JUEGO
+        PauseGame();
 
-        // EXPLICAR POWERUP DE RALENTIZACIÓN
-        ShowTutorial("⏰ POWERUP DE RALENTIZACIÓN ⏰\n\nEl icono del RELOJ 🕐 ralentiza a todos los enemigos durante 10 segundos.\n\n¡Úsalo ahora!");
-
-        // Resaltar botón de SlowTime
         var slowPowerUp = powerUpManager.GetPowerUpButton("SlowTime");
         if (slowPowerUp != null)
         {
             HighlightElement(slowPowerUp.GetComponent<RectTransform>());
+            StartHighlightEffect(slowPowerUp.gameObject);
         }
 
-        UnblockPlayerForPowerUps(); // DESBLOQUEAR SOLO POWERUPS
+        UnblockPlayerForPowerUps();
 
         if (continueButton != null)
         {
@@ -414,30 +442,22 @@ public class TutorialManager : MonoBehaviour
 
         waitingForPlayerAction = true;
 
+        Debug.Log("[Tutorial] ⏳ Esperando activación de SlowTime...");
         yield return new WaitUntil(() => !waitingForPlayerAction);
+        Debug.Log("[Tutorial] ✅ SlowTime activado!");
 
-
-        ClearHighlight();
-        ShowTutorial("¡Genial! Los enemigos ahora se mueven más lento.");
-        yield return StartCoroutine(WaitForSecondsOrContinue(2f));
-
-        ResumeGame();
-
-        // ESPERAR 4 SEGUNDOS Y ELIMINAR ATAQUE ENEMIGO
-        yield return StartCoroutine(WaitForSecondsOrContinue(4f));
-
-        // Destruir ataque enemigo
-        Character[] aiTroops = FindObjectsOfType<Character>();
-        foreach (var troop in aiTroops)
+        if (slowPowerUp != null)
         {
-            if (troop.CompareTag("AITeam"))
-            {
-                Destroy(troop.gameObject);
-            }
+            StopHighlightEffect(slowPowerUp.gameObject);
         }
-
-        ShowTutorial("¡El ataque enemigo ha sido eliminado! Ahora es tu turno de atacar.");
-        yield return StartCoroutine(WaitForSecondsOrContinue(2f));
+        ClearHighlight();
+        HideOptionalImage();
+        
+        ShowDialog("¡Perfecto! Los enemigos van lentos.", showImage: false);
+        yield return StartCoroutine(WaitForSecondsOrContinue(3f)); // ✅ +1s más lento
+        
+        HideTutorialPanel(); // ✅ OCULTAR UI
+        ResumeGame();
     }
 
     // ========== PASO 8: ATAQUE FINAL ==========
@@ -445,8 +465,10 @@ public class TutorialManager : MonoBehaviour
     {
         currentStep = 8;
 
-        ShowTutorial("¡Es tu momento! Lanza un último ataque para terminar el tutorial.");
-        UnblockPlayer(); // DESBLOQUEAR
+        ShowDialog("¡ATAQUE FINAL! Lanza tu combinación.", showImage: false);
+        yield return StartCoroutine(WaitForSecondsOrContinue(3f)); // ✅ +1s más lento
+        
+        UnblockPlayer();
 
         if (continueButton != null)
         {
@@ -457,43 +479,97 @@ public class TutorialManager : MonoBehaviour
 
         yield return new WaitUntil(() => !waitingForPlayerAction);
 
+        ShowDialog("¡EXCELENTE!", showImage: false);
+        yield return StartCoroutine(WaitForSecondsOrContinue(2.5f)); // ✅ +0.5s más lento
+        
+        HideTutorialPanel(); // ✅ OCULTAR UI
+        ResumeGame();
 
-        ShowTutorial("¡EXCELENTE! Has completado el ataque final.");
-        yield return StartCoroutine(WaitForSecondsOrContinue(3f));
+        yield return new WaitForSeconds(4f); // ✅ +1s más lento
+
+        if (aiTower != null)
+        {
+            aiTower.TakeDamage(9999);
+        }
+
+        yield return new WaitForSeconds(3f);
+
+        UnityEngine.SceneManagement.SceneManager.LoadScene("WinScene");
     }
 
-    // ========== PASO 9: COMPLETAR TUTORIAL ==========
+    // ========== PASO 9: COMPLETAR ==========
     private IEnumerator Tutorial_Completion()
     {
         currentStep = 9;
 
-        ShowTutorial("🎉 ¡TUTORIAL COMPLETADO! 🎉\n\nYa sabes:\n✅ Defender con cartas\n✅ Atacar con operaciones\n✅ Usar PowerUps estratégicamente\n\n¡Buena suerte en batalla!");
-        yield return StartCoroutine(WaitForSecondsOrContinue(5f));
+        ShowDialog("¡TUTORIAL COMPLETADO!\n\n¡A jugar!", showImage: false);
+        yield return StartCoroutine(WaitForSecondsOrContinue(4f));
 
         UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
     }
 
-    // ========== UTILIDADES - PAUSAR/REANUDAR CON GAMESPEEDMANAGER ==========
+    // ========== UTILIDADES ==========
+    
+    private Transform FindCardSlotByValue(int cardValue)
+    {
+        foreach (Transform slot in playerCardManager.cardSlots)
+        {
+            if (slot.childCount > 0)
+            {
+                CardDisplay display = slot.GetComponentInChildren<CardDisplay>();
+                if (display != null && display.cardData != null && display.cardData.cardValue == cardValue)
+                {
+                    return slot;
+                }
+            }
+        }
+        return null;
+    }
+
+    private void ShowDialog(string message, bool showImage, Sprite contextSprite = null)
+    {
+        tutorialPanel.SetActive(true);
+        dialogText.text = message;
+
+        if (showImage && contextSprite != null && optionalImage != null)
+        {
+            optionalImage.gameObject.SetActive(true);
+            optionalImage.sprite = contextSprite;
+        }
+        else if (optionalImage != null)
+        {
+            optionalImage.gameObject.SetActive(false);
+        }
+    }
+
+    private void HideOptionalImage()
+    {
+        if (optionalImage != null)
+        {
+            optionalImage.gameObject.SetActive(false);
+        }
+    }
 
     /// <summary>
-    /// PAUSA COMPLETA: GameSpeedManager + NavMesh
+    /// ✅ NUEVO: Oculta completamente el panel de tutorial
     /// </summary>
+    private void HideTutorialPanel()
+    {
+        if (tutorialPanel != null)
+        {
+            tutorialPanel.SetActive(false);
+        }
+    }
+
     private void PauseGame()
     {
-
         isTutorialPaused = true;
 
-        // PAUSAR con GameSpeedManager (afecta velocidad global)
         if (GameSpeedManager.Instance != null)
         {
-            GameSpeedManager.Instance.GameSpeedMultiplier = 0f; // PAUSA TOTAL
-        }
-        else
-        {
-            Debug.LogWarning("[TutorialManager] GameSpeedManager.Instance no encontrado");
+            GameSpeedManager.Instance.GameSpeedMultiplier = 0f;
         }
 
-        // PAUSAR NavMeshAgents por si acaso (redundancia)
         Character[] troops = FindObjectsOfType<Character>();
         foreach (var troop in troops)
         {
@@ -503,24 +579,17 @@ public class TutorialManager : MonoBehaviour
                 agent.isStopped = true;
             }
         }
-
     }
 
-    /// <summary>
-    /// REANUDAR JUEGO: GameSpeedManager + NavMesh
-    /// </summary>
     private void ResumeGame()
     {
-
         isTutorialPaused = false;
 
-        // REANUDAR con GameSpeedManager
         if (GameSpeedManager.Instance != null)
         {
-            GameSpeedManager.Instance.GameSpeedMultiplier = 1f; // VELOCIDAD NORMAL
+            GameSpeedManager.Instance.GameSpeedMultiplier = 1f;
         }
 
-        // REANUDAR NavMeshAgents
         Character[] troops = FindObjectsOfType<Character>();
         foreach (var troop in troops)
         {
@@ -534,107 +603,25 @@ public class TutorialManager : MonoBehaviour
         ClearHighlight();
     }
 
-    /// <summary>
-    /// BLOQUEO TOTAL: PlayerCardManager + PlayableArea + Panel bloqueante
-    /// </summary>
     private void BlockPlayer()
     {
         isPlayerBlocked = true;
-
-        // 1. DESACTIVAR PlayerCardManager
-        if (playerCardManager != null)
-        {
-            playerCardManager.enabled = false;
-        }
-
-        // 2. DESACTIVAR PlayableAreaUI
-        if (playableAreaUI != null)
-        {
-            playableAreaUI.enabled = false;
-        }
-
-        // 4. DESHABILITAR BOTONES DE OPERADORES
-        if (playerCardManager != null)
-        {
-            if (playerCardManager.SumaButton != null)
-            {
-                playerCardManager.SumaButton.interactable = false;
-            }
-            if (playerCardManager.RestaButton != null)
-            {
-                playerCardManager.RestaButton.interactable = false;
-            }
-        }
-
+        if (playerCardManager != null) playerCardManager.enabled = false;
+        if (playableAreaUI != null) playableAreaUI.enabled = false;
     }
 
-    /// <summary>
-    /// DESBLOQUEO COMPLETO: Todo vuelve a la normalidad
-    /// </summary>
     private void UnblockPlayer()
     {
         isPlayerBlocked = false;
-
-        // 1. REACTIVAR PlayerCardManager
-        if (playerCardManager != null)
-        {
-            playerCardManager.enabled = true;
-        }
-
-        // 2. REACTIVAR PlayableAreaUI
-        if (playableAreaUI != null)
-        {
-            playableAreaUI.enabled = true;
-        }
-
-        // 4. REHABILITAR BOTONES DE OPERADORES
-        if (playerCardManager != null)
-        {
-            if (playerCardManager.SumaButton != null)
-            {
-                playerCardManager.SumaButton.interactable = true;
-            }
-            if (playerCardManager.RestaButton != null)
-            {
-                playerCardManager.RestaButton.interactable = true;
-            }
-        }
-
+        if (playerCardManager != null) playerCardManager.enabled = true;
+        if (playableAreaUI != null) playableAreaUI.enabled = true;
     }
 
-    /// <summary>
-    /// DESBLOQUEO PARCIAL: Solo permite PowerUps (NO cartas ni área de juego)
-    /// </summary>
     private void UnblockPlayerForPowerUps()
     {
-        isPlayerBlocked = false; // Técnicamente desbloqueado pero limitado
-
-        // MANTENER PlayerCardManager DESACTIVADO
-        if (playerCardManager != null)
-        {
-            playerCardManager.enabled = false;
-        }
-
-        // MANTENER PlayableAreaUI DESACTIVADO
-        if (playableAreaUI != null)
-        {
-            playableAreaUI.enabled = false;
-        }
-
-
-    }
-
-    // ========== UTILIDADES DE UI ==========
-
-    private void ShowTutorial(string message)
-    {
-        tutorialPanel.SetActive(true);
-        tutorialText.text = message;
-    }
-
-    private void HideTutorial()
-    {
-        tutorialPanel.SetActive(false);
+        isPlayerBlocked = false;
+        if (playerCardManager != null) playerCardManager.enabled = false;
+        if (playableAreaUI != null) playableAreaUI.enabled = false;
     }
 
     private void HighlightCard(Transform cardSlot)
@@ -665,6 +652,20 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    private void StartHighlightEffect(GameObject target)
+    {
+        if (target == null) return;
+        TutorialHighlight highlight = target.GetComponent<TutorialHighlight>();
+        if (highlight != null) highlight.StartHighlight();
+    }
+
+    private void StopHighlightEffect(GameObject target)
+    {
+        if (target == null) return;
+        TutorialHighlight highlight = target.GetComponent<TutorialHighlight>();
+        if (highlight != null) highlight.StopHighlight();
+    }
+
     public bool IsTutorialPaused()
     {
         return isTutorialPaused;
@@ -679,32 +680,39 @@ public class TutorialManager : MonoBehaviour
 
     public void OnPlayerPlaysCard(int cardValue)
     {
-
+        Debug.Log($"[Tutorial] 📥 OnPlayerPlaysCard - Valor: {cardValue}, Step: {currentStep}, Esperando: {waitingForPlayerAction}");
+        
         if (currentStep == 2 && cardValue == 5 && waitingForPlayerAction)
         {
+            Debug.Log("[Tutorial] ✅ Carta 5 aceptada!");
             waitingForPlayerAction = false;
         }
     }
 
     public void OnPlayerPlaysOperation()
     {
-
+        Debug.Log($"[Tutorial] 📥 OnPlayerPlaysOperation - Step: {currentStep}, Esperando: {waitingForPlayerAction}");
+        
         if ((currentStep == 4 || currentStep == 8) && waitingForPlayerAction)
         {
+            Debug.Log("[Tutorial] ✅ Operación aceptada!");
             waitingForPlayerAction = false;
         }
     }
 
     public void OnPowerUpActivated(string powerUpName)
     {
-
+        Debug.Log($"[Tutorial] 📥 OnPowerUpActivated - PowerUp: {powerUpName}, Step: {currentStep}, Esperando: {waitingForPlayerAction}");
+        
         if (currentStep == 6 && powerUpName == "Health" && waitingForPlayerAction)
         {
+            Debug.Log("[Tutorial] ✅ PowerUp Health aceptado!");
             waitingForPlayerAction = false;
         }
         else if (currentStep == 7 && powerUpName == "SlowTime" && waitingForPlayerAction)
         {
+            Debug.Log("[Tutorial] ✅ PowerUp SlowTime aceptado!");
             waitingForPlayerAction = false;
-        }       
+        }
     }
 }

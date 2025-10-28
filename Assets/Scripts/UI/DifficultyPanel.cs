@@ -62,6 +62,11 @@ public class DifficultyPanel : MonoBehaviour
         GameManager.GoToPlayScene();
     }
 
+    public void IniciarTutorial()
+    {
+        GameManager.GoToTutorialScene();
+    }
+
     private void OnDestroy()
     {
         if (botonAbrirPanel != null)

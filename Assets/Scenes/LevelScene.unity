@@ -202,9 +202,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1768580463}
         m_TargetAssemblyTypeName: DifficultyPanel, Assembly-CSharp
-        m_MethodName: 
+        m_MethodName: IniciarTutorial
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1369,10 +1369,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SceneBridge
   screenImage: {fileID: 0}
   nextButton: {fileID: 0}
+  previousButton: {fileID: 0}
   screenSprites: []
-  normalButtonSprite: {fileID: 0}
-  finalButtonSprite: {fileID: 0}
-  onNormalButtonClick:
+  onNextButtonClick:
+    m_PersistentCalls:
+      m_Calls: []
+  onPreviousButtonClick:
     m_PersistentCalls:
       m_Calls: []
   onFinalButtonClick:

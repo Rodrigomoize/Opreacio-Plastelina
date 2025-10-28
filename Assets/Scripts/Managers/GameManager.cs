@@ -84,6 +84,14 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public static void GoToTutorialScene()
+    {
+        if (Instance != null)
+        {
+            Instance.LoadTutorialScene();
+        }
+    }
+
     public static void GoToWinScene()
     {
         if (Instance != null)
@@ -128,6 +136,11 @@ public class GameManager : MonoBehaviour
         isPaused = false;
 
         SceneManager.LoadScene("PlayScene");
+    }
+
+    private void LoadTutorialScene()
+    {
+        SceneManager.LoadScene("TutorialScene");
     }
 
     private void LoadWinScene()
