@@ -5841,14 +5841,14 @@ MonoBehaviour:
   leftZoneImage: {fileID: 121877454}
   rightZoneImage: {fileID: 1624217343}
   blockedEnemyZoneImage: {fileID: 1568474623}
-  availableColor: {r: 0.2216981, g: 1, b: 0.2216981, a: 0}
+  availableColor: {r: 0.4784314, g: 0.8352942, b: 1, a: 0.15686275}
   leftHighlightColor: {r: 0.47843137, g: 0.8352941, b: 1, a: 0.1764706}
   rightHighlightColor: {r: 0.47843137, g: 0.8352941, b: 1, a: 0.1764706}
-  blockedColor: {r: 1, g: 0, b: 0, a: 0.39215687}
+  blockedColor: {r: 1, g: 0, b: 0, a: 0.09803922}
   fadeDuration: 0.2
   enablePulse: 1
-  pulseSpeed: 1.5
-  pulseIntensity: 0.3
+  pulseSpeed: 0.5
+  pulseIntensity: 1
 --- !u!4 &1654938924
 Transform:
   m_ObjectHideFlags: 0

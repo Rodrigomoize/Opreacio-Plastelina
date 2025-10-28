@@ -76,7 +76,6 @@ public class DeploymentZoneFeedback : MonoBehaviour
     {
         if (isVisible) return;
         
-        Debug.LogWarning($"[DeploymentZoneFeedback] ShowZones llamado - enablePulse={enablePulse}"); // DEBUG
         
         isVisible = true;
         
@@ -84,14 +83,12 @@ public class DeploymentZoneFeedback : MonoBehaviour
         {
             leftZoneImage.enabled = true;
             leftZoneImage.color = availableColor;
-            Debug.LogWarning($"[DeploymentZoneFeedback] Left zone enabled, color={availableColor}"); // DEBUG
         }
         
         if (rightZoneImage != null)
         {
             rightZoneImage.enabled = true;
             rightZoneImage.color = availableColor;
-            Debug.LogWarning($"[DeploymentZoneFeedback] Right zone enabled, color={availableColor}"); // DEBUG
         }
         
         // Mostrar zona bloqueada del enemigo
@@ -99,7 +96,6 @@ public class DeploymentZoneFeedback : MonoBehaviour
         {
             blockedEnemyZoneImage.enabled = true;
             blockedEnemyZoneImage.color = blockedColor;
-            Debug.LogWarning($"[DeploymentZoneFeedback] Blocked enemy zone enabled, color={blockedColor}"); // DEBUG
         }
         
         // Detener parpadeo anterior si existe
@@ -161,17 +157,36 @@ public class DeploymentZoneFeedback : MonoBehaviour
         
         isHovering = true;
         isHoveringLeft = normalizedX < 0.5f;
-        
-        Debug.LogWarning($"[DeploymentZoneFeedback] UpdateHoverFeedback - normalizedX={normalizedX}, isHoveringLeft={isHoveringLeft}"); // DEBUG
-        
+
+        // Detener el parpadeo mientras hay hover
+        if (pulseCoroutine != null)
+        {
+            StopCoroutine(pulseCoroutine);
+            pulseCoroutine = null;
+        }
+
         // La zona con hover se mantiene resaltada (sin parpadeo)
         if (isHoveringLeft && leftZoneImage != null)
         {
             leftZoneImage.color = leftHighlightColor;
+            // Ocultar la derecha
+            if (rightZoneImage != null)
+            {
+                Color c = rightZoneImage.color;
+                c.a = 0f;
+                rightZoneImage.color = c;
+            }
         }
         else if (!isHoveringLeft && rightZoneImage != null)
         {
             rightZoneImage.color = rightHighlightColor;
+            // Ocultar la izquierda
+            if (leftZoneImage != null)
+            {
+                Color c = leftZoneImage.color;
+                c.a = 0f;
+                leftZoneImage.color = c;
+            }
         }
     }
     
@@ -182,10 +197,26 @@ public class DeploymentZoneFeedback : MonoBehaviour
     {
         if (!isVisible) return;
         
-        Debug.LogWarning("[DeploymentZoneFeedback] ResetHoverFeedback llamado - volviendo a parpadeo"); // DEBUG
         
         isHovering = false;
-        // El parpadeo se reanudará automáticamente en PulseZones()
+        // Restaurar alpha de ambas zonas antes de reactivar el parpadeo
+        if (leftZoneImage != null)
+        {
+            Color c = leftZoneImage.color;
+            c.a = availableColor.a;
+            leftZoneImage.color = c;
+        }
+        if (rightZoneImage != null)
+        {
+            Color c = rightZoneImage.color;
+            c.a = availableColor.a;
+            rightZoneImage.color = c;
+        }
+        // Reactivar el parpadeo al dejar de hacer hover
+        if (enablePulse && pulseCoroutine == null && isVisible)
+        {
+            pulseCoroutine = StartCoroutine(PulseZones());
+        }
     }
     
     private System.Collections.IEnumerator FadeIn()
@@ -291,8 +322,6 @@ public class DeploymentZoneFeedback : MonoBehaviour
     /// </summary>
     private System.Collections.IEnumerator PulseZones()
     {
-        Debug.LogWarning("[DeploymentZoneFeedback] PulseZones iniciado"); // DEBUG
-        Debug.LogWarning($"[DeploymentZoneFeedback] availableColor={availableColor}, pulseSpeed={pulseSpeed}, pulseIntensity={pulseIntensity}"); // DEBUG
         
         int frameCount = 0;
         
@@ -307,10 +336,6 @@ public class DeploymentZoneFeedback : MonoBehaviour
             float currentAlpha = Mathf.Lerp(minAlpha, maxAlpha, pulse);
             
             // Log cada 60 frames para debug
-            if (frameCount % 60 == 0)
-            {
-                Debug.LogWarning($"[DeploymentZoneFeedback] Frame {frameCount}: pulse={pulse:F2}, alpha={currentAlpha:F2} (min={minAlpha:F2}, max={maxAlpha:F2})"); // DEBUG
-            }
             frameCount++;
             
             // Solo parpadear la zona SIN hover
@@ -341,7 +366,6 @@ public class DeploymentZoneFeedback : MonoBehaviour
             yield return null;
         }
         
-        Debug.LogWarning("[DeploymentZoneFeedback] PulseZones terminado"); // DEBUG
     }
 }
 
