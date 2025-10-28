@@ -264,7 +264,7 @@ public class PowerUpManager : MonoBehaviour
         // Filtro azul constante durante toda la duración del powerup
         if (ScreenFlashEffect.Instance != null && p.duration > 0f)
         {
-            StartCoroutine(ConstantFilterCoroutine(slowTimeFlashColor, p.duration));
+            ScreenFlashEffect.Instance.SetPersistentFilter(slowTimeFlashColor, p.duration);
         }
         else if (ScreenFlashEffect.Instance != null)
         {

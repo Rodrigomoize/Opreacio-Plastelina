@@ -8,6 +8,10 @@ using System.Collections;
 /// </summary>
 public class ScreenFlashEffect : MonoBehaviour
 {
+    // Filtro persistente (ej: azul de slow time)
+    private bool persistentFilterActive = false;
+    private Color persistentFilterColor;
+    private Coroutine persistentCoroutine = null;
     public static ScreenFlashEffect Instance { get; private set; }
     
     [Header("Flash Settings")]
@@ -61,25 +65,78 @@ public class ScreenFlashEffect : MonoBehaviour
     /// <param name="duration">Duración del flash</param>
     public void Flash(Color color, float duration)
     {
+        // Si hay filtro persistente, ignorar flashes normales
+
+        if (persistentFilterActive) return;
         if (!isFlashing && flashImage != null)
         {
             StartCoroutine(DoFlash(color, duration));
         }
     }
-    
+
+    /// <summary>
+    /// Activa un filtro persistente (ej: azul) que bloquea otros flashes hasta que termine
+    /// </summary>
+    public void SetPersistentFilter(Color color, float duration)
+    {
+        if (persistentCoroutine != null)
+            StopCoroutine(persistentCoroutine);
+        persistentCoroutine = StartCoroutine(PersistentFilterCoroutine(color, duration));
+    }
+
+    private IEnumerator PersistentFilterCoroutine(Color color, float duration)
+    {
+        persistentFilterActive = true;
+        persistentFilterColor = color;
+        isFlashing = false; // Cancelar cualquier flash en curso
+        if (flashImage == null) yield break;
+
+        // Fade in rápido
+        float fadeInTime = 0.2f;
+        float elapsed = 0f;
+        while (elapsed < fadeInTime)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = Mathf.Lerp(0, color.a, elapsed / fadeInTime);
+            Color c = color;
+            c.a = alpha;
+            flashImage.color = c;
+            yield return null;
+        }
+        flashImage.color = color;
+
+        // Mantener el filtro
+        yield return new WaitForSeconds(duration - fadeInTime - 0.3f);
+
+        // Fade out
+        float fadeOutTime = 0.3f;
+        elapsed = 0f;
+        while (elapsed < fadeOutTime)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = Mathf.Lerp(color.a, 0, elapsed / fadeOutTime);
+            Color c = color;
+            c.a = alpha;
+            flashImage.color = c;
+            yield return null;
+        }
+        Color finalColor = color;
+        finalColor.a = 0;
+        flashImage.color = finalColor;
+        persistentFilterActive = false;
+        persistentCoroutine = null;
+    }
+
     private IEnumerator DoFlash(Color color, float duration)
     {
         isFlashing = true;
-        
         if (flashImage == null)
         {
             Debug.LogWarning("[ScreenFlashEffect] flashImage no está asignada!");
             isFlashing = false;
             yield break;
         }
-        
         float elapsed = 0f;
-        
         // Fade in rápido (25% del tiempo)
         float fadeInDuration = duration * 0.25f;
         while (elapsed < fadeInDuration)
@@ -91,7 +148,6 @@ public class ScreenFlashEffect : MonoBehaviour
             flashImage.color = c;
             yield return null;
         }
-        
         // Fade out más lento (75% del tiempo)
         elapsed = 0f;
         float fadeOutDuration = duration * 0.75f;
@@ -104,12 +160,10 @@ public class ScreenFlashEffect : MonoBehaviour
             flashImage.color = c;
             yield return null;
         }
-        
         // Asegurarse de que quede completamente invisible
         Color finalColor = color;
         finalColor.a = 0;
         flashImage.color = finalColor;
-        
         isFlashing = false;
     }
 }
