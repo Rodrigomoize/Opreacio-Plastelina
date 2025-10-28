@@ -988,14 +988,10 @@ public class PlayerCardManager : MonoBehaviour
     /// </summary>
     private void ShowInsufficientIntellectFeedback()
     {
-        // Activar camera shake si está disponible
-        if (CameraShake.Instance != null)
+        // Shake en la barra de intelecto en vez de la cámara completa
+        if (intelectBar != null)
         {
-            CameraShake.Instance.Shake();
-        }
-        else
-        {
-            Debug.LogWarning("[PlayerCardManager] CameraShake.Instance no encontrado");
+            intelectBar.ShakeBar(); // Usa valores del Inspector
         }
         
         // Activar flash rojo de pantalla si está disponible

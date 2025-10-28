@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 35211719}
   - component: {fileID: 35211718}
   - component: {fileID: 35211717}
+  - component: {fileID: 35211720}
   m_Layer: 5
   m_Name: "Bot\xF3nTutorial"
   m_TagString: Untagged
@@ -263,6 +264,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 35211715}
   m_CullTransparentMesh: 1
+--- !u!114 &35211720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 35211715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93b497450f9fae840a38cbfd2ca129fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonPressEffect
+  hoverScale: 1.1
+  pressScale: 0.9
+  scaleAnimationSpeed: 12
+  hoverRotation: 5
 --- !u!1 &142105549
 GameObject:
   m_ObjectHideFlags: 0
@@ -514,6 +531,7 @@ GameObject:
   - component: {fileID: 455854839}
   - component: {fileID: 455854838}
   - component: {fileID: 455854837}
+  - component: {fileID: 455854840}
   m_Layer: 5
   m_Name: "Bot\xF3nCerrar"
   m_TagString: Untagged
@@ -634,6 +652,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 455854835}
   m_CullTransparentMesh: 1
+--- !u!114 &455854840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 455854835}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93b497450f9fae840a38cbfd2ca129fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonPressEffect
+  hoverScale: 1.1
+  pressScale: 0.9
+  scaleAnimationSpeed: 12
+  hoverRotation: 5
 --- !u!1 &731506814
 GameObject:
   m_ObjectHideFlags: 0
@@ -766,6 +800,7 @@ GameObject:
   - component: {fileID: 1138511429}
   - component: {fileID: 1138511428}
   - component: {fileID: 1138511427}
+  - component: {fileID: 1138511430}
   m_Layer: 5
   m_Name: Mix
   m_TagString: Untagged
@@ -886,6 +921,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1138511425}
   m_CullTransparentMesh: 1
+--- !u!114 &1138511430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1138511425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93b497450f9fae840a38cbfd2ca129fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonPressEffect
+  hoverScale: 1.1
+  pressScale: 0.9
+  scaleAnimationSpeed: 12
+  hoverRotation: 5
 --- !u!1 &1209535539
 GameObject:
   m_ObjectHideFlags: 0
@@ -1048,6 +1099,7 @@ GameObject:
   - component: {fileID: 1267461976}
   - component: {fileID: 1267461975}
   - component: {fileID: 1267461974}
+  - component: {fileID: 1267461977}
   m_Layer: 5
   m_Name: "Bot\xF3nF\xE1cil"
   m_TagString: Untagged
@@ -1180,6 +1232,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1267461972}
   m_CullTransparentMesh: 1
+--- !u!114 &1267461977
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1267461972}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93b497450f9fae840a38cbfd2ca129fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonPressEffect
+  hoverScale: 1.1
+  pressScale: 0.9
+  scaleAnimationSpeed: 12
+  hoverRotation: 5
 --- !u!1 &1360751333
 GameObject:
   m_ObjectHideFlags: 0
@@ -1335,6 +1403,7 @@ GameObject:
   - component: {fileID: 1420190512}
   - component: {fileID: 1420190511}
   - component: {fileID: 1420190510}
+  - component: {fileID: 1420190513}
   m_Layer: 5
   m_Name: "Bot\xF3nDif\xEDcil"
   m_TagString: Untagged
@@ -1467,6 +1536,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1420190508}
   m_CullTransparentMesh: 1
+--- !u!114 &1420190513
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1420190508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93b497450f9fae840a38cbfd2ca129fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonPressEffect
+  hoverScale: 1.1
+  pressScale: 0.9
+  scaleAnimationSpeed: 12
+  hoverRotation: 5
 --- !u!1 &1497193107
 GameObject:
   m_ObjectHideFlags: 0
@@ -1872,6 +1957,7 @@ GameObject:
   - component: {fileID: 1823582289}
   - component: {fileID: 1823582288}
   - component: {fileID: 1823582287}
+  - component: {fileID: 1823582290}
   m_Layer: 5
   m_Name: "Bot\xF3nNormal"
   m_TagString: Untagged
@@ -2004,6 +2090,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1823582285}
   m_CullTransparentMesh: 1
+--- !u!114 &1823582290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1823582285}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93b497450f9fae840a38cbfd2ca129fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonPressEffect
+  hoverScale: 1.1
+  pressScale: 0.9
+  scaleAnimationSpeed: 12
+  hoverRotation: 5
 --- !u!1 &2057313185
 GameObject:
   m_ObjectHideFlags: 0

@@ -1484,7 +1484,6 @@ GameObject:
   - component: {fileID: 446840438}
   - component: {fileID: 446840442}
   - component: {fileID: 446840441}
-  - component: {fileID: 446840440}
   - component: {fileID: 446840439}
   m_Layer: 3
   m_Name: PlayableAreaAI
@@ -1542,29 +1541,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &446840440
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 446840437}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db7d10b4a599d6c42b588b2b01ca4345, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: '::'
-  playerManager: {fileID: 468729724}
-  worldCamera: {fileID: 962538953}
-  mapRawImage: {fileID: 727956710}
-  playAreaCollider: {fileID: 1813244267}
-  raycastMask:
-    serializedVersion: 2
-    m_Bits: 8
-  maxSpawnX: 5
-  planeY: 0
-  fallbackRayDistance: 200
-  zoneFeedback: {fileID: 0}
 --- !u!65 &446840441
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -5438,7 +5414,7 @@ MonoBehaviour:
     reaccionMax: 14
     umbralDefensa: 8
     chanceAtaque: 0.4
-    velocidadRegenIntelecto: 3.6
+    velocidadRegenIntelecto: 3.2
     vidaTorrePlayer: 10
     vidaTorreIA: 10
   configMedia:
@@ -5448,7 +5424,7 @@ MonoBehaviour:
     reaccionMax: 8
     umbralDefensa: 8
     chanceAtaque: 0.5
-    velocidadRegenIntelecto: 3.2
+    velocidadRegenIntelecto: 3
     vidaTorrePlayer: 10
     vidaTorreIA: 10
   configDificil:
@@ -5486,6 +5462,81 @@ Transform:
   m_Children: []
   m_Father: {fileID: 907959315}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1568474621
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1568474622}
+  - component: {fileID: 1568474624}
+  - component: {fileID: 1568474623}
+  m_Layer: 5
+  m_Name: NoDeployment
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1568474622
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1568474621}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 2.7665489, y: 2.2485442, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2111984699}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 168}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1568474623
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1568474621}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.2735849, g: 0.2735849, b: 0.2735849, a: 0.50980395}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1568474624
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1568474621}
+  m_CullTransparentMesh: 1
 --- !u!1 &1587260386
 GameObject:
   m_ObjectHideFlags: 0
@@ -5789,10 +5840,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DeploymentZoneFeedback
   leftZoneImage: {fileID: 121877454}
   rightZoneImage: {fileID: 1624217343}
+  blockedEnemyZoneImage: {fileID: 1568474623}
   availableColor: {r: 0.2216981, g: 1, b: 0.2216981, a: 0}
   leftHighlightColor: {r: 0.47843137, g: 0.8352941, b: 1, a: 0.1764706}
   rightHighlightColor: {r: 0.47843137, g: 0.8352941, b: 1, a: 0.1764706}
+  blockedColor: {r: 1, g: 0, b: 0, a: 0.39215687}
   fadeDuration: 0.2
+  enablePulse: 1
+  pulseSpeed: 1.5
+  pulseIntensity: 0.3
 --- !u!4 &1654938924
 Transform:
   m_ObjectHideFlags: 0
@@ -7043,6 +7099,7 @@ RectTransform:
   - {fileID: 568774854}
   - {fileID: 121877453}
   - {fileID: 1624217342}
+  - {fileID: 1568474622}
   - {fileID: 986712402}
   - {fileID: 1276959908}
   - {fileID: 1353759600}
@@ -7122,6 +7179,8 @@ MonoBehaviour:
   useSmoothTransition: 1
   smoothSpeed: 5
   enablePreview: 1
+  shakeDuration: 0.5
+  shakeMagnitude: 8
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

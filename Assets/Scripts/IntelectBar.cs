@@ -30,6 +30,13 @@ public class IntelectBar : MonoBehaviour
     [Header("Preview")]
     public bool enablePreview = true;
 
+    [Header("Shake Effect")]
+    [Tooltip("Duración del shake cuando no hay suficiente intelecto")]
+    public float shakeDuration = 0.5f;
+    
+    [Tooltip("Magnitud/intensidad del shake (distancia del temblor)")]
+    public float shakeMagnitude = 15f;
+
     private float maxIntelect = 10;
     private float currentHeight = 0f;
     private float targetHeight = 0f;
@@ -232,5 +239,85 @@ public class IntelectBar : MonoBehaviour
     public void SetMaxHeight(float height)
     {
         maxHeight = height;
+    }
+
+    /// <summary>
+    /// Shake visual de la barra para indicar intelecto insuficiente
+    /// </summary>
+    public void ShakeBar()
+    {
+        ShakeBar(shakeDuration, shakeMagnitude);
+    }
+    
+    /// <summary>
+    /// Shake visual de la barra con parámetros personalizados
+    /// </summary>
+    public void ShakeBar(float duration, float magnitude)
+    {
+        Debug.LogWarning($"[IntelectBar] ShakeBar llamado - duration={duration}, magnitude={magnitude}, activeInHierarchy={gameObject.activeInHierarchy}"); // DEBUG
+        
+        if (gameObject.activeInHierarchy)
+        {
+            StartCoroutine(ShakeCoroutine(duration, magnitude));
+        }
+        else
+        {
+            Debug.LogWarning("[IntelectBar] ShakeBar NO ejecutado - gameObject no está activo en jerarquía"); // DEBUG
+        }
+    }
+
+    private System.Collections.IEnumerator ShakeCoroutine(float duration, float magnitude)
+    {
+        // Intentar obtener RectTransform primero, si no hay, usar Transform normal
+        RectTransform rectTransform = GetComponent<RectTransform>();
+        Transform normalTransform = transform;
+        
+        Vector3 originalPosition;
+        bool useRectTransform = rectTransform != null;
+        
+        if (useRectTransform)
+        {
+            originalPosition = rectTransform.localPosition;
+            Debug.LogWarning("[IntelectBar] Usando RectTransform para shake"); // DEBUG
+        }
+        else
+        {
+            originalPosition = normalTransform.localPosition;
+            Debug.LogWarning("[IntelectBar] Usando Transform para shake"); // DEBUG
+        }
+        
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            float x = Random.Range(-1f, 1f) * magnitude;
+            float y = Random.Range(-1f, 1f) * magnitude;
+
+            Vector3 shakeOffset = originalPosition + new Vector3(x, y, 0);
+            
+            if (useRectTransform)
+            {
+                rectTransform.localPosition = shakeOffset;
+            }
+            else
+            {
+                normalTransform.localPosition = shakeOffset;
+            }
+
+            elapsed += Time.unscaledDeltaTime; // Usar unscaled para que funcione en pausa
+            yield return null;
+        }
+
+        // Restaurar posición original
+        if (useRectTransform)
+        {
+            rectTransform.localPosition = originalPosition;
+        }
+        else
+        {
+            normalTransform.localPosition = originalPosition;
+        }
+        
+        Debug.LogWarning("[IntelectBar] Shake completado"); // DEBUG
     }
 }
