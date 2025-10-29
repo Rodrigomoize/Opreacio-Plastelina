@@ -26,13 +26,13 @@ public class TutorialManager : MonoBehaviour
     public Image speechBubble;
     public TextMeshProUGUI dialogText;
     public Image optionalImage;
-    public Button continueButton;
+    public Image optionalImageAttack;
 
     [Header("Animación Popup")]
     [Tooltip("Escala objetivo cuando aparece (1 = tamaño normal)")]
     [Range(0.8f, 1.5f)]
     public float popupScaleTarget = 1f;
-    
+
     [Tooltip("Escala de la imagen del personaje (CadetNumeric)")]
     [Range(0.8f, 2f)]
     public float characterImageScale = 1.2f;
@@ -56,14 +56,18 @@ public class TutorialManager : MonoBehaviour
     public Sprite slowTimePowerUpSprite;
     public Sprite intelectBarIcon;
     public Sprite intelectCost;
+    public Sprite attackIcon;
 
     [Header("UI de Highlight")]
     public Image highlightOverlay;
     public RectTransform highlightRect;
 
+    [Header("Referencias para Highlight")]
+    [Tooltip("Componente Image del fillScaler para highlight de intelecto")]
+    public Image intelectBarFillImage;
+
     private int currentStep = 0;
     private bool waitingForPlayerAction = false;
-    private bool waitingForContinue = false;
     private bool isTutorialPaused = false;
     private bool isPlayerBlocked = false;
     private bool waitingForTroopsDestroyed = false;
@@ -72,12 +76,14 @@ public class TutorialManager : MonoBehaviour
 
     private bool waitingForTowerDamage = false;
     private int playerTowerHealthBeforeAttack = 0;
-    
+
     private bool waitingForCounterattack = false;
     private int playerIntelectBeforeCounterattack = 0;
-    
+
     private bool waitingForEnemyTowerDamage = false;
     private int aiTowerHealthBeforeAttack = 0;
+
+    private bool hasShownAttackExplanation = false;
 
     // Control de animación popup
     private bool isPopupVisible = false;
@@ -87,6 +93,7 @@ public class TutorialManager : MonoBehaviour
     private RectTransform speechBubbleRect;
     private RectTransform dialogTextRect;
     private RectTransform optionalImageRect;
+    private RectTransform optionalImageAttackRect;
 
     void Awake()
     {
@@ -97,16 +104,11 @@ public class TutorialManager : MonoBehaviour
         if (speechBubble != null) speechBubbleRect = speechBubble.GetComponent<RectTransform>();
         if (dialogText != null) dialogTextRect = dialogText.GetComponent<RectTransform>();
         if (optionalImage != null) optionalImageRect = optionalImage.GetComponent<RectTransform>();
+        if (optionalImageAttack != null) optionalImageAttackRect = optionalImageAttack.GetComponent<RectTransform>();
     }
 
     void Start()
     {
-        if (continueButton != null)
-        {
-            continueButton.onClick.AddListener(OnContinueButtonClicked);
-            continueButton.gameObject.SetActive(false);
-        }
-
         if (aiController != null)
         {
             aiController.enabled = false;
@@ -115,6 +117,11 @@ public class TutorialManager : MonoBehaviour
         if (optionalImage != null)
         {
             optionalImage.gameObject.SetActive(false);
+        }
+
+        if (optionalImageAttack != null)
+        {
+            optionalImageAttack.gameObject.SetActive(false);
         }
 
         SetPopupScale(popupScaleHidden);
@@ -143,7 +150,7 @@ public class TutorialManager : MonoBehaviour
                 waitingForTowerDamage = false;
             }
         }
-        
+
         if (waitingForCounterattack && playerIntelect != null)
         {
             if (playerIntelect.currentIntelect > playerIntelectBeforeCounterattack)
@@ -152,7 +159,7 @@ public class TutorialManager : MonoBehaviour
                 waitingForCounterattack = false;
             }
         }
-        
+
         if (waitingForEnemyTowerDamage && aiTower != null)
         {
             if (aiTower.currentHealth < aiTowerHealthBeforeAttack)
@@ -165,20 +172,12 @@ public class TutorialManager : MonoBehaviour
         AnimatePopupScale();
     }
 
-    void OnDestroy()
-    {
-        if (continueButton != null)
-        {
-            continueButton.onClick.RemoveListener(OnContinueButtonClicked);
-        }
-    }
-
     // ========== ANIMACIÓN POPUP ==========
 
     private void AnimatePopupScale()
     {
         float speed = Time.unscaledDeltaTime * popupAnimationSpeed;
-        
+
         if (characterImageRect != null && characterImageRect.localScale != targetCharacterScale)
         {
             characterImageRect.localScale = Vector3.Lerp(characterImageRect.localScale, targetCharacterScale, speed);
@@ -198,6 +197,11 @@ public class TutorialManager : MonoBehaviour
         {
             optionalImageRect.localScale = Vector3.Lerp(optionalImageRect.localScale, targetPopupScale, speed);
         }
+
+        if (optionalImageAttackRect != null && optionalImageAttack.gameObject.activeSelf && optionalImageAttackRect.localScale != targetPopupScale)
+        {
+            optionalImageAttackRect.localScale = Vector3.Lerp(optionalImageAttackRect.localScale, targetPopupScale, speed);
+        }
     }
 
     private void SetPopupScale(float scale)
@@ -209,6 +213,7 @@ public class TutorialManager : MonoBehaviour
         if (speechBubbleRect != null) speechBubbleRect.localScale = scaleVector;
         if (dialogTextRect != null) dialogTextRect.localScale = scaleVector;
         if (optionalImageRect != null) optionalImageRect.localScale = scaleVector;
+        if (optionalImageAttackRect != null) optionalImageAttackRect.localScale = scaleVector;
 
         targetPopupScale = scaleVector;
         targetCharacterScale = characterScale;
@@ -257,103 +262,61 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    private IEnumerator ShowAttackExplanation()
+    {
+        if (hasShownAttackExplanation) yield break;
+
+        hasShownAttackExplanation = true;
+
+        PauseGame();
+
+        ShowDialog("AIXÍ FUNCIONA L'ATAC!", showImage: false);
+
+        HideOptionalImage();
+
+        if (optionalImageAttack != null && attackIcon != null)
+        {
+            optionalImageAttack.gameObject.SetActive(true);
+            optionalImageAttack.sprite = attackIcon;
+
+            if (optionalImageAttackRect != null)
+                optionalImageAttackRect.localScale = targetPopupScale;
+        }
+
+        yield return new WaitForSeconds(4f);
+
+        HideOptionalImageAttack();
+
+        yield return StartCoroutine(HidePopupWithAnimation());
+
+        ResumeGame();
+    }
+
     // ========== UTILIDADES MODIFICADAS ==========
 
     private int CountTroopsByTag(string tag)
     {
         Character[] characters = FindObjectsOfType<Character>();
         CharacterCombined[] combined = FindObjectsOfType<CharacterCombined>();
-        
+
         int count = 0;
-        
+
         foreach (var character in characters)
         {
             if (character.CompareTag(tag)) count++;
         }
-        
+
         foreach (var comb in combined)
         {
             if (comb.CompareTag(tag)) count++;
         }
-        
+
         return count;
-    }
-    
-    /// <summary>
-    /// ✅ MEJORADO: Destruye todas las tropas enemigas (Character Y CharacterCombined)
-    /// </summary>
-    private void DestroyAllEnemyTroops()
-    {
-        Character[] characters = FindObjectsOfType<Character>();
-        CharacterCombined[] combined = FindObjectsOfType<CharacterCombined>();
-        
-        int destroyedCount = 0;
-        
-        foreach (var character in characters)
-        {
-            if (character.CompareTag("AITeam"))
-            {
-                if (character.troopUIInstance != null)
-                {
-                    Destroy(character.troopUIInstance.gameObject);
-                }
-                Destroy(character.gameObject);
-                destroyedCount++;
-            }
-        }
-        
-        foreach (var comb in combined)
-        {
-            if (comb.CompareTag("AITeam"))
-            {
-                if (comb.operationUIInstance != null)
-                {
-                    Destroy(comb.operationUIInstance.gameObject);
-                }
-                Destroy(comb.gameObject);
-                destroyedCount++;
-            }
-        }
-        
-        Debug.Log($"[Tutorial] 💥 Destruidas {destroyedCount} tropas enemigas (Character + CharacterCombined)");
-    }
-
-    private void OnContinueButtonClicked()
-    {
-        if (waitingForContinue)
-        {
-            waitingForContinue = false;
-        }
-    }
-
-    private IEnumerator WaitForSecondsOrContinue(float seconds, bool showButton = true)
-    {
-        waitingForContinue = true;
-
-        if (showButton && continueButton != null)
-        {
-            continueButton.gameObject.SetActive(true);
-        }
-
-        float elapsed = 0f;
-
-        while (elapsed < seconds && waitingForContinue)
-        {
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-
-        if (continueButton != null)
-        {
-            continueButton.gameObject.SetActive(false);
-        }
-
-        waitingForContinue = false;
     }
 
     private IEnumerator RunTutorial()
     {
-        yield return StartCoroutine(Tutorial_Welcome()); 
+        yield return StartCoroutine(Tutorial_Welcome());
         yield return StartCoroutine(Tutorial_AIAttacks());
         yield return StartCoroutine(Tutorial_PlayerDefends());
         yield return StartCoroutine(Tutorial_WaitForDestruction());
@@ -372,11 +335,11 @@ public class TutorialManager : MonoBehaviour
         PauseGame();
 
         ShowDialog("BENVINGUT AL TUTORIAL!", showImage: false);
-        
-        yield return StartCoroutine(WaitForSecondsOrContinue(4f));
+
+        yield return new WaitForSeconds(4f);
 
         yield return StartCoroutine(HidePopupWithAnimation());
-        
+
         Debug.Log("[Tutorial] ✅ Bienvenida completada, continuando al paso 1...");
     }
 
@@ -390,11 +353,11 @@ public class TutorialManager : MonoBehaviour
         Vector3 spawnPos = aiSpawnPoint.position;
         CardManager.GenerateResult result;
         cardManager.GenerateCombinedCharacter(card2, card3, spawnPos, 5, '+', "AITeam", out result, aiIntelect);
-        yield return StartCoroutine(WaitForSecondsOrContinue(1.5f));
+        yield return new WaitForSeconds(1.5f);
 
-        ShowDialog("¡CUIDADO T'ATACAN!", showImage: false); 
+        ShowDialog("¡CUIDADO T'ATACAN!", showImage: false);
 
-        yield return StartCoroutine(WaitForSecondsOrContinue(2f));
+        yield return new WaitForSeconds(2f);
 
         PauseGame();
     }
@@ -404,31 +367,36 @@ public class TutorialManager : MonoBehaviour
     {
         currentStep = 2;
 
-        yield return StartCoroutine(WaitForSecondsOrContinue(2f));
+        yield return new WaitForSeconds(2f);
 
         UpdatePopupContent("¡DEFENSA-HO AMB EL RESULTAT!", showImage: true, contextSprite: card5Sprite);
 
-        HighlightCard(playerCardManager.cardSlots[4]);
-        StartHighlightEffect(playerCardManager.cardSlots[4].gameObject);
+        if (playerCardManager.cardSlots.Count > 4)
+        {
+            Transform card5Slot = playerCardManager.cardSlots[4];
+
+            HighlightCard(card5Slot);
+
+            if (card5Slot.childCount > 0)
+            {
+                GameObject card5 = card5Slot.GetChild(0).gameObject;
+                StartHighlightEffect(card5);
+            }
+        }
 
         UnblockPlayer();
 
-        if (continueButton != null)
-        {
-            continueButton.gameObject.SetActive(false);
-        }
-        
         waitingForPlayerAction = true;
 
         float elapsed = 0f;
         float timeout = 5f;
-        
+
         while (elapsed < timeout && waitingForPlayerAction)
         {
             elapsed += Time.deltaTime;
             yield return null;
         }
-        
+
         if (waitingForPlayerAction)
         {
             Debug.Log("[Tutorial] ⏰ Timeout del popup, ocultando pero esperando acción del jugador...");
@@ -438,15 +406,29 @@ public class TutorialManager : MonoBehaviour
         yield return new WaitUntil(() => !waitingForPlayerAction);
         Debug.Log("[Tutorial] ✅ Carta 5 jugada!");
 
-        StopHighlightEffect(playerCardManager.cardSlots[4].gameObject);
+        if (playerCardManager.cardSlots.Count > 4)
+        {
+            Transform card5Slot = playerCardManager.cardSlots[4];
+            if (card5Slot.childCount > 0)
+            {
+                GameObject card5 = card5Slot.GetChild(0).gameObject;
+                StopHighlightEffect(card5);
+            }
+        }
+
         ClearHighlight();
         HideOptionalImage();
 
         PauseGame();
 
         yield return new WaitForSeconds(1f);
-        
+
         ShowDialog("CADA CARTA TE UN COST D'ENERGIA", showImage: true, contextSprite: intelectCost);
+
+        if (intelectBarFillImage != null)
+        {
+            StartHighlightEffect(intelectBarFillImage.gameObject);
+        }
 
         if (playerIntelect != null && playerIntelect.intelectSlider != null)
         {
@@ -454,12 +436,18 @@ public class TutorialManager : MonoBehaviour
             StartHighlightEffect(playerIntelect.intelectSlider.gameObject);
         }
 
-        yield return StartCoroutine(WaitForSecondsOrContinue(4f));
+        yield return new WaitForSeconds(4f);
+
+        if (intelectBarFillImage != null)
+        {
+            StopHighlightEffect(intelectBarFillImage.gameObject);
+        }
 
         if (playerIntelect != null && playerIntelect.intelectSlider != null)
         {
             StopHighlightEffect(playerIntelect.intelectSlider.gameObject);
         }
+
         ClearHighlight();
         HideOptionalImage();
 
@@ -508,16 +496,16 @@ public class TutorialManager : MonoBehaviour
         }
 
         waitingForCounterattack = true;
-        
+
         elapsed = 0f;
         timeout = 5f;
-        
+
         while (waitingForCounterattack && elapsed < timeout)
         {
             elapsed += Time.deltaTime;
             yield return null;
         }
-        
+
         if (elapsed >= timeout)
         {
             Debug.LogWarning("[Tutorial] ⚠️ TIMEOUT esperando contraataque");
@@ -529,25 +517,36 @@ public class TutorialManager : MonoBehaviour
 
         ShowDialog("¡MOLT BÉ, HAS GUANYAT 1 D'ENERGIA!", showImage: true, contextSprite: intelectBarIcon);
 
+        if (intelectBarFillImage != null)
+        {
+            StartHighlightEffect(intelectBarFillImage.gameObject);
+        }
+
         if (playerIntelect != null && playerIntelect.intelectSlider != null)
         {
             HighlightElement(playerIntelect.intelectSlider.GetComponent<RectTransform>());
             StartHighlightEffect(playerIntelect.intelectSlider.gameObject);
         }
 
-        yield return StartCoroutine(WaitForSecondsOrContinue(4f));
+        yield return new WaitForSeconds(4f);
+
+        if (intelectBarFillImage != null)
+        {
+            StopHighlightEffect(intelectBarFillImage.gameObject);
+        }
 
         if (playerIntelect != null && playerIntelect.intelectSlider != null)
         {
             StopHighlightEffect(playerIntelect.intelectSlider.gameObject);
         }
+
         ClearHighlight();
         HideOptionalImage();
 
         yield return StartCoroutine(HidePopupWithAnimation());
     }
 
-    // ========== PASO 4: ENSEÑAR A ATACAR (✅ CORREGIDO: Oculta popup después de operación) ==========
+    // ========== PASO 4: ENSEÑAR A ATACAR ==========
     private IEnumerator Tutorial_TeachAttack()
     {
         currentStep = 4;
@@ -555,33 +554,65 @@ public class TutorialManager : MonoBehaviour
         ShowDialog("FES UNA OPERACIO PER ATACAR", showImage: false);
         UnblockPlayer();
 
-        yield return new WaitForSeconds(4f);
+        foreach (Transform slot in playerCardManager.cardSlots)
+        {
+            if (slot.childCount > 0)
+            {
+                GameObject card = slot.GetChild(0).gameObject;
+                StartHighlightEffect(card);
+            }
+        }
+
+        if (playerCardManager.SumaButton != null)
+        {
+            StartHighlightEffect(playerCardManager.SumaButton.gameObject);
+        }
+        if (playerCardManager.RestaButton != null)
+        {
+            StartHighlightEffect(playerCardManager.RestaButton.gameObject);
+        }
 
         waitingForPlayerAction = true;
 
-        if (continueButton != null)
-        {
-            continueButton.gameObject.SetActive(false);
-        }
-
         float elapsed = 0f;
         float timeout = 4f;
-        
+
         while (elapsed < timeout && waitingForPlayerAction)
         {
             elapsed += Time.deltaTime;
             yield return null;
         }
-        
-        if (waitingForPlayerAction)
+
+        if (!waitingForPlayerAction)
+        {
+            Debug.Log("[Tutorial] ⚡ Jugador actuó rápidamente, saltando timeout del mensaje");
+        }
+        else
         {
             Debug.Log("[Tutorial] ⏰ Timeout del popup, ocultando pero esperando operación del jugador...");
             yield return StartCoroutine(HidePopupWithAnimation());
         }
 
         yield return new WaitUntil(() => !waitingForPlayerAction);
-        
-        // ✅ NUEVO: Ocultar popup después de que el jugador haga la operación
+
+        foreach (Transform slot in playerCardManager.cardSlots)
+        {
+            if (slot.childCount > 0)
+            {
+                GameObject card = slot.GetChild(0).gameObject;
+                StopHighlightEffect(card);
+            }
+        }
+
+        if (playerCardManager.SumaButton != null)
+        {
+            StopHighlightEffect(playerCardManager.SumaButton.gameObject);
+        }
+        if (playerCardManager.RestaButton != null)
+        {
+            StopHighlightEffect(playerCardManager.RestaButton.gameObject);
+        }
+
         if (isPopupVisible)
         {
             yield return StartCoroutine(HidePopupWithAnimation());
@@ -589,6 +620,8 @@ public class TutorialManager : MonoBehaviour
 
         ClearHighlight();
         ResumeGame();
+
+        yield return StartCoroutine(ShowAttackExplanation());
     }
 
     // ========== PASO 5: JUGADOR ATACA ==========
@@ -673,11 +706,6 @@ public class TutorialManager : MonoBehaviour
 
         UnblockPlayerForPowerUps();
 
-        if (continueButton != null)
-        {
-            continueButton.gameObject.SetActive(false);
-        }
-
         waitingForPlayerAction = true;
 
         yield return new WaitUntil(() => !waitingForPlayerAction);
@@ -690,13 +718,13 @@ public class TutorialManager : MonoBehaviour
         HideOptionalImage();
 
         UpdatePopupContent("BEN FET!", showImage: false);
-        yield return StartCoroutine(WaitForSecondsOrContinue(2.5f));
+        yield return new WaitForSeconds(2.5f);
 
         yield return StartCoroutine(HidePopupWithAnimation());
         ResumeGame();
     }
 
-    // ========== PASO 7: POWERUP SLOWTIME + ATAQUE DEFINITIVO (✅ CORREGIDO: No resetea velocidad) ==========
+    // ========== PASO 7: POWERUP SLOWTIME + ATAQUE DEFINITIVO (✅ COMPLETAMENTE FLEXIBLE) ==========
     private IEnumerator Tutorial_SlowTimePowerUp()
     {
         currentStep = 7;
@@ -709,7 +737,7 @@ public class TutorialManager : MonoBehaviour
         CardManager.GenerateResult result;
         cardManager.GenerateCombinedCharacter(card1A, card1B, spawnPos, 2, '+', "AITeam", out result, aiIntelect);
 
-        yield return StartCoroutine(WaitForSecondsOrContinue(3f));
+        yield return new WaitForSeconds(3f);
 
         PauseGame();
 
@@ -736,59 +764,73 @@ public class TutorialManager : MonoBehaviour
         HideOptionalImage();
 
         yield return StartCoroutine(HidePopupWithAnimation());
-        
-        // ✅ CORREGIDO: Reanudar sin resetear SlowTime (solo tropas, no GameSpeedMultiplier)
-        ResumeGameWithoutResetSpeed();
-        
-        Debug.Log("[Tutorial] ⏸️ Mostrando efecto SlowTime durante 5 segundos...");
-        yield return new WaitForSeconds(5f);
-        
-        PauseGame();
-        
-        ShowDialog("¡APROFITA PER ATACAR!", showImage: false);
-        yield return StartCoroutine(WaitForSecondsOrContinue(3f));
-        
-        yield return StartCoroutine(HidePopupWithAnimation());
-        
-        if (powerUpManager != null)
-        {
-            powerUpManager.StopAllPowerUps();
-            Debug.Log("[Tutorial] 🛑 Efectos de powerups detenidos");
-        }
-        
-        DestroyAllEnemyTroops();
-        
+
+        // ✅ Desbloquear jugador INMEDIATAMENTE después de activar SlowTime
         UnblockPlayer();
-        ResumeGame();
-        
+        ResumeGameWithoutResetSpeed();
+
+        // ✅ NUEVA LÓGICA: Esperar 1 segundo O hasta que el jugador ataque (lo que ocurra primero)
         waitingForPlayerAction = true;
-        
+
+        float elapsed = 0f;
+        float messageTimeout = 1f; // Solo 1 segundo de gracia
+
+        Debug.Log("[Tutorial] ⏳ Esperando ataque del jugador (1s de gracia)...");
+
+        while (elapsed < messageTimeout && waitingForPlayerAction)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        // ✅ Si el jugador NO atacó en 1 segundo, mostrar mensaje de ayuda
+        if (waitingForPlayerAction)
+        {
+            Debug.Log("[Tutorial] 💬 Jugador tardó más de 1s, mostrando mensaje de ayuda");
+
+            PauseGame();
+
+            ShowDialog("¡APROFITA PER ATACAR!", showImage: false);
+            yield return new WaitForSeconds(3.5f);
+
+            yield return StartCoroutine(HidePopupWithAnimation());
+
+            ResumeGame();
+        }
+        else
+        {
+            Debug.Log("[Tutorial] ⚡ Jugador atacó rápidamente, saltando mensaje de ayuda");
+        }
+
+        // ✅ Esperar hasta que el jugador complete el ataque (si aún no lo hizo)
         Debug.Log("[Tutorial] ⏳ Esperando ataque definitivo del jugador...");
         yield return new WaitUntil(() => !waitingForPlayerAction);
         Debug.Log("[Tutorial] ✅ Ataque definitivo lanzado!");
-        
+
+        // ✅ Esperar a que el ataque llegue a la torre
         if (aiTower != null)
         {
             aiTowerHealthBeforeAttack = aiTower.currentHealth;
         }
 
         waitingForEnemyTowerDamage = true;
-        
+
         float timeout = 15f;
-        float elapsed = 0f;
-        
+        elapsed = 0f;
+
         while (waitingForEnemyTowerDamage && elapsed < timeout)
         {
             elapsed += Time.deltaTime;
             yield return null;
         }
-        
+
+        // ✅ Forzar destrucción de la torre si es necesario
         if (aiTower != null)
         {
             Debug.Log("[Tutorial] 💥 Aplicando daño adicional de 10 a la torre enemiga para garantizar destrucción");
             aiTower.TakeDamage(10);
         }
-        
+
         yield return new WaitForSeconds(1f);
     }
 
@@ -796,20 +838,20 @@ public class TutorialManager : MonoBehaviour
     private IEnumerator Tutorial_TowerDestroyed()
     {
         currentStep = 8;
-        
+
         PauseGame();
-        
+
         ShowDialog("LA TORRE HA ESTAT DESTRUÏDA!", showImage: false);
-        yield return StartCoroutine(WaitForSecondsOrContinue(4f));
-        
+        yield return new WaitForSeconds(4f);
+
         UpdatePopupContent("HAS COMPLETAT EL TUTORIAL!", showImage: false);
-        yield return StartCoroutine(WaitForSecondsOrContinue(4f));
-        
+        yield return new WaitForSeconds(4f);
+
         UpdatePopupContent("JA ESTÀS PREPARAT PER\nRECUPERAR LA LLAVOR NUMÈRICA!", showImage: false);
-        yield return StartCoroutine(WaitForSecondsOrContinue(4f));
-        
+        yield return new WaitForSeconds(4f);
+
         yield return StartCoroutine(HidePopupWithAnimation());
-        
+
         Debug.Log("[Tutorial] 🎉 Tutorial completado! Cargando WinScene...");
         UnityEngine.SceneManagement.SceneManager.LoadScene("WinScene");
     }
@@ -853,6 +895,14 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    private void HideOptionalImageAttack()
+    {
+        if (optionalImageAttack != null)
+        {
+            optionalImageAttack.gameObject.SetActive(false);
+        }
+    }
+
     private void HideTutorialPanel()
     {
         StartCoroutine(HidePopupWithAnimation());
@@ -876,7 +926,7 @@ public class TutorialManager : MonoBehaviour
                 agent.isStopped = true;
             }
         }
-        
+
         CharacterCombined[] combined = FindObjectsOfType<CharacterCombined>();
         foreach (var comb in combined)
         {
@@ -906,7 +956,7 @@ public class TutorialManager : MonoBehaviour
                 agent.isStopped = false;
             }
         }
-        
+
         CharacterCombined[] combined = FindObjectsOfType<CharacterCombined>();
         foreach (var comb in combined)
         {
@@ -919,19 +969,11 @@ public class TutorialManager : MonoBehaviour
 
         ClearHighlight();
     }
-    
-    /// <summary>
-    /// ✅ NUEVA FUNCIÓN: Reanuda el juego SIN resetear GameSpeedMultiplier
-    /// Usado durante SlowTime para que las tropas se muevan pero mantengan su velocidad reducida
-    /// </summary>
+
     private void ResumeGameWithoutResetSpeed()
     {
         isTutorialPaused = false;
 
-        // ✅ NO tocamos GameSpeedMultiplier para mantener el efecto SlowTime
-        // GameSpeedManager.Instance.GameSpeedMultiplier sigue siendo el valor del powerup
-
-        // Solo reanudar el movimiento de las tropas (quitar isStopped)
         Character[] characters = FindObjectsOfType<Character>();
         foreach (var character in characters)
         {
@@ -939,10 +981,9 @@ public class TutorialManager : MonoBehaviour
             if (agent != null)
             {
                 agent.isStopped = false;
-                // La velocidad ya está afectada por GameSpeedManager
             }
         }
-        
+
         CharacterCombined[] combined = FindObjectsOfType<CharacterCombined>();
         foreach (var comb in combined)
         {
@@ -950,12 +991,11 @@ public class TutorialManager : MonoBehaviour
             if (agent != null)
             {
                 agent.isStopped = false;
-                // La velocidad ya está afectada por GameSpeedManager
             }
         }
 
         ClearHighlight();
-        
+
         Debug.Log("[Tutorial] ✅ Juego reanudado manteniendo SlowTime activo");
     }
 
