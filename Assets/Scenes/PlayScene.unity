@@ -2151,9 +2151,9 @@ MonoBehaviour:
   instructionSprites:
   - {fileID: 21300000, guid: a1a1521154d3b5241a8052b57883bdb6, type: 3}
   - {fileID: 21300000, guid: cb759ade68e034f42b1cf73f0c2a24d1, type: 3}
-  - {fileID: 21300000, guid: 16d0e00d1f57cc04685d9a39ac801759, type: 3}
   - {fileID: 21300000, guid: b64bb5b24d0ad6b4382b76190b8cab04, type: 3}
   - {fileID: 21300000, guid: 2482b767e4159214985d1b728d967a8f, type: 3}
+  - {fileID: 21300000, guid: 16d0e00d1f57cc04685d9a39ac801759, type: 3}
   instructionsImage: {fileID: 632163991}
   nextInstructionButton: {fileID: 1777042841}
   previousInstructionButton: {fileID: 333535189}
@@ -2173,10 +2173,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SceneBridge
   screenImage: {fileID: 0}
   nextButton: {fileID: 0}
+  previousButton: {fileID: 0}
   screenSprites: []
-  normalButtonSprite: {fileID: 0}
-  finalButtonSprite: {fileID: 0}
-  onNormalButtonClick:
+  onNextButtonClick:
+    m_PersistentCalls:
+      m_Calls: []
+  onPreviousButtonClick:
     m_PersistentCalls:
       m_Calls: []
   onFinalButtonClick:
@@ -4184,6 +4186,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tower
   maxHealth: 10
+  currentHealth: 0
   healthBarPrefab: {fileID: 8608500109205576431, guid: de29a2f92f9b54443a64fae0fe2d29fc, type: 3}
   isEnemyTower: 1
   teamTag: AITeam
@@ -5720,6 +5723,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tower
   maxHealth: 10
+  currentHealth: 0
   healthBarPrefab: {fileID: 8608500109205576431, guid: de29a2f92f9b54443a64fae0fe2d29fc, type: 3}
   isEnemyTower: 0
   teamTag: PlayerTeam

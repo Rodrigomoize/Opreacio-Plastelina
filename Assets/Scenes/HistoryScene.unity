@@ -402,7 +402,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  nextSceneAfterScreens: InstructionScene
+  nextSceneAfterScreens: LevelScene
 --- !u!114 &543879377
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -60,14 +60,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public static void GoToInstructionScene()
-    {
-        if (Instance != null)
-        {
-            Instance.LoadInstructionScene();
-        }
-    }
-
     public static void GoToLevelScene()
     {
         if (Instance != null)
@@ -118,11 +110,6 @@ public class GameManager : MonoBehaviour
     private void LoadHistoryScene()
     {
         SceneManager.LoadScene("HistoryScene");
-    }
-
-    private void LoadInstructionScene()
-    {
-        SceneManager.LoadScene("InstructionScene");
     }
 
     private void LoadLevelScene()
@@ -238,8 +225,7 @@ public class GameManager : MonoBehaviour
     /// Congela su movimiento y desactiva su capacidad de combate/interacción.
     public void FreezeAllTroops()
     {
-        
-        // Buscar todos los Characters (tropas individuales)
+        // Buscar todas las tropas individuales
         Character[] characters = FindObjectsByType<Character>(FindObjectsSortMode.None);
         foreach (Character character in characters)
         {
@@ -365,7 +351,7 @@ public class GameManager : MonoBehaviour
 
         AssignSceneManagers(scene);
 
-        string[] menuScenes = { "MainMenu", "HistoryScene", "InstructionScene", "LevelScene" };
+        string[] menuScenes = { "MainMenu", "HistoryScene", "LevelScene" };
         bool isMenuScene = System.Array.Exists(menuScenes, s => s == scene.name);
 
         if (isMenuScene)

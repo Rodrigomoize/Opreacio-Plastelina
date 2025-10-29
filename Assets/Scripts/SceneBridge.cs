@@ -107,9 +107,6 @@ public class SceneBridge : MonoBehaviour
             case "HistoryScene":
                 LoadHistoryScene();
                 break;
-            case "InstructionScene":
-                LoadInstructionScene();
-                break;
             case "LevelScene":
                 LoadLevelScene();
                 break;
@@ -135,11 +132,6 @@ public class SceneBridge : MonoBehaviour
     public static void LoadHistoryScene()
     {
         GameManager.GoToHistoryScene();
-    }
-
-    public static void LoadInstructionScene()
-    {
-        GameManager.GoToInstructionScene();
     }
 
     public static void LoadLevelScene()
