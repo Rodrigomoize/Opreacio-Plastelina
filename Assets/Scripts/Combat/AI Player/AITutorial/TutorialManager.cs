@@ -3,9 +3,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-/// <summary>
-/// Tutorial jugable simplificado con ayudas visuales para niños 6-8 años
-/// </summary>
 public class TutorialManager : MonoBehaviour
 {
     public static TutorialManager Instance { get; private set; }
@@ -30,7 +27,28 @@ public class TutorialManager : MonoBehaviour
     public TextMeshProUGUI dialogText;
     public Image optionalImage;
     public Button continueButton;
+
+    [Header("Animación Popup")]
+    [Tooltip("Escala objetivo cuando aparece (1 = tamaño normal)")]
+    [Range(0.8f, 1.5f)]
+    public float popupScaleTarget = 1f;
     
+    [Tooltip("Escala de la imagen del personaje (CadetNumeric)")]
+    [Range(0.8f, 2f)]
+    public float characterImageScale = 1.2f;
+
+    [Tooltip("Escala cuando se oculta (0 = invisible)")]
+    [Range(0f, 0.5f)]
+    public float popupScaleHidden = 0f;
+
+    [Tooltip("Duración de la animación de popup")]
+    [Range(0.1f, 1f)]
+    public float popupDuration = 0.3f;
+
+    [Tooltip("Velocidad de animación del popup")]
+    [Range(5f, 20f)]
+    public float popupAnimationSpeed = 12f;
+
     [Header("Sprites Contextuales")]
     public Sprite card5Sprite;
     public Sprite card2Sprite;
@@ -50,15 +68,33 @@ public class TutorialManager : MonoBehaviour
     private bool waitingForTroopsDestroyed = false;
     private int aiTroopCount = 0;
     private int playerTroopCount = 0;
-    
-    // Para detectar daño a la torre
+
     private bool waitingForTowerDamage = false;
     private int playerTowerHealthBeforeAttack = 0;
+    
+    // ✅ NUEVO: Control de colisión y contraataque
+    private bool waitingForCounterattack = false;
+    private int playerIntelectBeforeCounterattack = 0;
+
+    // Control de animación popup
+    private bool isPopupVisible = false;
+    private Vector3 targetPopupScale = Vector3.zero;
+    private Vector3 targetCharacterScale = Vector3.zero;
+    private RectTransform characterImageRect;
+    private RectTransform speechBubbleRect;
+    private RectTransform dialogTextRect;
+    private RectTransform optionalImageRect;
 
     void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+
+        // Obtener RectTransforms para animación
+        if (characterImage != null) characterImageRect = characterImage.GetComponent<RectTransform>();
+        if (speechBubble != null) speechBubbleRect = speechBubble.GetComponent<RectTransform>();
+        if (dialogText != null) dialogTextRect = dialogText.GetComponent<RectTransform>();
+        if (optionalImage != null) optionalImageRect = optionalImage.GetComponent<RectTransform>();
     }
 
     void Start()
@@ -79,15 +115,10 @@ public class TutorialManager : MonoBehaviour
             optionalImage.gameObject.SetActive(false);
         }
 
-        StartCoroutine(RunTutorial());
-    }
+        // Inicializar popup oculto
+        SetPopupScale(popupScaleHidden);
 
-    void OnDestroy()
-    {
-        if (continueButton != null)
-        {
-            continueButton.onClick.RemoveListener(OnContinueButtonClicked);
-        }
+        StartCoroutine(RunTutorial());
     }
 
     void Update()
@@ -102,7 +133,7 @@ public class TutorialManager : MonoBehaviour
                 waitingForTroopsDestroyed = false;
             }
         }
-        
+
         // Detectar cuando la torre recibe daño
         if (waitingForTowerDamage && playerTower != null)
         {
@@ -112,7 +143,134 @@ public class TutorialManager : MonoBehaviour
                 waitingForTowerDamage = false;
             }
         }
+        
+        // ✅ NUEVO: Detectar cuando el jugador gana intelecto (contraataque exitoso)
+        if (waitingForCounterattack && playerIntelect != null)
+        {
+            if (playerIntelect.currentIntelect > playerIntelectBeforeCounterattack)
+            {
+                Debug.Log($"[Tutorial] ⚔️ ¡Contraataque exitoso! Intelecto: {playerIntelectBeforeCounterattack} → {playerIntelect.currentIntelect}");
+                waitingForCounterattack = false;
+            }
+        }
+
+        // Animar escala del popup suavemente
+        AnimatePopupScale();
     }
+
+    void OnDestroy()
+    {
+        if (continueButton != null)
+        {
+            continueButton.onClick.RemoveListener(OnContinueButtonClicked);
+        }
+    }
+
+    // ========== ANIMACIÓN POPUP ==========
+
+    /// <summary>
+    /// Anima la escala del popup suavemente usando Lerp (estilo CardDisplay)
+    /// </summary>
+    private void AnimatePopupScale()
+    {
+        float speed = Time.unscaledDeltaTime * popupAnimationSpeed;
+        
+        // ✅ Animar characterImage con escala independiente
+        if (characterImageRect != null && characterImageRect.localScale != targetCharacterScale)
+        {
+            characterImageRect.localScale = Vector3.Lerp(characterImageRect.localScale, targetCharacterScale, speed);
+        }
+
+        // Animar resto de elementos con escala normal
+        if (speechBubbleRect != null && speechBubbleRect.localScale != targetPopupScale)
+        {
+            speechBubbleRect.localScale = Vector3.Lerp(speechBubbleRect.localScale, targetPopupScale, speed);
+        }
+
+        if (dialogTextRect != null && dialogTextRect.localScale != targetPopupScale)
+        {
+            dialogTextRect.localScale = Vector3.Lerp(dialogTextRect.localScale, targetPopupScale, speed);
+        }
+
+        // Solo animar optionalImage si está activo
+        if (optionalImageRect != null && optionalImage.gameObject.activeSelf && optionalImageRect.localScale != targetPopupScale)
+        {
+            optionalImageRect.localScale = Vector3.Lerp(optionalImageRect.localScale, targetPopupScale, speed);
+        }
+    }
+
+    /// <summary>
+    /// Establece la escala del popup inmediatamente sin animación
+    /// </summary>
+    private void SetPopupScale(float scale)
+    {
+        Vector3 scaleVector = Vector3.one * scale;
+        Vector3 characterScale = Vector3.one * scale * characterImageScale; // ✅ Escala mayor para personaje
+
+        if (characterImageRect != null) characterImageRect.localScale = characterScale;
+        if (speechBubbleRect != null) speechBubbleRect.localScale = scaleVector;
+        if (dialogTextRect != null) dialogTextRect.localScale = scaleVector;
+        if (optionalImageRect != null) optionalImageRect.localScale = scaleVector;
+
+        targetPopupScale = scaleVector;
+        targetCharacterScale = characterScale;
+    }
+
+    /// <summary>
+    /// Muestra el popup con animación de aparecer (scale up)
+    /// </summary>
+    private void ShowPopupWithAnimation()
+    {
+        if (!isPopupVisible)
+        {
+            tutorialPanel.SetActive(true);
+            targetPopupScale = Vector3.one * popupScaleTarget;
+            targetCharacterScale = Vector3.one * popupScaleTarget * characterImageScale; // ✅ Escala mayor para personaje
+            isPopupVisible = true;
+        }
+    }
+
+    /// <summary>
+    /// Oculta el popup con animación de desaparecer (scale down)
+    /// </summary>
+    private IEnumerator HidePopupWithAnimation()
+    {
+        if (isPopupVisible)
+        {
+            targetPopupScale = Vector3.one * popupScaleHidden;
+            targetCharacterScale = Vector3.one * popupScaleHidden; // También ocultar personaje
+
+            // Esperar a que termine la animación
+            yield return new WaitForSecondsRealtime(popupDuration);
+
+            tutorialPanel.SetActive(false);
+            isPopupVisible = false;
+        }
+    }
+
+    /// <summary>
+    /// Actualiza el contenido del popup SIN animar (para cambios de texto manteniendo el popup visible)
+    /// </summary>
+    private void UpdatePopupContent(string message, bool showImage, Sprite contextSprite = null)
+    {
+        dialogText.text = message;
+
+        if (showImage && contextSprite != null && optionalImage != null)
+        {
+            optionalImage.gameObject.SetActive(true);
+            optionalImage.sprite = contextSprite;
+
+            // Si la optional image se acaba de activar, ajustar su escala al popup actual
+            if (optionalImageRect != null)
+                optionalImageRect.localScale = targetPopupScale;
+        }
+        else if (optionalImage != null)
+        {
+            optionalImage.gameObject.SetActive(false);
+        }
+    }
+
+    // ========== UTILIDADES MODIFICADAS ==========
 
     private int CountTroopsByTag(string tag)
     {
@@ -176,8 +334,8 @@ public class TutorialManager : MonoBehaviour
     {
         currentStep = 1;
 
-        ShowDialog("¡Te atacan con 2+3!", showImage: false);
-        yield return StartCoroutine(WaitForSecondsOrContinue(2.5f)); // ✅ +0.5s más lento
+        ShowDialog("¡Te atacan con 2+3!", showImage: false); // Primera aparición → anima
+        yield return StartCoroutine(WaitForSecondsOrContinue(1.5f));
 
         var card2 = cardManager.GetCardByIndex(1);
         var card3 = cardManager.GetCardByIndex(2);
@@ -185,7 +343,7 @@ public class TutorialManager : MonoBehaviour
         CardManager.GenerateResult result;
         cardManager.GenerateCombinedCharacter(card2, card3, spawnPos, 5, '+', "AITeam", out result, aiIntelect);
 
-        yield return StartCoroutine(WaitForSecondsOrContinue(2f)); // ✅ +0.5s más lento
+        yield return StartCoroutine(WaitForSecondsOrContinue(2f));
 
         PauseGame();
     }
@@ -195,17 +353,23 @@ public class TutorialManager : MonoBehaviour
     {
         currentStep = 2;
 
-        ShowDialog("¡Defiende con la carta 5!", showImage: true, contextSprite: card5Sprite);
-        
+        // ✅ Actualizar contenido SIN animar (popup ya visible del paso 1)
+        UpdatePopupContent("¡Defiende con la carta 5!", showImage: true, contextSprite: card5Sprite);
+
         HighlightCard(playerCardManager.cardSlots[4]);
         StartHighlightEffect(playerCardManager.cardSlots[4].gameObject);
-        
+
         UnblockPlayer();
 
         if (continueButton != null)
         {
             continueButton.gameObject.SetActive(false);
         }
+
+        // ✅ CAMBIO: Esperar 2 segundos y OCULTAR el popup
+        yield return new WaitForSeconds(2f);
+        
+        yield return StartCoroutine(HidePopupWithAnimation());
 
         waitingForPlayerAction = true;
 
@@ -216,50 +380,61 @@ public class TutorialManager : MonoBehaviour
         StopHighlightEffect(playerCardManager.cardSlots[4].gameObject);
         ClearHighlight();
         HideOptionalImage();
-        
+
         PauseGame();
-        
+
+        // ✅ Nueva aparición → animar
         ShowDialog("¡Muy bien! La carta 5 cuesta 5 de energía.", showImage: true, contextSprite: intelectBarSprite);
-        
+
         if (playerIntelect != null && playerIntelect.intelectSlider != null)
         {
             HighlightElement(playerIntelect.intelectSlider.GetComponent<RectTransform>());
             StartHighlightEffect(playerIntelect.intelectSlider.gameObject);
         }
-        
-        yield return StartCoroutine(WaitForSecondsOrContinue(4f)); // ✅ +1s más lento
-        
+
+        yield return StartCoroutine(WaitForSecondsOrContinue(4f));
+
         if (playerIntelect != null && playerIntelect.intelectSlider != null)
         {
             StopHighlightEffect(playerIntelect.intelectSlider.gameObject);
         }
         ClearHighlight();
         HideOptionalImage();
-        
-        ShowDialog("¡Mira cómo chocan!", showImage: false);
-        yield return StartCoroutine(WaitForSecondsOrContinue(2.5f)); // ✅ +0.5s más lento
 
-        HideTutorialPanel(); // ✅ OCULTAR UI
+        // ✅ Actualizar contenido SIN animar
+        UpdatePopupContent("¡Mira cómo chocan!", showImage: false);
+        yield return StartCoroutine(WaitForSecondsOrContinue(2.5f));
+
+        // ✅ OCULTAR con animación
+        yield return StartCoroutine(HidePopupWithAnimation());
         ResumeGame();
     }
 
-    // ========== PASO 3: ESPERAR DESTRUCCIÓN ==========
+    // ========== PASO 3: ESPERAR DESTRUCCIÓN Y CONTRAATAQUE ==========
     private IEnumerator Tutorial_WaitForDestruction()
     {
         currentStep = 3;
 
-        yield return new WaitForSeconds(1.5f); // ✅ +0.5s más lento
+        yield return new WaitForSeconds(0.5f); // ✅ Reducido para detectar antes
+
+        // ✅ NUEVO: Guardar intelecto ANTES de la colisión
+        if (playerIntelect != null)
+        {
+            playerIntelectBeforeCounterattack = playerIntelect.currentIntelect;
+            Debug.Log($"[Tutorial] 💚 Intelecto ANTES del contraataque: {playerIntelectBeforeCounterattack}");
+        }
 
         aiTroopCount = CountTroopsByTag("AITeam");
         playerTroopCount = CountTroopsByTag("PlayerTeam");
-        
+
         if (aiTroopCount == 0 && playerTroopCount == 0)
         {
-            yield return new WaitForSeconds(2.5f); // ✅ +0.5s más lento
+            yield return new WaitForSeconds(2.5f);
             PauseGame();
             yield break;
         }
 
+        // ✅ NUEVO: Esperar a que colisionen (tropas se destruyan)
         waitingForTroopsDestroyed = true;
 
         float timeout = 15f;
@@ -273,30 +448,51 @@ public class TutorialManager : MonoBehaviour
 
         if (elapsed >= timeout)
         {
+            Debug.LogWarning("[Tutorial] ⚠️ TIMEOUT esperando colisión");
             waitingForTroopsDestroyed = false;
         }
 
-        yield return new WaitForSeconds(2.5f); // ✅ +0.5s más lento
+        // ✅ NUEVO: Esperar a que se otorgue el intelecto de contraataque
+        waitingForCounterattack = true;
+        
+        elapsed = 0f;
+        timeout = 5f;
+        
+        while (waitingForCounterattack && elapsed < timeout)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        if (elapsed >= timeout)
+        {
+            Debug.LogWarning("[Tutorial] ⚠️ TIMEOUT esperando contraataque");
+        }
+
+        yield return new WaitForSeconds(1.5f); // ✅ Pausa adicional después del contraataque
 
         PauseGame();
-        
-        ShowDialog("¡Ganaste +1 de energía!", showImage: true, contextSprite: intelectBarSprite);
-        
+
+        // ✅ Nueva aparición → animar
+        ShowDialog("¡Ganaste +1 de energía por contraatacar!", showImage: true, contextSprite: intelectBarSprite);
+
         if (playerIntelect != null && playerIntelect.intelectSlider != null)
         {
             HighlightElement(playerIntelect.intelectSlider.GetComponent<RectTransform>());
             StartHighlightEffect(playerIntelect.intelectSlider.gameObject);
         }
-        
-        yield return StartCoroutine(WaitForSecondsOrContinue(4f)); // ✅ +1s más lento
-        
+
+        yield return StartCoroutine(WaitForSecondsOrContinue(4f));
+
         if (playerIntelect != null && playerIntelect.intelectSlider != null)
         {
             StopHighlightEffect(playerIntelect.intelectSlider.gameObject);
         }
         ClearHighlight();
         HideOptionalImage();
-        HideTutorialPanel(); // ✅ OCULTAR UI
+
+        // ✅ OCULTAR con animación
+        yield return StartCoroutine(HidePopupWithAnimation());
     }
 
     // ========== PASO 4: ENSEÑAR A ATACAR ==========
@@ -304,10 +500,12 @@ public class TutorialManager : MonoBehaviour
     {
         currentStep = 4;
 
+        // ✅ Nueva aparición → animar
         ShowDialog("Ahora ataca:\n1. Elige carta\n2. Presiona +/-\n3. Elige otra\n4. ¡Tira!", showImage: false);
-        yield return StartCoroutine(WaitForSecondsOrContinue(5f)); // ✅ +2s MÁS LENTO (era 3f)
+        yield return StartCoroutine(WaitForSecondsOrContinue(5f));
 
-        ShowDialog("¡Hazlo ahora!", showImage: false);
+        // ✅ Actualizar contenido SIN animar
+        UpdatePopupContent("¡Hazlo ahora!", showImage: false);
         UnblockPlayer();
 
         if (continueButton != null)
@@ -320,10 +518,13 @@ public class TutorialManager : MonoBehaviour
         yield return new WaitUntil(() => !waitingForPlayerAction);
 
         ClearHighlight();
-        ShowDialog("¡Bien! Tu ataque va a la torre.", showImage: false);
-        yield return StartCoroutine(WaitForSecondsOrContinue(2.5f)); // ✅ +0.5s más lento
 
-        HideTutorialPanel(); // ✅ OCULTAR UI
+        // ✅ Actualizar contenido SIN animar
+        UpdatePopupContent("¡Bien! Tu ataque va a la torre.", showImage: false);
+        yield return StartCoroutine(WaitForSecondsOrContinue(2.5f));
+
+        // ✅ OCULTAR con animación
+        yield return StartCoroutine(HidePopupWithAnimation());
         ResumeGame();
     }
 
@@ -332,8 +533,7 @@ public class TutorialManager : MonoBehaviour
     {
         currentStep = 5;
 
-        // ✅ ESPERAR A QUE EL ATAQUE LLEGUE Y DAÑE LA TORRE ENEMIGA
-        yield return new WaitForSeconds(10f); // ✅ Tiempo para que llegue el ataque
+        yield return new WaitForSeconds(10f);
     }
 
     // ========== PASO 6: POWERUP HEALTH (ESPERAR DAÑO A LA TORRE) ==========
@@ -342,39 +542,39 @@ public class TutorialManager : MonoBehaviour
         currentStep = 6;
 
         BlockPlayer();
-        
-        // GUARDAR salud actual de la torre ANTES del ataque
+
         if (playerTower != null)
         {
             playerTowerHealthBeforeAttack = playerTower.currentHealth;
             Debug.Log($"[Tutorial] 💚 Salud de torre ANTES del ataque: {playerTowerHealthBeforeAttack}");
         }
-        
+
         var card2 = cardManager.GetCardByIndex(1);
         var card1 = cardManager.GetCardByIndex(0);
         Vector3 spawnPos = aiSpawnPoint.position;
         CardManager.GenerateResult result;
         cardManager.GenerateCombinedCharacter(card2, card1, spawnPos, 3, '+', "AITeam", out result, aiIntelect);
 
-        // ✅ Esperar a que la tropa LLEGUE y DAÑE la torre
         waitingForTowerDamage = true;
         Debug.Log("[Tutorial] ⏳ Esperando que la torre reciba daño...");
-        
-        float timeout = 15f; // ✅ Aumentado timeout
+
+        float timeout = 15f;
         float elapsed = 0f;
-        
+
         while (waitingForTowerDamage && elapsed < timeout)
         {
             elapsed += Time.deltaTime;
             yield return null;
         }
-        
+
         if (elapsed >= timeout)
         {
             Debug.LogWarning("[Tutorial] ⚠️ TIMEOUT esperando daño a la torre");
         }
 
         PauseGame();
+
+        // ✅ Nueva aparición → animar
         ShowDialog("¡Te dañaron! Usa el corazón ❤️", showImage: true, contextSprite: healthPowerUpSprite);
 
         var healPowerUp = powerUpManager.GetPowerUpButton("Health");
@@ -401,28 +601,31 @@ public class TutorialManager : MonoBehaviour
         }
         ClearHighlight();
         HideOptionalImage();
-        
-        ShowDialog("¡Curado!", showImage: false);
-        yield return StartCoroutine(WaitForSecondsOrContinue(2.5f)); // ✅ +0.5s más lento
-        
-        HideTutorialPanel(); // ✅ OCULTAR UI
+
+        // ✅ Actualizar contenido SIN animar
+        UpdatePopupContent("¡Curado!", showImage: false);
+        yield return StartCoroutine(WaitForSecondsOrContinue(2.5f));
+
+        // ✅ OCULTAR con animación
+        yield return StartCoroutine(HidePopupWithAnimation());
         ResumeGame();
     }
 
-    // ========== PASO 7: POWERUP SLOWTIME (SIMPLIFICADO - SOLO ENSEÑAR POWERUP) ==========
+    // ========== PASO 7: POWERUP SLOWTIME ==========
     private IEnumerator Tutorial_SlowTimePowerUp()
     {
         currentStep = 7;
 
+        // ✅ Nueva aparición → animar
         ShowDialog("¡Usa el reloj 🕐 para hacer lentos a los enemigos!", showImage: true, contextSprite: slowTimePowerUpSprite);
-        
+
         var card1A = cardManager.GetCardByIndex(0);
         var card1B = cardManager.GetCardByIndex(0);
         Vector3 spawnPos = aiSpawnPoint.position;
         CardManager.GenerateResult result;
         cardManager.GenerateCombinedCharacter(card1A, card1B, spawnPos, 2, '+', "AITeam", out result, aiIntelect);
 
-        yield return StartCoroutine(WaitForSecondsOrContinue(3f)); // ✅ +1s más lento
+        yield return StartCoroutine(WaitForSecondsOrContinue(3f));
 
         PauseGame();
 
@@ -452,11 +655,13 @@ public class TutorialManager : MonoBehaviour
         }
         ClearHighlight();
         HideOptionalImage();
-        
-        ShowDialog("¡Perfecto! Los enemigos van lentos.", showImage: false);
-        yield return StartCoroutine(WaitForSecondsOrContinue(3f)); // ✅ +1s más lento
-        
-        HideTutorialPanel(); // ✅ OCULTAR UI
+
+        // ✅ Actualizar contenido SIN animar
+        UpdatePopupContent("¡Perfecto! Los enemigos van lentos.", showImage: false);
+        yield return StartCoroutine(WaitForSecondsOrContinue(3f));
+
+        // ✅ OCULTAR con animación
+        yield return StartCoroutine(HidePopupWithAnimation());
         ResumeGame();
     }
 
@@ -465,9 +670,10 @@ public class TutorialManager : MonoBehaviour
     {
         currentStep = 8;
 
+        // ✅ Nueva aparición → animar
         ShowDialog("¡ATAQUE FINAL! Lanza tu combinación.", showImage: false);
-        yield return StartCoroutine(WaitForSecondsOrContinue(3f)); // ✅ +1s más lento
-        
+        yield return StartCoroutine(WaitForSecondsOrContinue(3f));
+
         UnblockPlayer();
 
         if (continueButton != null)
@@ -479,13 +685,15 @@ public class TutorialManager : MonoBehaviour
 
         yield return new WaitUntil(() => !waitingForPlayerAction);
 
-        ShowDialog("¡EXCELENTE!", showImage: false);
-        yield return StartCoroutine(WaitForSecondsOrContinue(2.5f)); // ✅ +0.5s más lento
-        
-        HideTutorialPanel(); // ✅ OCULTAR UI
+        // ✅ Actualizar contenido SIN animar
+        UpdatePopupContent("¡EXCELENTE!", showImage: false);
+        yield return StartCoroutine(WaitForSecondsOrContinue(2.5f));
+
+        // ✅ OCULTAR con animación
+        yield return StartCoroutine(HidePopupWithAnimation());
         ResumeGame();
 
-        yield return new WaitForSeconds(4f); // ✅ +1s más lento
+        yield return new WaitForSeconds(4f);
 
         if (aiTower != null)
         {
@@ -502,6 +710,7 @@ public class TutorialManager : MonoBehaviour
     {
         currentStep = 9;
 
+        // ✅ Nueva aparición → animar
         ShowDialog("¡TUTORIAL COMPLETADO!\n\n¡A jugar!", showImage: false);
         yield return StartCoroutine(WaitForSecondsOrContinue(4f));
 
@@ -509,7 +718,7 @@ public class TutorialManager : MonoBehaviour
     }
 
     // ========== UTILIDADES ==========
-    
+
     private Transform FindCardSlotByValue(int cardValue)
     {
         foreach (Transform slot in playerCardManager.cardSlots)
@@ -528,17 +737,16 @@ public class TutorialManager : MonoBehaviour
 
     private void ShowDialog(string message, bool showImage, Sprite contextSprite = null)
     {
-        tutorialPanel.SetActive(true);
-        dialogText.text = message;
-
-        if (showImage && contextSprite != null && optionalImage != null)
+        // Si el popup ya está visible, solo actualizar contenido
+        if (isPopupVisible)
         {
-            optionalImage.gameObject.SetActive(true);
-            optionalImage.sprite = contextSprite;
+            UpdatePopupContent(message, showImage, contextSprite);
         }
-        else if (optionalImage != null)
+        else
         {
-            optionalImage.gameObject.SetActive(false);
+            // Primera aparición → animar
+            ShowPopupWithAnimation();
+            UpdatePopupContent(message, showImage, contextSprite);
         }
     }
 
@@ -551,14 +759,11 @@ public class TutorialManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ✅ NUEVO: Oculta completamente el panel de tutorial
+    /// ✅ DEPRECADO: Usar HidePopupWithAnimation() en su lugar
     /// </summary>
     private void HideTutorialPanel()
     {
-        if (tutorialPanel != null)
-        {
-            tutorialPanel.SetActive(false);
-        }
+        StartCoroutine(HidePopupWithAnimation());
     }
 
     private void PauseGame()
@@ -681,7 +886,7 @@ public class TutorialManager : MonoBehaviour
     public void OnPlayerPlaysCard(int cardValue)
     {
         Debug.Log($"[Tutorial] 📥 OnPlayerPlaysCard - Valor: {cardValue}, Step: {currentStep}, Esperando: {waitingForPlayerAction}");
-        
+
         if (currentStep == 2 && cardValue == 5 && waitingForPlayerAction)
         {
             Debug.Log("[Tutorial] ✅ Carta 5 aceptada!");
@@ -692,7 +897,7 @@ public class TutorialManager : MonoBehaviour
     public void OnPlayerPlaysOperation()
     {
         Debug.Log($"[Tutorial] 📥 OnPlayerPlaysOperation - Step: {currentStep}, Esperando: {waitingForPlayerAction}");
-        
+
         if ((currentStep == 4 || currentStep == 8) && waitingForPlayerAction)
         {
             Debug.Log("[Tutorial] ✅ Operación aceptada!");
@@ -703,7 +908,7 @@ public class TutorialManager : MonoBehaviour
     public void OnPowerUpActivated(string powerUpName)
     {
         Debug.Log($"[Tutorial] 📥 OnPowerUpActivated - PowerUp: {powerUpName}, Step: {currentStep}, Esperando: {waitingForPlayerAction}");
-        
+
         if (currentStep == 6 && powerUpName == "Health" && waitingForPlayerAction)
         {
             Debug.Log("[Tutorial] ✅ PowerUp Health aceptado!");
