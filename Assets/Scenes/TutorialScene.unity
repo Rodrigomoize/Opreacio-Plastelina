@@ -4054,6 +4054,37 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1 &1055435151
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1055435152}
+  m_Layer: 0
+  m_Name: SpawnAI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1055435152
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1055435151}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.02, y: 0, z: 4.7}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1056367764
 GameObject:
   m_ObjectHideFlags: 0
@@ -6481,7 +6512,7 @@ MonoBehaviour:
   playerIntelect: {fileID: 1639695185}
   aiIntelect: {fileID: 1587260387}
   powerUpManager: {fileID: 485398284}
-  aiSpawnPoint: {fileID: 1188949408}
+  aiSpawnPoint: {fileID: 1055435152}
   playerSpawnPoint: {fileID: 1654938924}
   playerTower: {fileID: 1632648660}
   aiTower: {fileID: 1188949411}
@@ -7673,3 +7704,4 @@ SceneRoots:
   - {fileID: 104346809}
   - {fileID: 907959315}
   - {fileID: 1654938924}
+  - {fileID: 1055435152}
