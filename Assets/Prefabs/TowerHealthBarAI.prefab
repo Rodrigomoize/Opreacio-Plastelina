@@ -81,7 +81,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 0}
   m_FillRect: {fileID: 3002904309102976156}
   m_HandleRect: {fileID: 0}
-  m_Direction: 0
+  m_Direction: 1
   m_MinValue: 0
   m_MaxValue: 10
   m_WholeNumbers: 0
@@ -123,7 +123,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: -2.800003, y: 0}
+  m_AnchoredPosition: {x: 2.800003, y: 0}
   m_SizeDelta: {x: -5.0000005, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1731814397106842189
@@ -272,7 +272,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.25}
   m_AnchorMax: {x: 1, y: 0.75}
-  m_AnchoredPosition: {x: 2.5, y: 0}
+  m_AnchoredPosition: {x: -2.5, y: 0}
   m_SizeDelta: {x: -5, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &8608500109205576431
@@ -288,7 +288,7 @@ GameObject:
   - component: {fileID: 4051565382557747591}
   - component: {fileID: 6954378576008125032}
   m_Layer: 0
-  m_Name: TowerHealthBar
+  m_Name: TowerHealthBarAI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -359,7 +359,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 10
-  m_PresetInfoIsWorld: 0
+  m_PresetInfoIsWorld: 1
 --- !u!114 &6954378576008125032
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -377,7 +377,7 @@ MonoBehaviour:
   sliderFillImage: {fileID: 1026819894781666406}
   offset: {x: 0, y: 0, z: 0}
   teamTag: 
-  fullHealthColor: {r: 0, g: 0.31878048, b: 0.9622642, a: 1}
-  halfHealthColor: {r: 0, g: 0.31764707, b: 0.9607844, a: 1}
-  lowHealthColor: {r: 0, g: 0.31764707, b: 0.9607844, a: 1}
+  fullHealthColor: {r: 1, g: 0, b: 0, a: 1}
+  halfHealthColor: {r: 1, g: 0, b: 0, a: 1}
+  lowHealthColor: {r: 1, g: 0, b: 0, a: 1}
   maxHealth: 10

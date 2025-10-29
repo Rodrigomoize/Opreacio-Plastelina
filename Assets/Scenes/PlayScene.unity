@@ -4187,7 +4187,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Tower
   maxHealth: 10
   currentHealth: 0
-  healthBarPrefab: {fileID: 8608500109205576431, guid: de29a2f92f9b54443a64fae0fe2d29fc, type: 3}
+  healthBarPrefab: {fileID: 8608500109205576431, guid: e9fad4a89241d4747a8da9511b46f68c, type: 3}
   isEnemyTower: 1
   teamTag: AITeam
   fractureObject: {fileID: 1188949412}
@@ -5175,6 +5175,74 @@ RectTransform:
   m_AnchoredPosition: {x: 0.2, y: 0}
   m_SizeDelta: {x: 101.2979, y: 100}
   m_Pivot: {x: 0.5, y: 0}
+--- !u!1 &1400165530
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1400165533}
+  - component: {fileID: 1400165532}
+  - component: {fileID: 1400165531}
+  m_Layer: 0
+  m_Name: RiverCrossingZoneAI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1400165531
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1400165530}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca16cba50c9d8c04caf144dceceb8eb9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RiverCrossingZone
+  triggerForTeam: 1
+  showLogs: 1
+--- !u!65 &1400165532
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1400165530}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 15.46, y: 3.22, z: 0.09}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!4 &1400165533
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1400165530}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.32252, y: 0, z: 1.54}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1439576984
 GameObject:
   m_ObjectHideFlags: 0
@@ -5924,7 +5992,7 @@ Transform:
   m_GameObject: {fileID: 1656068768}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.32252, y: 0, z: -0.013}
+  m_LocalPosition: {x: 0.32252, y: 0, z: -1.54}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5942,6 +6010,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca16cba50c9d8c04caf144dceceb8eb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RiverCrossingZone
+  triggerForTeam: 0
   showLogs: 1
 --- !u!1 &1753038880
 GameObject:
@@ -7366,3 +7435,4 @@ SceneRoots:
   - {fileID: 907959315}
   - {fileID: 1654938924}
   - {fileID: 1656068770}
+  - {fileID: 1400165533}

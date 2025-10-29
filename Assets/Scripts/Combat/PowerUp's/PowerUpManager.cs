@@ -133,6 +133,8 @@ public class PowerUpManager : MonoBehaviour
                 {
                     p.isOnCooldown = false;
                     p.cooldownTimer = 0f;
+                    UpdatePowerUpUI(p); // Forzar update inmediato al terminar cooldown
+                    continue; // Saltar el update extra abajo
                 }
                 UpdatePowerUpUI(p);
             }
@@ -194,10 +196,11 @@ public class PowerUpManager : MonoBehaviour
         p.isActive = true;
         p.durationTimer = p.duration;
 
-        // Si es instantáneo, iniciar cooldown ahora
+        // Si es instantáneo, iniciar cooldown y desactivar inmediatamente
         if (p.duration <= 0f)
         {
             StartCooldown(p);
+            p.isActive = false;
         }
 
         UpdatePowerUpUI(p);

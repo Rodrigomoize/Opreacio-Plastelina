@@ -2,10 +2,16 @@
 
 /// <summary>
 /// Zona de trigger que detecta cuando las tropas individuales (Character) cruzan el río
-/// y las destruye con un efecto de despawn
+/// y las destruye con un efecto de despawn. Permite configurar para qué equipo es el trigger.
 /// </summary>
 public class RiverCrossingZone : MonoBehaviour
 {
+    public enum Team { Player, Enemy }
+
+    [Header("Configuración de equipo")]
+    [Tooltip("Este trigger solo afecta a tropas del equipo opuesto")]
+    public Team triggerForTeam = Team.Player;
+
     [Header("Debug")]
     [Tooltip("Mostrar logs de debug")]
     public bool showLogs = true;
@@ -30,7 +36,6 @@ public class RiverCrossingZone : MonoBehaviour
     {
         // Solo afectar a Characters (tropas individuales), NO a CharacterCombined (camiones)
         Character character = other.GetComponent<Character>();
-        
         if (character != null)
         {
             // Verificar que NO es un camión (CharacterCombined también tiene Character)
@@ -41,8 +46,15 @@ public class RiverCrossingZone : MonoBehaviour
                 return;
             }
 
+            // Determinar el tag esperado según el equipo configurado
+            string tagEsperado = (triggerForTeam == Team.Player) ? "AITeam" : "PlayerTeam";
+            if (!other.CompareTag(tagEsperado))
+            {
+                Log($"Ignorando tropa aliada {other.gameObject.name} (tag={other.tag})");
+                return;
+            }
+
             Log($"Tropa {other.gameObject.name} (valor {character.GetValue()}) cruzó el río - iniciando despawn");
-            
             // Buscar el componente TroopDespawnController (debe estar pre-configurado en el prefab)
             TroopDespawnController despawner = other.GetComponent<TroopDespawnController>();
             if (despawner != null)
@@ -63,6 +75,7 @@ public class RiverCrossingZone : MonoBehaviour
     {
         if (showLogs)
         {
+            Debug.Log($"[RiverCrossingZone] {message}");
         }
     }
 }
