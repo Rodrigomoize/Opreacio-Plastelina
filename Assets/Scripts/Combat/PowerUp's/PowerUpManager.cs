@@ -415,4 +415,45 @@ public class PowerUpManager : MonoBehaviour
         PowerUpData p = powerUps.Find(x => x.powerUpName == powerUpName);
         return p?.powerUpButton;
     }
+
+    public void StopAllPowerUps()
+    {
+        foreach (var p in powerUps)
+        {
+            if (p.isActive)
+            {
+                // Detener efectos específicos según el tipo de powerup
+                switch (p.powerUpName)
+                {
+                    case "SlowTime":
+                        DeactivateSlowTimePowerUp(p);
+                        break;
+                        // Agregar casos para otros powerups con efectos persistentes
+                }
+
+                // Resetear estado del powerup
+                p.isActive = false;
+                p.durationTimer = 0f;
+
+                // Ocultar el temporizador de duración en UI
+                if (p.powerUpButton != null)
+                {
+                    PowerUpDurationUI durationUI = p.powerUpButton.GetComponent<PowerUpDurationUI>();
+                    if (durationUI != null)
+                    {
+                        durationUI.HideTimer();
+                    }
+                }
+
+                // Actualizar UI
+                UpdatePowerUpUI(p);
+            }
+        }
+
+        // Detener todos los filtros visuales persistentes
+        if (ScreenFlashEffect.Instance != null)
+        {
+            ScreenFlashEffect.Instance.ClearPersistentFilter();
+        }
+    }
 }

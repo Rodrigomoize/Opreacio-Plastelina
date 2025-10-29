@@ -166,4 +166,20 @@ public class ScreenFlashEffect : MonoBehaviour
         flashImage.color = finalColor;
         isFlashing = false;
     }
+
+    public void ClearPersistentFilter()
+    {
+        if (persistentCoroutine != null)
+        {
+            StopCoroutine(persistentCoroutine);
+            persistentCoroutine = null;
+        }
+        persistentFilterActive = false;
+        if (flashImage != null)
+        {
+            Color c = flashImage.color;
+            c.a = 0;
+            flashImage.color = c;
+        }
+    }
 }
