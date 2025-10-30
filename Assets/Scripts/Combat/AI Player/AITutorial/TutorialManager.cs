@@ -925,7 +925,7 @@ public class TutorialManager : MonoBehaviour
         ResumeGame();
     }
 
-    // ✅ MODIFICADO: Spawnar PRIMERO, luego activar el mensaje del powerup
+    // ✅ MODIFICADO: Añadir PauseGame después de spawner la tropa
     private IEnumerator Tutorial_SlowTimePowerUp()
     {
         currentStep = 7;
@@ -940,9 +940,11 @@ public class TutorialManager : MonoBehaviour
         // ✅ SEGUNDO: Esperar un momento para que la tropa aparezca
         yield return new WaitForSeconds(1f);
 
-        // ✅ TERCERO: AHORA SÍ mostrar el mensaje y pausar
+        // ✅ NUEVO: PAUSAR el juego ANTES de mostrar el mensaje
         PauseGame();
+        Debug.Log("[Tutorial] ⏸️ Juego pausado después de spawner tropa enemiga (paso SlowTime)");
 
+        // ✅ TERCERO: AHORA SÍ mostrar el mensaje
         ShowDialog("¡FES QUE VAGIN MÉS LENTS!", showImage: true, contextSprite: slowTimePowerUpSprite);
 
         allowedPowerUps = new string[] { "SlowTime" };
@@ -992,7 +994,7 @@ public class TutorialManager : MonoBehaviour
 
         // Esperar 2 segundos para que el efecto de SlowTime sea visible
         yield return new WaitForSeconds(2f);
-        
+
         // Remover el multiplicador ACTIVO del tag
         if (GameSpeedManager.Instance != null)
         {
@@ -1060,9 +1062,9 @@ public class TutorialManager : MonoBehaviour
         waitingForEnemyTowerDamage = true;
 
         Debug.Log("[Tutorial] ⏳ Esperando que el ataque llegue a la torre enemiga (sin timeout)...");
-        
+
         yield return new WaitUntil(() => !waitingForEnemyTowerDamage);
-        
+
         Debug.Log("[Tutorial] ✅ Ataque alcanzó la torre, daño de 10 aplicado automáticamente en Update()");
 
         yield return new WaitForSeconds(1f);

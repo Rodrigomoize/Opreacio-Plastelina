@@ -2047,7 +2047,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PowerUpManager
   powerUps:
   - powerUpName: SlowTime
-    duration: 20
+    duration: 10
     cooldownTime: 25
     powerUpButton: {fileID: 225682427}
     cooldownFillImage: {fileID: 225682428}
@@ -4542,7 +4542,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Tower
   maxHealth: 10
   currentHealth: 0
-  healthBarPrefab: {fileID: 8608500109205576431, guid: de29a2f92f9b54443a64fae0fe2d29fc, type: 3}
+  healthBarPrefab: {fileID: 8608500109205576431, guid: e9fad4a89241d4747a8da9511b46f68c, type: 3}
   isEnemyTower: 1
   teamTag: AITeam
   fractureObject: {fileID: 1188949412}

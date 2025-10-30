@@ -129,7 +129,7 @@ public class WinResultUI : MonoBehaviour
     {
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.RestartCurrentLevel();
+            GameManager.GoToLevelScene();
         }
     }
 
