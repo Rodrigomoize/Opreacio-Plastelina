@@ -938,7 +938,7 @@ public class TutorialManager : MonoBehaviour
         cardManager.GenerateCombinedCharacter(card1A, card1B, spawnPos, 2, '+', "AITeam", out result, aiIntelect);
 
         // ✅ SEGUNDO: Esperar un momento para que la tropa aparezca
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(2.5f);
 
         // ✅ NUEVO: PAUSAR el juego ANTES de mostrar el mensaje
         PauseGame();
