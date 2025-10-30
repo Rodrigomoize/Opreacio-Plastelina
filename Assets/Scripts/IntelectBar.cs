@@ -42,6 +42,12 @@ public class IntelectBar : MonoBehaviour
     private float lastIntellectValue = -1f; // Cache para evitar updates innecesarios
     private Coroutine shakeCoroutine;
 
+    // Cachés y almacenamiento de la posición original para asegurar restauración
+    private RectTransform cachedRectTransform;
+    private Transform cachedTransform;
+    private Vector3 originalLocalPosition;
+    private bool originalPositionStored = false;
+
     void Start()
     {
         SetupBar();
@@ -84,6 +90,10 @@ public class IntelectBar : MonoBehaviour
 
         // Configurar preview al inicio
         HidePreview();
+
+        // Cachear transform/rectTransform para el shake
+        cachedRectTransform = GetComponent<RectTransform>();
+        cachedTransform = transform;
     }
 
     public void UpdateBar()
@@ -250,33 +260,44 @@ public class IntelectBar : MonoBehaviour
         // Detener shake anterior si existe
         if (shakeCoroutine != null)
         {
+            // Detener corrutina en curso
             StopCoroutine(shakeCoroutine);
+
+            // Restaurar posición original inmediatamente si la tenemos almacenada
+            if (originalPositionStored)
+            {
+                if (cachedRectTransform != null)
+                {
+                    cachedRectTransform.localPosition = originalLocalPosition;
+                }
+                else if (cachedTransform != null)
+                {
+                    cachedTransform.localPosition = originalLocalPosition;
+                }
+
+                originalPositionStored = false;
+            }
+
+            // Limpiar referencia
+            shakeCoroutine = null;
         }
-        
+
         // Iniciar nueva corrutina de shake
         shakeCoroutine = StartCoroutine(ShakeCoroutine(duration, magnitude));
     }
 
     private System.Collections.IEnumerator ShakeCoroutine(float duration, float magnitude)
     {
-        // Intentar obtener RectTransform primero, si no hay, usar Transform normal
-        RectTransform rectTransform = GetComponent<RectTransform>();
-        Transform normalTransform = transform;
-        
-        Vector3 originalPosition;
+        // Usar los cachés ya obtenidos en SetupBar
+        RectTransform rectTransform = cachedRectTransform;
+        Transform normalTransform = cachedTransform;
+
         bool useRectTransform = rectTransform != null;
-        
-        if (useRectTransform)
-        {
-            originalPosition = rectTransform.localPosition;
-            Debug.LogWarning("[IntelectBar] Usando RectTransform para shake"); // DEBUG
-        }
-        else
-        {
-            originalPosition = normalTransform.localPosition;
-            Debug.LogWarning("[IntelectBar] Usando Transform para shake"); // DEBUG
-        }
-        
+
+        // Guardar la posición original (la usamos también si la corrutina es interrumpida)
+        originalLocalPosition = useRectTransform ? rectTransform.localPosition : normalTransform.localPosition;
+        originalPositionStored = true;
+
         float elapsed = 0f;
 
         while (elapsed < duration)
@@ -284,8 +305,8 @@ public class IntelectBar : MonoBehaviour
             float x = Random.Range(-1f, 1f) * magnitude;
             float y = Random.Range(-1f, 1f) * magnitude;
 
-            Vector3 shakeOffset = originalPosition + new Vector3(x, y, 0);
-            
+            Vector3 shakeOffset = originalLocalPosition + new Vector3(x, y, 0);
+
             if (useRectTransform)
             {
                 rectTransform.localPosition = shakeOffset;
@@ -299,16 +320,17 @@ public class IntelectBar : MonoBehaviour
             yield return null;
         }
 
-        // Restaurar posición original
+        // Restaurar posición original al terminar
         if (useRectTransform)
         {
-            rectTransform.localPosition = originalPosition;
+            rectTransform.localPosition = originalLocalPosition;
         }
         else
         {
-            normalTransform.localPosition = originalPosition;
+            normalTransform.localPosition = originalLocalPosition;
         }
-        
+
+        originalPositionStored = false;
         shakeCoroutine = null;
     }
 }
