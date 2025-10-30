@@ -628,7 +628,7 @@ public class TutorialManager : MonoBehaviour
         allowedActionsRemaining = 1;
         allowedSpecificCardValue = 5;
         restrictToLeftZone = true;
-        
+
         Debug.Log("[Tutorial] 🛡️ Paso 2: Solo carta 5 permitida, zona izquierda");
 
         yield return new WaitForSeconds(2.7f);
@@ -653,35 +653,27 @@ public class TutorialManager : MonoBehaviour
 
         UpdateTutorialVisualFeedback();
 
+        // Esperar 5 segundos antes de ocultar el popup (pero seguir pausado)
+        yield return new WaitForSeconds(5f);
+
+        // Ocultar el popup pero MANTENER el juego pausado
+        yield return StartCoroutine(HidePopupWithAnimation());
+
+        // Desbloquear solo el jugador para que pueda interactuar
         UnblockPlayer();
-        ResumeGame();
+        // IMPORTANTE: NO llamar a ResumeGame() aquí - mantener pausado
 
         waitingForPlayerAction = true;
 
-        // Mostrar el mensaje por 5 segundos o hasta que actúe
-        float elapsed = 0f;
-        float timeout = 5f;
-
-        while (elapsed < timeout && waitingForPlayerAction)
-        {
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-
-        // Ocultar el popup si aún está visible después de 5 segundos
-        if (waitingForPlayerAction)
-        {
-            yield return StartCoroutine(HidePopupWithAnimation());
-        }
-
         // ESPERAR hasta que el jugador juegue la carta 5
+        // Durante este tiempo el juego está pausado pero el jugador puede interactuar
         yield return new WaitUntil(() => !waitingForPlayerAction);
 
         Debug.Log("[Tutorial] ✅ Paso 2: Carta 5 jugada - Continuando");
 
-        // PAUSAR inmediatamente después de jugar la carta
+        // AHORA SÍ pausar completamente de nuevo
         yield return new WaitForSeconds(0.1f);
-        
+
         BlockPlayer();
         PauseGame();
 
@@ -690,7 +682,7 @@ public class TutorialManager : MonoBehaviour
         allowOnlySingleCards = false;
         allowedActionsRemaining = -1;
         allowedSpecificCardValue = -1;
-        
+
         Debug.Log("[Tutorial] 🔓 Paso 2 completado - Restricciones desactivadas");
 
         if (playerCardManager.cardSlots.Count > 4)
@@ -708,6 +700,7 @@ public class TutorialManager : MonoBehaviour
 
         yield return new WaitForSeconds(1f);
 
+        BlockPlayer();
         ShowDialog("CADA CARTA TÉ UN COST D'ENERGIA", showImage: true, contextSprite: intelectCost);
 
         if (intelectBarFillImage != null)
@@ -1012,12 +1005,13 @@ public class TutorialManager : MonoBehaviour
         CardManager.GenerateResult result;
         cardManager.GenerateCombinedCharacter(card1A, card1B, spawnPos, 2, '+', "AITeam", out result, aiIntelect);
 
+        // ⏸️ PAUSAR INMEDIATAMENTE después de generar el ataque
         yield return new WaitForSeconds(2.5f);
 
-        // Primera pausa: Usar SlowTime
         BlockPlayer();
         PauseGame();
 
+        // Primera pausa: Usar SlowTime
         ShowDialog("FES QUE VAGIN MÉS LENTS!", showImage: true, contextSprite: slowTimePowerUpSprite);
 
         allowedPowerUps = new string[] { "SlowTime" };
@@ -1079,11 +1073,11 @@ public class TutorialManager : MonoBehaviour
         // Segunda pausa: Explicar defensa con carta 2
         BlockPlayer();
         PauseGame();
-        
+
         ShowDialog("PRIMER, DEFENSA'T AMB EL 2!", showImage: true, contextSprite: card2Sprite);
         yield return new WaitForSeconds(3f);
         yield return StartCoroutine(HidePopupWithAnimation());
-        
+
         Debug.Log("[Tutorial] 🛡️ Paso 7 - Fase Defensa: Solo carta 2 permitida, solo zona izquierda");
 
         if (playerCardManager.cardSlots.Count > 1)
@@ -1100,7 +1094,7 @@ public class TutorialManager : MonoBehaviour
         }
 
         UpdateTutorialVisualFeedback();
-        
+
         UnblockPlayer();
         ResumeGameWithoutResetSpeed();
 
@@ -1132,13 +1126,13 @@ public class TutorialManager : MonoBehaviour
         allowOnlySingleCards = false;
         allowOnlyOperations = true;
         restrictToLeftZone = false;
-        
+
         Debug.Log("[Tutorial] ⚔️ Paso 7 - Fase Ataque: Solo operaciones, cualquier zona");
-        
+
         ShowDialog("ARA, APROFITA PER ATACAR!", showImage: false);
         yield return new WaitForSeconds(3f);
         yield return StartCoroutine(HidePopupWithAnimation());
-        
+
         UnblockPlayer();
         ResumeGameWithoutResetSpeed();
 
@@ -1155,7 +1149,7 @@ public class TutorialManager : MonoBehaviour
         allowOnlyOperations = false;
         restrictToLeftZone = false;
         allowedSpecificCardValue = -1;
-        
+
         Debug.Log("[Tutorial] 🔓 Paso 7 completado - Todas las restricciones desactivadas");
 
         if (aiTower != null)

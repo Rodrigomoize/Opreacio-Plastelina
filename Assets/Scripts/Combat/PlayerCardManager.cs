@@ -155,6 +155,22 @@ public class PlayerCardManager : MonoBehaviour
             return;
         }
 
+        // ✅ VALIDACIÓN DE TUTORIAL: Solo verificar carta específica si estamos en modo "carta individual"
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialInProgress())
+        {
+            // Solo validar carta específica si se permite jugar cartas individuales
+            if (TutorialManager.Instance.CanPlaySingleCard())
+            {
+                int cardValue = display.cardData.cardValue;
+                if (!TutorialManager.Instance.CanPlaySpecificCard(cardValue))
+                {
+                    Debug.LogWarning($"[Tutorial] ⛔ Carta {cardValue} NO permitida - bloqueando selección");
+                    ShowInsufficientIntellectFeedback();
+                    return;
+                }
+            }
+        }
+
         // PRIMERA SELECCIÓN
         if (selectedDisplays.Count == 0)
         {
@@ -205,6 +221,7 @@ public class PlayerCardManager : MonoBehaviour
                     }
                     else
                     {
+                        ShowInsufficientIntellectFeedback();
                         return;
                     }
                 }
@@ -220,6 +237,21 @@ public class PlayerCardManager : MonoBehaviour
 
             if (currentOperator == '\0')
             {
+                // ✅ VALIDACIÓN DE TUTORIAL al cambiar selección (solo si permite cartas individuales)
+                if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialInProgress())
+                {
+                    if (TutorialManager.Instance.CanPlaySingleCard())
+                    {
+                        int cardValue = display.cardData.cardValue;
+                        if (!TutorialManager.Instance.CanPlaySpecificCard(cardValue))
+                        {
+                            Debug.LogWarning($"[Tutorial] ⛔ Carta {cardValue} NO permitida - bloqueando cambio de selección");
+                            ShowInsufficientIntellectFeedback();
+                            return;
+                        }
+                    }
+                }
+
                 SetCardElevation(first, false);
                 selectedDisplays.Clear();
                 selectedDisplays.Add(display);
@@ -259,6 +291,7 @@ public class PlayerCardManager : MonoBehaviour
                 }
                 else
                 {
+                    ShowInsufficientIntellectFeedback();
                     return;
                 }
             }
@@ -267,6 +300,21 @@ public class PlayerCardManager : MonoBehaviour
         // YA HAY DOS CARTAS
         if (selectedDisplays.Count >= 2)
         {
+            // ✅ VALIDACIÓN DE TUTORIAL al resetear selección (solo si permite cartas individuales)
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialInProgress())
+            {
+                if (TutorialManager.Instance.CanPlaySingleCard())
+                {
+                    int cardValue = display.cardData.cardValue;
+                    if (!TutorialManager.Instance.CanPlaySpecificCard(cardValue))
+                    {
+                        Debug.LogWarning($"[Tutorial] ⛔ Carta {cardValue} NO permitida - bloqueando nueva selección");
+                        ShowInsufficientIntellectFeedback();
+                        return;
+                    }
+                }
+            }
+
             foreach (var d in selectedDisplays) SetCardElevation(d, false);
             selectedDisplays.Clear();
             currentOperator = '\0';
@@ -343,12 +391,15 @@ public class PlayerCardManager : MonoBehaviour
             return;
         }
 
-        // ✅ MODIFICADO: Solo verificar restricción si hay tutorial activo
-        if (TutorialManager.Instance != null && !TutorialManager.Instance.CanPlayOperation())
+        // ✅ VALIDACIÓN DE TUTORIAL
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialInProgress())
         {
-            Debug.LogWarning("[Tutorial] ⛔ No puedes usar operadores en este paso");
-            ShowInsufficientIntellectFeedback();
-            return;
+            if (!TutorialManager.Instance.CanPlayOperation())
+            {
+                Debug.LogWarning("[Tutorial] ⛔ No puedes usar operadores en este paso");
+                ShowInsufficientIntellectFeedback();
+                return;
+            }
         }
 
         if (currentOperator == op)
@@ -377,16 +428,19 @@ public class PlayerCardManager : MonoBehaviour
             return;
         }
 
-        // ✅ MODIFICADO: Solo verificar si hay tutorial activo
+        // ✅ CARTA INDIVIDUAL
         if (selectedDisplays.Count == 1)
         {
-            // Carta individual
-            if (TutorialManager.Instance != null && !TutorialManager.Instance.CanPlaySingleCard())
+            // Validación de tutorial
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialInProgress())
             {
-                Debug.LogWarning("[Tutorial] ⛔ No puedes jugar cartas individuales en este paso");
-                ShowInsufficientIntellectFeedback();
-                DeselectAll();
-                return;
+                if (!TutorialManager.Instance.CanPlaySingleCard())
+                {
+                    Debug.LogWarning("[Tutorial] ⛔ No puedes jugar cartas individuales en este paso");
+                    ShowInsufficientIntellectFeedback();
+                    DeselectAll();
+                    return;
+                }
             }
 
             CardManager.Card c = selectedDisplays[0].GetCardData();
@@ -419,7 +473,7 @@ public class PlayerCardManager : MonoBehaviour
                     }
                 }
 
-                if (TutorialManager.Instance != null)
+                if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialInProgress())
                 {
                     TutorialManager.Instance.OnPlayerPlaysCard(cardValuePlayed);
                 }
@@ -430,6 +484,7 @@ public class PlayerCardManager : MonoBehaviour
             return;
         }
 
+        // ✅ OPERACIÓN (2 CARTAS)
         if (selectedDisplays.Count == 2)
         {
             if (currentOperator == '\0')
@@ -438,13 +493,16 @@ public class PlayerCardManager : MonoBehaviour
                 return;
             }
 
-            // ✅ MODIFICADO: Solo verificar si hay tutorial activo
-            if (TutorialManager.Instance != null && !TutorialManager.Instance.CanPlayOperation())
+            // Validación de tutorial
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialInProgress())
             {
-                Debug.LogWarning("[Tutorial] ⛔ No puedes jugar operaciones en este paso");
-                ShowInsufficientIntellectFeedback();
-                DeselectAll();
-                return;
+                if (!TutorialManager.Instance.CanPlayOperation())
+                {
+                    Debug.LogWarning("[Tutorial] ⛔ No puedes jugar operaciones en este paso");
+                    ShowInsufficientIntellectFeedback();
+                    DeselectAll();
+                    return;
+                }
             }
 
             var firstDisplay = selectedDisplays[0];
@@ -564,7 +622,7 @@ public class PlayerCardManager : MonoBehaviour
                     }
                 }
 
-                if (TutorialManager.Instance != null)
+                if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialInProgress())
                 {
                     TutorialManager.Instance.OnPlayerPlaysOperation();
                     Debug.Log($"[PlayerCardManager] 🔔 Notificando tutorial: operación {currentOperator}");
@@ -657,6 +715,24 @@ public class PlayerCardManager : MonoBehaviour
     {
         if (display == null || display.cardData == null) return false;
 
+        // ✅ VALIDACIÓN DE TUTORIAL: Solo verificar carta específica si permite cartas individuales
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialInProgress())
+        {
+            // Si solo permite cartas individuales (no operaciones), validar carta específica
+            if (TutorialManager.Instance.CanPlaySingleCard() && !TutorialManager.Instance.CanPlayOperation())
+            {
+                int cardValue = display.cardData.cardValue;
+                
+                if (!TutorialManager.Instance.CanPlaySpecificCard(cardValue))
+                {
+                    return false;
+                }
+            }
+            
+            // Si solo permite operaciones (no cartas individuales), todas las cartas son válidas para selección
+            // pero no para jugar directamente
+        }
+
         if (selectedDisplays.Count == 0) return true;
 
         if (selectedDisplays.Count == 1 && currentOperator == '\0') return true;
@@ -704,10 +780,13 @@ public class PlayerCardManager : MonoBehaviour
 
     private bool IsOperatorValid(char op)
     {
-        // ✅ MODIFICADO: Solo verificar si hay tutorial activo
-        if (TutorialManager.Instance != null && !TutorialManager.Instance.CanPlayOperation())
+        // ✅ VALIDACIÓN DE TUTORIAL
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialInProgress())
         {
-            return false;
+            if (!TutorialManager.Instance.CanPlayOperation())
+            {
+                return false;
+            }
         }
 
         if (selectedDisplays.Count == 0) return false;
