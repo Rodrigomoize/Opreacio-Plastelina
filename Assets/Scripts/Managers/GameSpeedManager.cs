@@ -161,6 +161,22 @@ public class GameSpeedManager : MonoBehaviour
         };
     }
 
+    /// <summary>
+    /// Remueve el multiplicador activo de un tag para que nuevas tropas no se vean afectadas,
+    /// pero mantiene el slowdown en las tropas existentes con ese tag
+    /// </summary>
+    public void RemoveActiveTagMultiplier(string tag)
+    {
+        if (string.IsNullOrEmpty(tag)) return;
+        
+        // Solo remover de activeTagMultipliers
+        // Las tropas existentes en perObjectMultipliers seguirán lentas
+        if (activeTagMultipliers.Remove(tag))
+        {
+            Debug.Log($"[GameSpeedManager] Multiplicador activo removido para tag '{tag}'. Tropas existentes siguen lentas, nuevas tropas irán a velocidad normal.");
+        }
+    }
+
     private void OnDestroy()
     {
         perObjectMultipliers.Clear();

@@ -14,11 +14,11 @@ public class PlayerCardManager : MonoBehaviour
     public Transform spawnPoint;
 
     public float elevationAmount = 500f;
-    
+
     [Header("Deployment Zone Feedback")]
     [Tooltip("Referencia al PlayableAreaUI para controlar zonas de despliegue")]
     public PlayableAreaUI playableAreaUI;
-    
+
     [Header("Visual Feedback")]
     [Tooltip("Color para cartas válidas/seleccionables")]
     public Color validCardColor = Color.white;
@@ -27,20 +27,19 @@ public class PlayerCardManager : MonoBehaviour
     [Tooltip("Color para cartas seleccionadas")]
     public Color selectedCardColor = new Color(1f, 1f, 0.5f, 1f);
     [Tooltip("Color para carta seleccionada 2 veces (auto-combinación)")]
-    public Color doubleSelectedCardColor = new Color(1f, 0.5f, 1f, 1f); // Rosa/magenta para indicar doble selección
+    public Color doubleSelectedCardColor = new Color(1f, 0.5f, 1f, 1f);
     [Tooltip("Color para carta seleccionada pero bloqueada (ej: 2 con operador -, no puede seleccionar 2 otra vez)")]
-    public Color selectedButBlockedCardColor = new Color(0.7f, 0.7f, 0.4f, 0.8f); // Amarillo oscuro/grisáceo
+    public Color selectedButBlockedCardColor = new Color(0.7f, 0.7f, 0.4f, 0.8f);
     [Tooltip("Color para botones de operación válidos")]
     public Color validOperatorColor = Color.white;
-    [Tooltip("Color para botones de operación inválidos")]       
+    [Tooltip("Color para botones de operación inválidos")]
     public Color invalidOperatorColor = new Color(0.5f, 0.5f, 0.5f, 0.6f);
     [Tooltip("Color para el operador actualmente seleccionado")]
     public Color selectedOperatorColor = new Color(1f, 1f, 0.5f, 1f);
 
     [Header("UI Feedback")]
-    public IntelectBar intelectBar; // Referencia a la barra de intelecto
+    public IntelectBar intelectBar;
 
-    // Estado de selección / operación
     private List<CardDisplay> selectedDisplays = new List<CardDisplay>(2);
     private List<CardManager.Card> playerCards = new List<CardManager.Card>();
     private List<GameObject> spawnedCards = new List<GameObject>();
@@ -77,11 +76,10 @@ public class PlayerCardManager : MonoBehaviour
     }
 
     [Header("Regla especial: Duplicar carta")]
-    public bool allowSelfCombination = true; // Permitir usar la misma carta dos veces (ej: 1+1 con una sola carta)
+    public bool allowSelfCombination = true;
 
     void Start()
     {
-        // Inicializa mano con cartas ordenadas del 1-5 (una de cada)
         for (int i = 0; i < 5 && i < cardSlots.Count; i++)
         {
             CardManager.Card originalCard = cardManager.GetCardByIndex(i);
@@ -91,8 +89,7 @@ public class PlayerCardManager : MonoBehaviour
                 CreateCard(clonedCard, cardSlots[i]);
             }
         }
-        
-        // Estado inicial: todas las cartas válidas
+
         UpdateVisualFeedback();
     }
 
@@ -141,14 +138,12 @@ public class PlayerCardManager : MonoBehaviour
         }
 
         spawnedCards.Add(newCard);
-        
-        // Actualizar feedback visual después de agregar carta
+
         UpdateVisualFeedback();
     }
 
     public void OnCardClickedRequest(CardDisplay display)
     {
-        // Verificar si el gameplay está desactivado (ej: durante secuencia de victoria)
         if (GameManager.Instance != null && GameManager.Instance.IsGameplayDisabled)
         {
             return;
@@ -160,7 +155,6 @@ public class PlayerCardManager : MonoBehaviour
             return;
         }
 
-
         // PRIMERA SELECCIÓN
         if (selectedDisplays.Count == 0)
         {
@@ -169,7 +163,7 @@ public class PlayerCardManager : MonoBehaviour
 
             AudioManager.Instance?.PlayCardSelected();
 
-            UpdateVisualFeedback(); // Actualizar feedback visual
+            UpdateVisualFeedback();
             return;
         }
 
@@ -179,11 +173,8 @@ public class PlayerCardManager : MonoBehaviour
             var first = selectedDisplays[0];
             bool isSameCard = ReferenceEquals(display, first);
 
-
-            // Si es LA MISMA carta física
             if (isSameCard)
             {
-                // Si NO hay operador: deseleccionar
                 if (currentOperator == '\0')
                 {
                     SetCardElevation(first, false);
@@ -191,42 +182,32 @@ public class PlayerCardManager : MonoBehaviour
                     UpdateVisualFeedback();
                     return;
                 }
-                // Si HAY operador Y permitimos auto-combinación: validar si el resultado es válido
                 else if (allowSelfCombination)
                 {
                     int cardValue = display.cardData.cardValue;
                     bool isValidResult = false;
-                    
-                    // Validar según el operador
+
                     if (currentOperator == '+')
                     {
                         int result = cardValue + cardValue;
                         isValidResult = (result <= 5);
-                        
-                        if (!isValidResult)
-                        {
-                        }
                     }
                     else if (currentOperator == '-')
                     {
-                        // Carta consigo misma siempre da 0, que NO es válido (debe ser >0)
                         isValidResult = false;
                     }
-                    
+
                     if (isValidResult)
                     {
-                        selectedDisplays.Add(display); // Añadir la misma carta otra vez
-                        // No elevamos más porque ya está elevada
+                        selectedDisplays.Add(display);
                         UpdateVisualFeedback();
                         return;
                     }
                     else
                     {
-                        // No hacer nada, la carta ya está seleccionada y el operador activo
                         return;
                     }
                 }
-                // Si HAY operador pero NO permitimos auto-combinación: deseleccionar
                 else
                 {
                     SetCardElevation(first, false);
@@ -237,8 +218,6 @@ public class PlayerCardManager : MonoBehaviour
                 }
             }
 
-            // Si NO es la misma carta (carta diferente)
-            // Si NO hay operador, reemplazar selección
             if (currentOperator == '\0')
             {
                 SetCardElevation(first, false);
@@ -253,33 +232,23 @@ public class PlayerCardManager : MonoBehaviour
             }
             else
             {
-                // SI hay operador, validar si la combinación es válida antes de añadir
                 int firstValue = first.cardData.cardValue;
                 int secondValue = display.cardData.cardValue;
                 bool isValidCombination = false;
-                
+
                 if (currentOperator == '+')
                 {
                     int result = firstValue + secondValue;
                     isValidCombination = (result <= 5);
-                    
-                    if (!isValidCombination)
-                    {
-                    }
                 }
                 else if (currentOperator == '-')
                 {
                     int result = firstValue - secondValue;
-                    isValidCombination = (result > 0 && result <= 5); // Cambiado: debe ser >0, no >=0
-                    
-                    if (!isValidCombination)
-                    {
-                    }
+                    isValidCombination = (result > 0 && result <= 5);
                 }
-                
+
                 if (isValidCombination)
                 {
-                    // Combinación válida, añadir segunda carta
                     selectedDisplays.Add(display);
                     SetCardElevation(display, true);
 
@@ -290,13 +259,12 @@ public class PlayerCardManager : MonoBehaviour
                 }
                 else
                 {
-                    // Combinación inválida, no hacer nada
                     return;
                 }
             }
         }
 
-        // YA HAY DOS CARTAS - reiniciar selección
+        // YA HAY DOS CARTAS
         if (selectedDisplays.Count >= 2)
         {
             foreach (var d in selectedDisplays) SetCardElevation(d, false);
@@ -313,7 +281,6 @@ public class PlayerCardManager : MonoBehaviour
         }
     }
 
-    // Método para elevar o bajar la carta (efecto UNO)
     private void SetCardElevation(CardDisplay display, bool elevated)
     {
         if (display == null) return;
@@ -321,22 +288,18 @@ public class PlayerCardManager : MonoBehaviour
         RectTransform rt = display.GetComponent<RectTransform>();
         if (rt != null)
         {
-            // Usar offsetMin/offsetMax en lugar de anchoredPosition para no interferir con hover
             if (elevated)
             {
-                // Mover el top hacia arriba (offsetMax.y positivo sube la carta)
                 rt.offsetMin = new Vector2(rt.offsetMin.x, elevationAmount);
                 rt.offsetMax = new Vector2(rt.offsetMax.x, elevationAmount);
             }
             else
             {
-                // Resetear a posición original (stretch fill en el slot)
                 rt.offsetMin = Vector2.zero;
                 rt.offsetMax = Vector2.zero;
             }
         }
 
-        // Mantener el visual de selección también
         display.SetSelectedVisual(elevated);
     }
 
@@ -358,7 +321,6 @@ public class PlayerCardManager : MonoBehaviour
 
     private void TryToggleOperator(char op)
     {
-        // Verificar si el gameplay está desactivado (ej: durante secuencia de victoria)
         if (GameManager.Instance != null && GameManager.Instance.IsGameplayDisabled)
         {
             return;
@@ -376,9 +338,16 @@ public class PlayerCardManager : MonoBehaviour
             return;
         }
 
-        // Si la operación está completa (2 cartas), no permitir cambiar operador
         if (selectedDisplays.Count >= 2)
         {
+            return;
+        }
+
+        // ✅ MODIFICADO: Solo verificar restricción si hay tutorial activo
+        if (TutorialManager.Instance != null && !TutorialManager.Instance.CanPlayOperation())
+        {
+            Debug.LogWarning("[Tutorial] ⛔ No puedes usar operadores en este paso");
+            ShowInsufficientIntellectFeedback();
             return;
         }
 
@@ -408,13 +377,22 @@ public class PlayerCardManager : MonoBehaviour
             return;
         }
 
+        // ✅ MODIFICADO: Solo verificar si hay tutorial activo
         if (selectedDisplays.Count == 1)
         {
-            // Se jugó una carta simple
+            // Carta individual
+            if (TutorialManager.Instance != null && !TutorialManager.Instance.CanPlaySingleCard())
+            {
+                Debug.LogWarning("[Tutorial] ⛔ No puedes jugar cartas individuales en este paso");
+                ShowInsufficientIntellectFeedback();
+                DeselectAll();
+                return;
+            }
+
             CardManager.Card c = selectedDisplays[0].GetCardData();
             CardManager.GenerateResult result;
             GameObject character = cardManager.GenerateCharacter(c, spawnPosition, "PlayerTeam", out result, null);
-            
+
             if (result == CardManager.GenerateResult.InsufficientIntellect)
             {
                 ShowInsufficientIntellectFeedback();
@@ -422,15 +400,15 @@ public class PlayerCardManager : MonoBehaviour
                 currentOperator = '\0';
                 return;
             }
-            
+
             if (character != null)
             {
                 int cardValuePlayed = c.cardValue;
                 Transform slotOfCard = selectedDisplays[0].transform.parent;
-                
+
                 RemoveCardUI(selectedDisplays[0]);
                 selectedDisplays.Clear();
-                
+
                 if (slotOfCard != null)
                 {
                     int indexToGet = cardValuePlayed - 1;
@@ -440,14 +418,13 @@ public class PlayerCardManager : MonoBehaviour
                         CreateCard(cardManager.CloneCard(newCard), slotOfCard);
                     }
                 }
-                
-                // 🔔 NOTIFICAR AL TUTORIAL
+
                 if (TutorialManager.Instance != null)
                 {
                     TutorialManager.Instance.OnPlayerPlaysCard(cardValuePlayed);
                 }
             }
-            
+
             DeselectAll();
             currentOperator = '\0';
             return;
@@ -461,10 +438,18 @@ public class PlayerCardManager : MonoBehaviour
                 return;
             }
 
+            // ✅ MODIFICADO: Solo verificar si hay tutorial activo
+            if (TutorialManager.Instance != null && !TutorialManager.Instance.CanPlayOperation())
+            {
+                Debug.LogWarning("[Tutorial] ⛔ No puedes jugar operaciones en este paso");
+                ShowInsufficientIntellectFeedback();
+                DeselectAll();
+                return;
+            }
+
             var firstDisplay = selectedDisplays[0];
             var secondDisplay = selectedDisplays[1];
 
-            // CASO ESPECIAL: Si ambos displays son la misma referencia (auto-combinación)
             bool isAutoCombo = ReferenceEquals(firstDisplay, secondDisplay);
 
             var a = firstDisplay.GetCardData();
@@ -491,7 +476,6 @@ public class PlayerCardManager : MonoBehaviour
             {
                 if (a.cardValue < b.cardValue)
                 {
-
                     selectedDisplays[0] = secondDisplay;
                     selectedDisplays[1] = firstDisplay;
                     var tmp = a; a = b; b = tmp;
@@ -529,7 +513,6 @@ public class PlayerCardManager : MonoBehaviour
 
             if (success)
             {
-                // Si es auto-combo, solo guardamos UNA carta y UN slot
                 if (isAutoCombo)
                 {
                     int valueUsed = a.cardValue;
@@ -538,7 +521,6 @@ public class PlayerCardManager : MonoBehaviour
                     RemoveCardUI(firstDisplay);
                     selectedDisplays.Clear();
 
-                    // Reponer la misma carta
                     if (slotToRefill != null)
                     {
                         int indexToGet = valueUsed - 1;
@@ -551,7 +533,6 @@ public class PlayerCardManager : MonoBehaviour
                 }
                 else
                 {
-                    // Combo normal: dos cartas diferentes
                     int valueA = a.cardValue;
                     int valueB = b.cardValue;
 
@@ -568,7 +549,6 @@ public class PlayerCardManager : MonoBehaviour
                     }
                     selectedDisplays.Clear();
 
-                    // Rellenar con las cartas correspondientes a los valores jugados
                     for (int i = 0; i < slotsToRefill.Count; i++)
                     {
                         Transform slot = slotsToRefill[i];
@@ -584,38 +564,18 @@ public class PlayerCardManager : MonoBehaviour
                     }
                 }
 
-                // 🔔 NOTIFICAR AL TUTORIAL
                 if (TutorialManager.Instance != null)
                 {
                     TutorialManager.Instance.OnPlayerPlaysOperation();
                     Debug.Log($"[PlayerCardManager] 🔔 Notificando tutorial: operación {currentOperator}");
                 }
             }
-            else
-            {
-            }
 
             currentOperator = '\0';
             UpdateVisualFeedback();
             return;
         }
-        
-        // === NOTIFICAR AL TUTORIAL ===
-        if (TutorialManager.Instance != null)
-        {
-            // Si jugó una carta simple
-            if (selectedDisplays.Count == 1)
-            {
-                int cardValue = selectedDisplays[0].cardData.cardValue;
-                TutorialManager.Instance.OnPlayerPlaysCard(cardValue);
-            }
-            // Si jugó una operación (2 cartas)
-            else if (selectedDisplays.Count == 2)
-            {
-                TutorialManager.Instance.OnPlayerPlaysOperation();
-            }
-        }
-        
+
         DeselectAll();
         currentOperator = '\0';
     }
@@ -642,7 +602,6 @@ public class PlayerCardManager : MonoBehaviour
 
             if (playerCards.Contains(cardData)) playerCards.Remove(cardData);
 
-            // Robar la misma carta que se jugó
             if (slotOfCard != null)
             {
                 int indexToGet = cardValuePlayed - 1;
@@ -654,7 +613,6 @@ public class PlayerCardManager : MonoBehaviour
                 }
             }
 
-            // 🔔 NOTIFICAR AL TUTORIAL
             if (TutorialManager.Instance != null)
             {
                 TutorialManager.Instance.OnPlayerPlaysCard(cardData.cardValue);
@@ -694,36 +652,27 @@ public class PlayerCardManager : MonoBehaviour
             Destroy(card);
         }
     }
-    
-    /// <summary>
-    /// Verifica si una carta es válida para seleccionar según el contexto actual
-    /// </summary>
+
     private bool IsCardValid(CardDisplay display)
     {
         if (display == null || display.cardData == null) return false;
-        
-        // Sin cartas seleccionadas: todas son válidas
+
         if (selectedDisplays.Count == 0) return true;
-        
-        // Una carta seleccionada, sin operador: todas son válidas (puedes cambiar selección)
+
         if (selectedDisplays.Count == 1 && currentOperator == '\0') return true;
-        
-        // DOS cartas seleccionadas: operación completa, no se pueden seleccionar más
+
         if (selectedDisplays.Count >= 2) return false;
-        
-        // Una carta seleccionada CON operador
+
         if (selectedDisplays.Count == 1 && currentOperator != '\0')
         {
             var firstCard = selectedDisplays[0];
             int firstValue = firstCard.cardData.cardValue;
             int currentValue = display.cardData.cardValue;
-            
-            // Si es la misma carta, verificar auto-combinación Y que el resultado sea válido
+
             if (ReferenceEquals(display, firstCard))
             {
                 if (!allowSelfCombination) return false;
-                
-                // Validar que el resultado de usar la misma carta sea válido
+
                 if (currentOperator == '+')
                 {
                     int result = firstValue + firstValue;
@@ -731,56 +680,50 @@ public class PlayerCardManager : MonoBehaviour
                 }
                 else if (currentOperator == '-')
                 {
-                    // Carta consigo misma siempre da 0, que NO es válido (debe ser >0)
                     return false;
                 }
                 return false;
             }
-            
-            // Validar según operador para cartas diferentes
+
             if (currentOperator == '+')
             {
-                // Suma: resultado no puede superar 5
                 int result = firstValue + currentValue;
                 return result <= 5;
             }
             else if (currentOperator == '-')
             {
-                // Resta: resultado debe ser >0 y ≤5 (no permitir resultado 0)
                 int result = firstValue - currentValue;
-                return result > 0 && result <= 5; // Cambiado: >0 en vez de >=0
+                return result > 0 && result <= 5;
             }
         }
-        
-        // Dos cartas seleccionadas: no se pueden seleccionar más
+
         if (selectedDisplays.Count >= 2) return false;
-        
+
         return true;
     }
-    
-    /// <summary>
-    /// Verifica si un operador es válido según las cartas seleccionadas
-    /// </summary>
+
     private bool IsOperatorValid(char op)
     {
-        // Sin cartas: operador no válido
+        // ✅ MODIFICADO: Solo verificar si hay tutorial activo
+        if (TutorialManager.Instance != null && !TutorialManager.Instance.CanPlayOperation())
+        {
+            return false;
+        }
+
         if (selectedDisplays.Count == 0) return false;
-        
-        // Con una carta: verificar si hay alguna combinación válida posible
+
         if (selectedDisplays.Count == 1)
         {
             int firstValue = selectedDisplays[0].cardData.cardValue;
             var firstDisplay = selectedDisplays[0];
-            
+
             if (op == '+')
             {
-                // Para suma: ver si hay alguna carta que sumada no supere 5
                 foreach (var card in spawnedCards)
                 {
                     var display = card.GetComponent<CardDisplay>();
                     if (display != null && display.cardData != null)
                     {
-                        // Si es la misma carta, verificar auto-combinación
                         if (ReferenceEquals(display, firstDisplay))
                         {
                             if (allowSelfCombination)
@@ -788,66 +731,53 @@ public class PlayerCardManager : MonoBehaviour
                                 int selfResult = firstValue + firstValue;
                                 if (selfResult <= 5) return true;
                             }
-                            continue; // Si no permite auto-combo o el resultado es >5, continuar con otras cartas
+                            continue;
                         }
-                        
+
                         int result = firstValue + display.cardData.cardValue;
-                        if (result <= 5) return true; // Hay al menos una opción válida
+                        if (result <= 5) return true;
                     }
                 }
-                return false; // No hay opciones válidas
+                return false;
             }
             else if (op == '-')
             {
-                // Para resta: ver si hay alguna carta que restada dé resultado >0 y ≤5
                 foreach (var card in spawnedCards)
                 {
                     var display = card.GetComponent<CardDisplay>();
                     if (display != null && display.cardData != null)
                     {
-                        // Si es la misma carta, verificar auto-combinación (siempre da 0, NO válido)
                         if (ReferenceEquals(display, firstDisplay))
                         {
-                            // X - X = 0, que NO es válido (debe ser >0)
-                            continue; // Saltar esta opción
+                            continue;
                         }
-                        
+
                         int result = firstValue - display.cardData.cardValue;
-                        if (result > 0 && result <= 5) return true; // Hay al menos una opción válida (>0 y ≤5)
+                        if (result > 0 && result <= 5) return true;
                     }
                 }
-                return false; // No hay opciones válidas
+                return false;
             }
         }
-        
-        // Con dos cartas: operación completa, no se puede cambiar operador
+
         return false;
     }
-    
-    /// <summary>
-    /// Actualiza la visibilidad de las zonas de despliegue según el estado de selección
-    /// </summary>
+
     private void UpdateDeploymentZoneFeedback()
     {
         if (playableAreaUI == null) return;
-        
-        // Determinar si se pueden desplegar tropas:
-        // 1. Una carta seleccionada → puede desplegar carta simple
-        // 2. Dos cartas con operador → puede desplegar operación
+
         bool canDeploy = false;
-        
+
         if (selectedDisplays.Count == 1)
         {
-            // Una carta sola → siempre desplegable
             canDeploy = true;
         }
         else if (selectedDisplays.Count == 2 && currentOperator != '\0')
         {
-            // Operación completa → desplegable
             canDeploy = true;
         }
-        
-        // Mostrar u ocultar zonas
+
         if (canDeploy)
         {
             playableAreaUI.ShowDeploymentZones();
@@ -857,80 +787,63 @@ public class PlayerCardManager : MonoBehaviour
             playableAreaUI.HideDeploymentZones();
         }
     }
-    
-    /// <summary>
-    /// Actualiza el estado visual de todas las cartas y botones según el contexto
-    /// </summary>
+
     private void UpdateVisualFeedback()
     {
-        
-        // Actualizar feedback de zonas de despliegue
         UpdateDeploymentZoneFeedback();
-        
-        // ===== NUEVO: Actualizar preview de intelecto =====
+
         UpdateIntelectPreview();
-        
-        // Detectar si hay auto-combinación (misma carta seleccionada 2 veces)
+
         bool isAutoCombination = false;
         if (selectedDisplays.Count == 2 && ReferenceEquals(selectedDisplays[0], selectedDisplays[1]))
         {
             isAutoCombination = true;
         }
-        
-        // Actualizar estado visual de cada carta
+
         foreach (var cardObj in spawnedCards)
         {
             if (cardObj == null) continue;
-            
+
             var display = cardObj.GetComponent<CardDisplay>();
             if (display == null) continue;
-            
+
             bool isValid = IsCardValid(display);
             bool isSelected = selectedDisplays.Contains(display);
-            
+
             Image cardImage = display.GetComponent<Image>();
             if (cardImage != null)
             {
-                // CASO ESPECIAL: Carta seleccionada 2 veces (auto-combinación)
                 if (isAutoCombination && ReferenceEquals(display, selectedDisplays[0]))
                 {
-                    cardImage.color = doubleSelectedCardColor; // Color especial rosa/magenta
+                    cardImage.color = doubleSelectedCardColor;
                 }
-                // CASO ESPECIAL: Carta seleccionada pero bloqueada (ej: 2- y quieres seleccionar 2 otra vez)
                 else if (isSelected && !isValid && selectedDisplays.Count == 1 && currentOperator != '\0')
                 {
-                    // La carta está seleccionada, hay operador activo, pero no es válida para segunda selección
-                    cardImage.color = selectedButBlockedCardColor; // Color amarillo oscuro/grisáceo
+                    cardImage.color = selectedButBlockedCardColor;
                 }
-                // Caso normal: carta seleccionada
                 else if (isSelected)
                 {
                     cardImage.color = selectedCardColor;
                 }
-                // Carta válida pero no seleccionada
                 else if (isValid)
                 {
                     cardImage.color = validCardColor;
                 }
-                // Carta inválida
                 else
                 {
                     cardImage.color = invalidCardColor;
                 }
             }
         }
-        
-        // Actualizar botones de operación
+
         if (SumaButton != null)
         {
             bool sumaSelected = (currentOperator == '+');
             bool operationComplete = (selectedDisplays.Count >= 2);
-            
-            
+
             Image btnImage = SumaButton.GetComponent<Image>();
             if (btnImage != null)
             {
-                // Si está seleccionado, siempre usar color de selección
                 if (sumaSelected)
                 {
                     btnImage.color = selectedOperatorColor;
@@ -941,12 +854,9 @@ public class PlayerCardManager : MonoBehaviour
                     btnImage.color = sumaValid ? validOperatorColor : invalidOperatorColor;
                 }
             }
-            
-            // Cuando la operación está completa, el botón NO debe ser clickeable pero SÍ verse seleccionado
-            // Para evitar que Unity lo oscurezca automáticamente, lo dejamos interactable pero bloqueamos clicks
+
             if (operationComplete)
             {
-                // Mantener interactable para que no se oscurezca, pero no responderá a clicks (la lógica lo previene)
                 SumaButton.interactable = true;
             }
             else
@@ -955,16 +865,15 @@ public class PlayerCardManager : MonoBehaviour
                 SumaButton.interactable = sumaValid || sumaSelected;
             }
         }
-        
+
         if (RestaButton != null)
         {
             bool restaSelected = (currentOperator == '-');
             bool operationComplete = (selectedDisplays.Count >= 2);
-            
+
             Image btnImage = RestaButton.GetComponent<Image>();
             if (btnImage != null)
             {
-                // Si está seleccionado, siempre usar color de selección
                 if (restaSelected)
                 {
                     btnImage.color = selectedOperatorColor;
@@ -975,12 +884,9 @@ public class PlayerCardManager : MonoBehaviour
                     btnImage.color = restaValid ? validOperatorColor : invalidOperatorColor;
                 }
             }
-            
-            // Cuando la operación está completa, el botón NO debe ser clickeable pero SÍ verse seleccionado
-            // Para evitar que Unity lo oscurezca automáticamente, lo dejamos interactable pero bloqueamos clicks
+
             if (operationComplete)
             {
-                // Mantener interactable para que no se oscurezca, pero no responderá a clicks (la lógica lo previene)
                 RestaButton.interactable = true;
             }
             else
@@ -990,19 +896,14 @@ public class PlayerCardManager : MonoBehaviour
             }
         }
     }
-    
-    /// <summary>
-    /// Muestra feedback visual negativo cuando no hay suficiente intelecto
-    /// </summary>
+
     private void ShowInsufficientIntellectFeedback()
     {
-        // Shake en la barra de intelecto en vez de la cámara completa
         if (intelectBar != null)
         {
-            intelectBar.ShakeBar(); // Usa valores del Inspector
+            intelectBar.ShakeBar();
         }
-        
-        // Activar flash rojo de pantalla si está disponible
+
         if (ScreenFlashEffect.Instance != null)
         {
             ScreenFlashEffect.Instance.Flash();
@@ -1011,22 +912,16 @@ public class PlayerCardManager : MonoBehaviour
         {
             Debug.LogWarning("[PlayerCardManager] ScreenFlashEffect.Instance no encontrado");
         }
-        
     }
 
-    /// <summary>
-    /// Actualiza el preview de la barra de intelecto según la selección actual
-    /// </summary>
     private void UpdateIntelectPreview()
     {
         if (intelectBar == null) return;
-        
+
         int previewCost = 0;
-        
-        // Calcular el costo según lo seleccionado
+
         if (selectedDisplays.Count == 1)
         {
-            // Una carta sola
             var card = selectedDisplays[0].GetCardData();
             if (card != null)
             {
@@ -1035,14 +930,13 @@ public class PlayerCardManager : MonoBehaviour
         }
         else if (selectedDisplays.Count == 2 && currentOperator != '\0')
         {
-            // Operación completa: calcular el resultado
             var cardA = selectedDisplays[0].GetCardData();
             var cardB = selectedDisplays[1].GetCardData();
-            
+
             if (cardA != null && cardB != null)
             {
                 int result = 0;
-                
+
                 if (currentOperator == '+')
                 {
                     result = cardA.cardValue + cardB.cardValue;
@@ -1051,13 +945,11 @@ public class PlayerCardManager : MonoBehaviour
                 {
                     result = Mathf.Abs(cardA.cardValue - cardB.cardValue);
                 }
-                
-                // El costo es el resultado de la operación
+
                 previewCost = Mathf.Max(0, result);
             }
         }
-        
-        // Mostrar u ocultar preview según el costo
+
         if (previewCost > 0)
         {
             intelectBar.ShowPreview(previewCost);

@@ -2,11 +2,6 @@
 using UnityEngine.UI;
 using System.Collections.Generic;
 
-/// <summary>
-/// Gestor de powerups. Soporta configuraci�n desde inspector para cada powerup.
-/// - SlowTime: usa GameSpeedManager.ApplyTagSpeedMultiplier / RemoveTagSpeedMultiplier
-/// - Health: busca la torre objetivo v�a TowerManager y llama Heal(amount)
-/// </summary>
 public class PowerUpManager : MonoBehaviour
 {
     public static PowerUpManager Instance { get; private set; }
@@ -14,15 +9,14 @@ public class PowerUpManager : MonoBehaviour
     [System.Serializable]
     public class PowerUpData
     {
-        public string powerUpName;      // "SlowTime", "Health", etc.
-        public float duration = 0f;     // 0 = instant�neo
+        public string powerUpName;
+        public float duration = 0f;
         public float cooldownTime = 10f;
         public Button powerUpButton;
         public Image cooldownFillImage;
 
-        // Opciones espec�ficas por powerup:
         [Header("SlowTime settings")]
-        [Tooltip("Tag objetivo que ser� afectado por SlowTime (ej: 'AITeam')")]
+        [Tooltip("Tag objetivo que será afectado por SlowTime (ej: 'AITeam')")]
         public string targetTeam = "AITeam";
         [Tooltip("Multiplicador aplicado durante el SlowTime. 0.3 = 30% de velocidad")]
         public float slowMultiplier = 0.3f;
@@ -30,13 +24,16 @@ public class PowerUpManager : MonoBehaviour
         [Header("Health settings")]
         [Tooltip("Cantidad de vida a restaurar para powerup Health")]
         public int healAmount = 3;
-        [Tooltip("Equipo cuyo TowerHealthBar se curar� (ej: 'PlayerTeam' o 'AITeam')")]
+        [Tooltip("Equipo cuyo TowerHealthBar se curará (ej: 'PlayerTeam' o 'AITeam')")]
         public string healTargetTeam = "PlayerTeam";
 
         [HideInInspector] public bool isOnCooldown;
         [HideInInspector] public float cooldownTimer;
         [HideInInspector] public bool isActive;
         [HideInInspector] public float durationTimer;
+
+        // ✅ NUEVO: Control de bloqueo por tutorial
+        [HideInInspector] public bool isBlockedByTutorial = false;
     }
 
     [Header("Power-Up Configuration")]
@@ -46,7 +43,10 @@ public class PowerUpManager : MonoBehaviour
     [SerializeField] private Color availableColor = Color.white;
     [SerializeField] private Color cooldownColor = Color.gray;
     [SerializeField] private Color activeColor = Color.green;
-    
+
+    // ✅ NUEVO: Color para powerups bloqueados por tutorial
+    [SerializeField] private Color blockedByTutorialColor = new Color(0.3f, 0.3f, 0.3f, 0.5f);
+
     [Header("Screen Flash Effects")]
     [Tooltip("Color del flash para healing (verde)")]
     [SerializeField] private Color healingFlashColor = new Color(0f, 1f, 0f, 0.4f);
@@ -71,29 +71,23 @@ public class PowerUpManager : MonoBehaviour
         UpdateCooldowns();
         UpdateActiveDurationTimers();
     }
-    
-    /// <summary>
-    /// Actualiza los temporizadores de duración de powerups activos y muestra UI
-    /// </summary>
+
     private void UpdateActiveDurationTimers()
     {
         foreach (var p in powerUps)
         {
             if (p.isActive && p.duration > 0f && p.powerUpButton != null)
             {
-                // Buscar o crear el componente PowerUpDurationUI
                 PowerUpDurationUI durationUI = p.powerUpButton.GetComponent<PowerUpDurationUI>();
                 if (durationUI == null)
                 {
                     durationUI = p.powerUpButton.gameObject.AddComponent<PowerUpDurationUI>();
                 }
-                
-                // Actualizar el temporizador
+
                 durationUI.UpdateTimer(p.durationTimer);
             }
             else if (p.powerUpButton != null)
             {
-                // Ocultar el temporizador cuando no está activo
                 PowerUpDurationUI durationUI = p.powerUpButton.GetComponent<PowerUpDurationUI>();
                 if (durationUI != null)
                 {
@@ -112,12 +106,24 @@ public class PowerUpManager : MonoBehaviour
                 string nameCopy = p.powerUpName;
                 p.powerUpButton.onClick.AddListener(() => ActivatePowerUp(nameCopy));
 
-                // Asegurar que el botón tenga el componente de hover
                 if (p.powerUpButton.GetComponent<PowerUpButtonHover>() == null)
                 {
                     p.powerUpButton.gameObject.AddComponent<PowerUpButtonHover>();
                 }
             }
+            
+            // ✅ MODIFICADO: Solo bloquear si hay tutorial activo
+            if (TutorialManager.Instance != null)
+            {
+                p.isBlockedByTutorial = true;
+                Debug.Log($"[PowerUpManager] PowerUp '{p.powerUpName}' bloqueado (tutorial detectado)");
+            }
+            else
+            {
+                p.isBlockedByTutorial = false;
+                Debug.Log($"[PowerUpManager] PowerUp '{p.powerUpName}' disponible (sin tutorial)");
+            }
+            
             UpdatePowerUpUI(p);
         }
     }
@@ -133,8 +139,8 @@ public class PowerUpManager : MonoBehaviour
                 {
                     p.isOnCooldown = false;
                     p.cooldownTimer = 0f;
-                    UpdatePowerUpUI(p); // Forzar update inmediato al terminar cooldown
-                    continue; // Saltar el update extra abajo
+                    UpdatePowerUpUI(p);
+                    continue;
                 }
                 UpdatePowerUpUI(p);
             }
@@ -145,13 +151,11 @@ public class PowerUpManager : MonoBehaviour
                 if (p.durationTimer <= 0f)
                 {
                     p.isActive = false;
-                    // Desactivar efectos espec�ficos
                     switch (p.powerUpName)
                     {
                         case "SlowTime":
                             DeactivateSlowTimePowerUp(p);
                             break;
-                            // otros con duraci�n aqu�...
                     }
                     StartCooldown(p);
                     UpdatePowerUpUI(p);
@@ -173,12 +177,41 @@ public class PowerUpManager : MonoBehaviour
             return;
         }
 
+        // ✅ NUEVO: Solo verificar bloqueo si hay un tutorial activo
+        if (TutorialManager.Instance != null && p.isBlockedByTutorial)
+        {
+            Debug.LogWarning($"[Tutorial] ⛔ PowerUp '{powerUpName}' bloqueado por tutorial");
+            
+            if (ScreenFlashEffect.Instance != null)
+            {
+                ScreenFlashEffect.Instance.Flash();
+            }
+            
+            if (p.powerUpButton != null)
+            {
+                StartCoroutine(ShakeButton(p.powerUpButton.GetComponent<RectTransform>()));
+            }
+            
+            return;
+        }
+
         if (p.isOnCooldown || p.isActive)
         {
             return;
         }
 
-        // Ejecutar efecto
+        // ✅ MODIFICADO: Segunda verificación solo si hay tutorial
+        if (TutorialManager.Instance != null && !TutorialManager.Instance.IsPowerUpAllowed(powerUpName))
+        {
+            Debug.LogWarning($"[Tutorial] ⛔ PowerUp '{powerUpName}' no permitido en este paso");
+            
+            if (ScreenFlashEffect.Instance != null)
+            {
+                ScreenFlashEffect.Instance.Flash();
+            }
+            return;
+        }
+
         switch (powerUpName)
         {
             case "SlowTime":
@@ -192,11 +225,9 @@ public class PowerUpManager : MonoBehaviour
                 return;
         }
 
-        // Marcar activo y temporizador de duración
         p.isActive = true;
         p.durationTimer = p.duration;
 
-        // Si es instantáneo, iniciar cooldown y desactivar inmediatamente
         if (p.duration <= 0f)
         {
             StartCooldown(p);
@@ -204,8 +235,7 @@ public class PowerUpManager : MonoBehaviour
         }
 
         UpdatePowerUpUI(p);
-        
-        // === NOTIFICAR AL TUTORIAL ===
+
         if (TutorialManager.Instance != null)
         {
             TutorialManager.Instance.OnPowerUpActivated(powerUpName);
@@ -222,29 +252,106 @@ public class PowerUpManager : MonoBehaviour
     {
         if (p.powerUpButton == null) return;
 
+        // ✅ MODIFICADO: Prioridad al bloqueo por tutorial
+        if (p.isBlockedByTutorial)
+        {
+            p.powerUpButton.interactable = false;
+
+            ColorBlock colors = p.powerUpButton.colors;
+            colors.normalColor = blockedByTutorialColor;
+            colors.disabledColor = blockedByTutorialColor;
+            p.powerUpButton.colors = colors;
+
+            // Ocultar fill durante bloqueo
+            if (p.cooldownFillImage != null)
+            {
+                p.cooldownFillImage.fillAmount = 0f;
+            }
+
+            return;
+        }
+
+        // Lógica normal si NO está bloqueado
         p.powerUpButton.interactable = !p.isOnCooldown && !p.isActive;
 
-        ColorBlock colors = p.powerUpButton.colors;
-        if (p.isActive) colors.normalColor = activeColor;
-        else if (p.isOnCooldown) colors.normalColor = cooldownColor;
-        else colors.normalColor = availableColor;
-        p.powerUpButton.colors = colors;
+        ColorBlock normalColors = p.powerUpButton.colors;
+        if (p.isActive)
+            normalColors.normalColor = activeColor;
+        else if (p.isOnCooldown)
+            normalColors.normalColor = cooldownColor;
+        else
+            normalColors.normalColor = availableColor;
 
-        // Actualizar fill del cooldown
+        p.powerUpButton.colors = normalColors;
+
         if (p.cooldownFillImage != null)
         {
             if (p.isOnCooldown && p.cooldownTime > 0f)
             {
-                // Durante cooldown: el fill va de 1 (recién usado) a 0 (listo)
                 float fillProgress = p.cooldownTimer / p.cooldownTime;
                 p.cooldownFillImage.fillAmount = fillProgress;
             }
             else
             {
-                // Cuando está disponible (sin usar), el fill está vacío
                 p.cooldownFillImage.fillAmount = 0f;
             }
         }
+    }
+
+    // ✅ NUEVO: Efecto de shake para botones bloqueados
+    private System.Collections.IEnumerator ShakeButton(RectTransform buttonRect)
+    {
+        if (buttonRect == null) yield break;
+
+        Vector3 originalPos = buttonRect.anchoredPosition;
+        float duration = 0.3f;
+        float magnitude = 10f;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            float x = Random.Range(-1f, 1f) * magnitude;
+            float y = Random.Range(-1f, 1f) * magnitude;
+
+            buttonRect.anchoredPosition = originalPos + new Vector3(x, y, 0f);
+
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        buttonRect.anchoredPosition = originalPos;
+    }
+
+    // ✅ NUEVO: Métodos públicos para controlar el bloqueo desde el tutorial
+    public void SetPowerUpBlocked(string powerUpName, bool blocked)
+    {
+        PowerUpData p = powerUps.Find(x => x.powerUpName == powerUpName);
+        if (p != null)
+        {
+            p.isBlockedByTutorial = blocked;
+            UpdatePowerUpUI(p);
+            Debug.Log($"[PowerUpManager] PowerUp '{powerUpName}' bloqueado: {blocked}");
+        }
+    }
+
+    public void BlockAllPowerUps()
+    {
+        foreach (var p in powerUps)
+        {
+            p.isBlockedByTutorial = true;
+            UpdatePowerUpUI(p);
+        }
+        Debug.Log("[PowerUpManager] 🔒 Todos los powerups bloqueados");
+    }
+
+    public void UnblockAllPowerUps()
+    {
+        foreach (var p in powerUps)
+        {
+            p.isBlockedByTutorial = false;
+            UpdatePowerUpUI(p);
+        }
+        Debug.Log("[PowerUpManager] 🔓 Todos los powerups desbloqueados");
     }
 
     #region PowerUp Implementations
@@ -264,74 +371,22 @@ public class PowerUpManager : MonoBehaviour
 
         int affected = GameSpeedManager.Instance.ApplyTagSpeedMultiplier(p.targetTeam, p.slowMultiplier);
 
-        // Filtro azul constante durante toda la duración del powerup
         if (ScreenFlashEffect.Instance != null && p.duration > 0f)
         {
             ScreenFlashEffect.Instance.SetPersistentFilter(slowTimeFlashColor, p.duration);
         }
         else if (ScreenFlashEffect.Instance != null)
         {
-            // Si es instantáneo, un solo flash breve
             ScreenFlashEffect.Instance.Flash(slowTimeFlashColor, flashDuration);
         }
 
-        // Si la duración es 0 (instantáneo), programamos la restauración inmediata
         if (p.duration <= 0f)
         {
-            // Desactivar inmediatamente
             DeactivateSlowTimePowerUp(p);
             StartCooldown(p);
             p.isActive = false;
             UpdatePowerUpUI(p);
         }
-    }
-    
-    /// <summary>
-    /// Corrutina para mantener un filtro de color constante durante toda la duración del powerup
-    /// </summary>
-    private System.Collections.IEnumerator ConstantFilterCoroutine(Color filterColor, float duration)
-    {
-        if (ScreenFlashEffect.Instance == null || ScreenFlashEffect.Instance.flashImage == null) 
-            yield break;
-        
-        Image flashImage = ScreenFlashEffect.Instance.flashImage;
-        
-        // Fade in rápido al color del filtro
-        float fadeInTime = 0.2f;
-        float elapsed = 0f;
-        
-        while (elapsed < fadeInTime)
-        {
-            elapsed += Time.deltaTime;
-            float alpha = Mathf.Lerp(0, filterColor.a, elapsed / fadeInTime);
-            Color c = filterColor;
-            c.a = alpha;
-            flashImage.color = c;
-            yield return null;
-        }
-        
-        // Mantener el filtro constante
-        flashImage.color = filterColor;
-        yield return new WaitForSeconds(duration - fadeInTime - 0.3f);
-        
-        // Fade out al final
-        float fadeOutTime = 0.3f;
-        elapsed = 0f;
-        
-        while (elapsed < fadeOutTime)
-        {
-            elapsed += Time.deltaTime;
-            float alpha = Mathf.Lerp(filterColor.a, 0, elapsed / fadeOutTime);
-            Color c = filterColor;
-            c.a = alpha;
-            flashImage.color = c;
-            yield return null;
-        }
-        
-        // Asegurarse de que quede invisible
-        Color finalColor = filterColor;
-        finalColor.a = 0;
-        flashImage.color = finalColor;
     }
 
     private void DeactivateSlowTimePowerUp(PowerUpData p)
@@ -351,15 +406,13 @@ public class PowerUpManager : MonoBehaviour
         {
             AudioManager.Instance.PlayHealPowerUpSFX();
         }
-        
-        // Preferimos TowerManager
+
         TowerHealthBar target = null;
         if (TowerManager.Instance != null)
         {
             target = TowerManager.Instance.GetTowerByTeam(p.healTargetTeam);
         }
 
-        // Fallback: buscar la primera TowerHealthBar con ese teamTag en escena
         if (target == null)
         {
             TowerHealthBar[] bars = FindObjectsByType<TowerHealthBar>(FindObjectsSortMode.None);
@@ -375,19 +428,17 @@ public class PowerUpManager : MonoBehaviour
 
         if (target == null)
         {
-            Debug.LogWarning($"ActivateHealthPowerUp: No se encontr� TowerHealthBar para team '{p.healTargetTeam}'");
+            Debug.LogWarning($"ActivateHealthPowerUp: No se encontró TowerHealthBar para team '{p.healTargetTeam}'");
             return;
         }
 
         target.Heal(p.healAmount);
 
-        // Flash verde para healing
         if (ScreenFlashEffect.Instance != null)
         {
             ScreenFlashEffect.Instance.Flash(healingFlashColor, flashDuration);
         }
 
-        // si duration == 0, lo consideramos instantáneo y lanzamos cooldown
         if (p.duration <= 0f)
         {
             StartCooldown(p);
@@ -398,11 +449,10 @@ public class PowerUpManager : MonoBehaviour
 
     #endregion
 
-    // M�todos p�blicos/�tiles
     public bool IsPowerUpAvailable(string powerUpName)
     {
         PowerUpData p = powerUps.Find(x => x.powerUpName == powerUpName);
-        return p != null && !p.isOnCooldown && !p.isActive;
+        return p != null && !p.isOnCooldown && !p.isActive && !p.isBlockedByTutorial;
     }
 
     public float GetCooldownProgress(string powerUpName)
@@ -425,20 +475,16 @@ public class PowerUpManager : MonoBehaviour
         {
             if (p.isActive)
             {
-                // Detener efectos específicos según el tipo de powerup
                 switch (p.powerUpName)
                 {
                     case "SlowTime":
                         DeactivateSlowTimePowerUp(p);
                         break;
-                        // Agregar casos para otros powerups con efectos persistentes
                 }
 
-                // Resetear estado del powerup
                 p.isActive = false;
                 p.durationTimer = 0f;
 
-                // Ocultar el temporizador de duración en UI
                 if (p.powerUpButton != null)
                 {
                     PowerUpDurationUI durationUI = p.powerUpButton.GetComponent<PowerUpDurationUI>();
@@ -448,12 +494,10 @@ public class PowerUpManager : MonoBehaviour
                     }
                 }
 
-                // Actualizar UI
                 UpdatePowerUpUI(p);
             }
         }
 
-        // Detener todos los filtros visuales persistentes
         if (ScreenFlashEffect.Instance != null)
         {
             ScreenFlashEffect.Instance.ClearPersistentFilter();

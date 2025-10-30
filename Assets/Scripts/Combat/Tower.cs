@@ -151,29 +151,6 @@ public class Tower : MonoBehaviour
         }
     }
 
-    private IEnumerator DefeatSequence()
-    {
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlayTowerDestroyed();
-        }
-
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.DisableGameplay();
-            GameManager.Instance.FreezeAllTroops();
-        }
-
-        if (fractureObject != null)
-        {
-            fractureObject.Explode();
-        }
-
-        yield return new WaitForSeconds(explosionDelay);
-
-        SceneBridge.LoadLoseScene();
-    }
-
     private IEnumerator VictorySequence()
     {
         if (AudioManager.Instance != null)
@@ -192,8 +169,49 @@ public class Tower : MonoBehaviour
             fractureObject.Explode();
         }
 
+        // ✅ NUEVO: Verificar si hay un tutorial activo
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialInProgress())
+        {
+            Debug.Log("[Tower] 🎓 Tutorial activo detectado. El tutorial manejará el cambio de escena.");
+            // No hacer nada más, el tutorial se encargará del cambio de escena
+            yield break;
+        }
+
+        // ✅ Solo llegar aquí si NO hay tutorial activo
         yield return new WaitForSeconds(explosionDelay);
 
         SceneBridge.LoadWinScene();
+    }
+
+    private IEnumerator DefeatSequence()
+    {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayTowerDestroyed();
+        }
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.DisableGameplay();
+            GameManager.Instance.FreezeAllTroops();
+        }
+
+        if (fractureObject != null)
+        {
+            fractureObject.Explode();
+        }
+
+        // ✅ NUEVO: Verificar si hay un tutorial activo
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialInProgress())
+        {
+            Debug.Log("[Tower] 🎓 Tutorial activo detectado. El tutorial manejará el cambio de escena.");
+            // No hacer nada más, el tutorial se encargará del cambio de escena
+            yield break;
+        }
+
+        // ✅ Solo llegar aquí si NO hay tutorial activo
+        yield return new WaitForSeconds(explosionDelay);
+
+        SceneBridge.LoadLoseScene();
     }
 }

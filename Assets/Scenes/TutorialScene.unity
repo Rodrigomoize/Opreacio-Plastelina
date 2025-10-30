@@ -2059,6 +2059,7 @@ MonoBehaviour:
     cooldownTimer: 0
     isActive: 0
     durationTimer: 0
+    isBlockedByTutorial: 0
   - powerUpName: Health
     duration: 0
     cooldownTime: 35
@@ -2072,9 +2073,11 @@ MonoBehaviour:
     cooldownTimer: 0
     isActive: 0
     durationTimer: 0
+    isBlockedByTutorial: 0
   availableColor: {r: 1, g: 1, b: 1, a: 1}
   cooldownColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   activeColor: {r: 0, g: 1, b: 0, a: 1}
+  blockedByTutorialColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   healingFlashColor: {r: 0, g: 1, b: 0, a: 0.4}
   slowTimeFlashColor: {r: 0, g: 0.5, b: 1, a: 0.3}
   flashDuration: 0.5
@@ -5541,8 +5544,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 85.50116, y: -92.82253}
-  m_SizeDelta: {x: 68.57893, y: 66.4932}
+  m_AnchoredPosition: {x: 84.4, y: -81}
+  m_SizeDelta: {x: 79.23445, y: 68.46136}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1342649114
 MonoBehaviour:
@@ -6825,6 +6828,7 @@ MonoBehaviour:
   aiTower: {fileID: 1188949411}
   aiController: {fileID: 1556190452}
   playableAreaUI: {fileID: 1035249387}
+  gameTimer: {fileID: 104346808}
   tutorialPanel: {fileID: 1443187162}
   characterImage: {fileID: 644121548}
   speechBubble: {fileID: 71266143}
@@ -6850,6 +6854,9 @@ MonoBehaviour:
   highlightRect: {fileID: 0}
   intelectBarFillImage: {fileID: 172906825}
   restrictToLeftZone: 0
+  allowOnlySingleCards: 0
+  allowOnlyOperations: 0
+  allowedPowerUps: []
 --- !u!1 &1753038880
 GameObject:
   m_ObjectHideFlags: 0
