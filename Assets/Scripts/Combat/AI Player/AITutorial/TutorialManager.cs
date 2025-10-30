@@ -700,8 +700,8 @@ public class TutorialManager : MonoBehaviour
 
         yield return new WaitForSeconds(1f);
 
-        BlockPlayer();
         ShowDialog("CADA CARTA TÉ UN COST D'ENERGIA", showImage: true, contextSprite: intelectCost);
+        PauseGame();
 
         if (intelectBarFillImage != null)
         {
@@ -713,6 +713,9 @@ public class TutorialManager : MonoBehaviour
             HighlightElement(playerIntelect.intelectSlider.GetComponent<RectTransform>());
             StartHighlightEffect(playerIntelect.intelectSlider.gameObject);
         }
+
+        // ✅ Mostrar cartas bloqueadas durante la explicación
+        UpdateTutorialVisualFeedback();
 
         yield return StartCoroutine(ShowContinueButtonAfterDelay(4f));
 
@@ -784,9 +787,10 @@ public class TutorialManager : MonoBehaviour
         yield return new WaitForSeconds(2f);
 
         PauseGame();
+        BlockPlayer(); // ✅ Bloquear jugador para mostrar cartas bloqueadas
 
         ShowDialog("MOLT BÉ, HAS GUANYAT + 1 D'ENERGIA!", showImage: true, contextSprite: intelectBarIcon);
-        BlockPlayer();
+        
         if (intelectBarFillImage != null)
         {
             StartHighlightEffect(intelectBarFillImage.gameObject);
@@ -797,6 +801,9 @@ public class TutorialManager : MonoBehaviour
             HighlightElement(playerIntelect.intelectSlider.GetComponent<RectTransform>());
             StartHighlightEffect(playerIntelect.intelectSlider.gameObject);
         }
+
+        // ✅ Mostrar cartas bloqueadas durante la explicación
+        UpdateTutorialVisualFeedback();
 
         yield return StartCoroutine(ShowContinueButtonAfterDelay(4f));
 
@@ -940,6 +947,7 @@ public class TutorialManager : MonoBehaviour
         }
 
         PauseGame();
+        BlockPlayer(); // ✅ Asegurar que está bloqueado
 
         ShowDialog("OH NO, CURA'T!", showImage: true, contextSprite: healthPowerUpSprite);
 
@@ -956,6 +964,9 @@ public class TutorialManager : MonoBehaviour
             HighlightElement(healPowerUp.GetComponent<RectTransform>());
             StartHighlightEffect(healPowerUp.gameObject);
         }
+
+        // ✅ Mostrar cartas bloqueadas durante la explicación
+        UpdateTutorialVisualFeedback();
 
         UnblockPlayerForPowerUps();
 
@@ -1003,13 +1014,15 @@ public class TutorialManager : MonoBehaviour
         var card1B = cardManager.GetCardByIndex(0);
         Vector3 spawnPos = aiSpawnPoint.position;
         CardManager.GenerateResult result;
-        cardManager.GenerateCombinedCharacter(card1A, card1B, spawnPos, 2, '+', "AITeam", out result, aiIntelect);
 
-        // ⏸️ PAUSAR INMEDIATAMENTE después de generar el ataque
+        // ✅ Generar el personaje combinado
+        bool success = cardManager.GenerateCombinedCharacter(card1A, card1B, spawnPos, 2, '+', "AITeam", out result, aiIntelect);
+
         yield return new WaitForSeconds(2.5f);
-
+        // ⏸️ PAUSAR INMEDIATAMENTE después de generar
         BlockPlayer();
         PauseGame();
+        Debug.Log("[Tutorial] ⏸️ Paso 7: Juego PAUSADO inmediatamente");
 
         // Primera pausa: Usar SlowTime
         ShowDialog("FES QUE VAGIN MÉS LENTS!", showImage: true, contextSprite: slowTimePowerUpSprite);
@@ -1028,12 +1041,18 @@ public class TutorialManager : MonoBehaviour
             StartHighlightEffect(slowPowerUp.gameObject);
         }
 
+        // ✅ Mostrar cartas bloqueadas durante la explicación
+        UpdateTutorialVisualFeedback();
+
+        // ⏸️ MANTENER PAUSADO - solo desbloquear los powerups
         UnblockPlayerForPowerUps();
-        ResumeGame();
 
         waitingForPlayerAction = true;
 
         yield return new WaitUntil(() => !waitingForPlayerAction);
+
+        // Después de usar SlowTime, reanudar el juego
+        ResumeGame();
 
         if (PowerUpManager.Instance != null)
         {
@@ -1051,7 +1070,14 @@ public class TutorialManager : MonoBehaviour
 
         yield return StartCoroutine(HidePopupWithAnimation());
 
-        yield return new WaitForSeconds(2f);
+        // ✅ VER 1 SEGUNDO CÓMO VA MÁS LENTO (gameplay activo)
+        Debug.Log("[Tutorial] ⏱️ Mostrando efecto SlowTime durante 1 segundo...");
+        yield return new WaitForSeconds(1f);
+
+        // ✅ VOLVER A PAUSAR después de ver el efecto
+        BlockPlayer();
+        PauseGame();
+        Debug.Log("[Tutorial] ⏸️ Juego pausado después de ver SlowTime");
 
         // Aplicar boost al jugador
         if (GameSpeedManager.Instance != null)
@@ -1071,10 +1097,9 @@ public class TutorialManager : MonoBehaviour
         allowedSpecificCardValue = 2;
 
         // Segunda pausa: Explicar defensa con carta 2
-        BlockPlayer();
-        PauseGame();
-
         ShowDialog("PRIMER, DEFENSA'T AMB EL 2!", showImage: true, contextSprite: card2Sprite);
+
+        // ✅ ESPERAR MIENTRAS ESTÁ PAUSADO antes de ocultar el popup
         yield return new WaitForSeconds(3f);
         yield return StartCoroutine(HidePopupWithAnimation());
 
@@ -1095,6 +1120,7 @@ public class TutorialManager : MonoBehaviour
 
         UpdateTutorialVisualFeedback();
 
+        // ✅ AHORA desbloquear y reanudar SIN resetear velocidad
         UnblockPlayer();
         ResumeGameWithoutResetSpeed();
 
