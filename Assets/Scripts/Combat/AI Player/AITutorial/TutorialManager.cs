@@ -70,6 +70,12 @@ public class TutorialManager : MonoBehaviour
     [Tooltip("Componente Image del fillScaler para highlight de intelecto")]
     public Image intelectBarFillImage;
 
+    [Header("Tutorial - Visual Feedback")]
+    [Tooltip("Color para elementos bloqueados por el tutorial")]
+    public Color tutorialBlockedColor = new Color(0.3f, 0.3f, 0.3f, 0.5f);
+    [Tooltip("Color para elementos permitidos en el tutorial")]
+    public Color tutorialAllowedColor = Color.white;
+
     [Header("Tutorial - Restricción de Despliegue")]
     [Tooltip("Si true, solo permite desplegar en la zona izquierda durante el tutorial")]
     public bool restrictToLeftZone = false;
@@ -86,6 +92,9 @@ public class TutorialManager : MonoBehaviour
 
     [Tooltip("Si es mayor que 0, solo permite ese número de acciones antes de bloquear")]
     private int allowedActionsRemaining = -1;
+
+    [Tooltip("Si es >= 1, solo permite jugar esta carta específica (bloquea las demás)")]
+    private int allowedSpecificCardValue = -1;
 
     private int currentStep = 0;
     private bool waitingForPlayerAction = false;
@@ -118,7 +127,6 @@ public class TutorialManager : MonoBehaviour
     private RectTransform optionalImageAttackRect;
     private RectTransform optionalImageDefenseRect;
 
-    // ✅ NUEVO: Variables para trackear las acciones en el paso 7
     private bool step7_hasDefended = false;
     private bool step7_hasAttacked = false;
 
@@ -211,6 +219,11 @@ public class TutorialManager : MonoBehaviour
         }
 
         AnimatePopupScale();
+        
+        if (!isPlayerBlocked)
+        {
+            UpdateTutorialVisualFeedback();
+        }
     }
 
     void OnDestroy()
@@ -218,6 +231,136 @@ public class TutorialManager : MonoBehaviour
         if (continueButton != null)
         {
             continueButton.onClick.RemoveListener(OnContinueButtonClicked);
+        }
+    }
+
+    private void UpdateTutorialVisualFeedback()
+    {
+        if (playerCardManager == null) return;
+
+        foreach (Transform slot in playerCardManager.cardSlots)
+        {
+            if (slot.childCount == 0) continue;
+
+            CardDisplay display = slot.GetComponentInChildren<CardDisplay>();
+            if (display == null || display.cardData == null) continue;
+
+            TutorialHighlight highlight = display.GetComponent<TutorialHighlight>();
+            bool hasActiveHighlight = (highlight != null && highlight.enabled);
+
+            if (hasActiveHighlight) continue;
+
+            Image cardImage = display.GetComponent<Image>();
+            if (cardImage == null) continue;
+
+            int cardValue = display.cardData.cardValue;
+
+            bool isCardAllowed = IsSpecificCardAllowed(cardValue);
+
+            if (!isCardAllowed)
+            {
+                ApplyTutorialBlockedTint(cardImage);
+            }
+            else if (!CanPlaySingleCard())
+            {
+                ApplyTutorialBlockedTint(cardImage);
+            }
+            else if (allowedActionsRemaining == 0)
+            {
+                ApplyTutorialBlockedTint(cardImage);
+            }
+        }
+
+        UpdateOperatorButtonFeedback();
+    }
+
+    private bool IsSpecificCardAllowed(int cardValue)
+    {
+        if (allowedSpecificCardValue < 1) return true;
+
+        return cardValue == allowedSpecificCardValue;
+    }
+
+    private void UpdateOperatorButtonFeedback()
+    {
+        if (playerCardManager == null) return;
+
+        bool operationsAllowed = CanPlayOperation();
+
+        if (playerCardManager.SumaButton != null)
+        {
+            Image sumaImage = playerCardManager.SumaButton.GetComponent<Image>();
+            if (sumaImage != null)
+            {
+                if (!operationsAllowed && allowOnlySingleCards)
+                {
+                    sumaImage.color = tutorialBlockedColor;
+                    playerCardManager.SumaButton.interactable = false;
+                }
+            }
+        }
+
+        if (playerCardManager.RestaButton != null)
+        {
+            Image restaImage = playerCardManager.RestaButton.GetComponent<Image>();
+            if (restaImage != null)
+            {
+                if (!operationsAllowed && allowOnlySingleCards)
+                {
+                    restaImage.color = tutorialBlockedColor;
+                    playerCardManager.RestaButton.interactable = false;
+                }
+            }
+        }
+    }
+
+    private void ApplyTutorialBlockedTint(Image image)
+    {
+        if (image == null) return;
+
+        Color currentColor = image.color;
+        image.color = Color.Lerp(currentColor, tutorialBlockedColor, 0.7f);
+    }
+
+    private void RestoreTutorialVisualFeedback()
+    {
+        if (playerCardManager == null) return;
+
+        foreach (Transform slot in playerCardManager.cardSlots)
+        {
+            if (slot.childCount == 0) continue;
+
+            CardDisplay display = slot.GetComponentInChildren<CardDisplay>();
+            if (display == null) continue;
+
+            TutorialHighlight highlight = display.GetComponent<TutorialHighlight>();
+            bool hasActiveHighlight = (highlight != null && highlight.enabled);
+
+            if (hasActiveHighlight) continue;
+
+            Image cardImage = display.GetComponent<Image>();
+            if (cardImage != null)
+            {
+                cardImage.color = playerCardManager.validCardColor;
+            }
+        }
+
+        if (playerCardManager.SumaButton != null)
+        {
+            Image sumaImage = playerCardManager.SumaButton.GetComponent<Image>();
+            if (sumaImage != null)
+            {
+                sumaImage.color = playerCardManager.validOperatorColor;
+            }
+        }
+
+        if (playerCardManager.RestaButton != null)
+        {
+            Image restaImage = playerCardManager.RestaButton.GetComponent<Image>();
+            if (restaImage != null)
+            {
+                restaImage.color = playerCardManager.validOperatorColor;
+            }
         }
     }
 
@@ -479,11 +622,19 @@ public class TutorialManager : MonoBehaviour
     {
         currentStep = 2;
 
+        // Configurar restricciones ANTES de mostrar UI
         allowOnlySingleCards = true;
         allowOnlyOperations = false;
         allowedActionsRemaining = 1;
+        allowedSpecificCardValue = 5;
+        restrictToLeftZone = true;
+        
+        Debug.Log("[Tutorial] 🛡️ Paso 2: Solo carta 5 permitida, zona izquierda");
 
         yield return new WaitForSeconds(2.7f);
+
+        BlockPlayer();
+        PauseGame();
 
         UpdatePopupContent("¡DEFENSA-HO AMB EL RESULTAT!", showImage: true, contextSprite: card5Sprite);
 
@@ -500,12 +651,14 @@ public class TutorialManager : MonoBehaviour
             }
         }
 
-        restrictToLeftZone = true;
+        UpdateTutorialVisualFeedback();
 
         UnblockPlayer();
+        ResumeGame();
 
         waitingForPlayerAction = true;
 
+        // Mostrar el mensaje por 5 segundos o hasta que actúe
         float elapsed = 0f;
         float timeout = 5f;
 
@@ -515,19 +668,30 @@ public class TutorialManager : MonoBehaviour
             yield return null;
         }
 
+        // Ocultar el popup si aún está visible después de 5 segundos
         if (waitingForPlayerAction)
         {
             yield return StartCoroutine(HidePopupWithAnimation());
         }
 
+        // ESPERAR hasta que el jugador juegue la carta 5
         yield return new WaitUntil(() => !waitingForPlayerAction);
 
+        Debug.Log("[Tutorial] ✅ Paso 2: Carta 5 jugada - Continuando");
+
+        // PAUSAR inmediatamente después de jugar la carta
         yield return new WaitForSeconds(0.1f);
+        
+        BlockPlayer();
         PauseGame();
 
+        // Limpiar restricciones
         restrictToLeftZone = false;
         allowOnlySingleCards = false;
         allowedActionsRemaining = -1;
+        allowedSpecificCardValue = -1;
+        
+        Debug.Log("[Tutorial] 🔓 Paso 2 completado - Restricciones desactivadas");
 
         if (playerCardManager.cardSlots.Count > 4)
         {
@@ -542,13 +706,9 @@ public class TutorialManager : MonoBehaviour
         ClearHighlight();
         HideOptionalImage();
 
-        BlockPlayer();
-
         yield return new WaitForSeconds(1f);
 
         ShowDialog("CADA CARTA TÉ UN COST D'ENERGIA", showImage: true, contextSprite: intelectCost);
-        BlockPlayer();
-        PauseGame();
 
         if (intelectBarFillImage != null)
         {
@@ -841,11 +1001,11 @@ public class TutorialManager : MonoBehaviour
         ResumeGame();
     }
 
-    // ✅ CORREGIDO: Paso 7 con restricción de zona izquierda para defensa
     private IEnumerator Tutorial_SlowTimePowerUp()
     {
         currentStep = 7;
 
+        // Generar ataque enemigo
         var card1A = cardManager.GetCardByIndex(0);
         var card1B = cardManager.GetCardByIndex(0);
         Vector3 spawnPos = aiSpawnPoint.position;
@@ -854,6 +1014,8 @@ public class TutorialManager : MonoBehaviour
 
         yield return new WaitForSeconds(2.5f);
 
+        // Primera pausa: Usar SlowTime
+        BlockPlayer();
         PauseGame();
 
         ShowDialog("FES QUE VAGIN MÉS LENTS!", showImage: true, contextSprite: slowTimePowerUpSprite);
@@ -873,6 +1035,7 @@ public class TutorialManager : MonoBehaviour
         }
 
         UnblockPlayerForPowerUps();
+        ResumeGame();
 
         waitingForPlayerAction = true;
 
@@ -896,54 +1059,80 @@ public class TutorialManager : MonoBehaviour
 
         yield return new WaitForSeconds(2f);
 
+        // Aplicar boost al jugador
         if (GameSpeedManager.Instance != null)
         {
             GameSpeedManager.Instance.RemoveActiveTagMultiplier("AITeam");
-        }
-
-        // Aumentar boost de 3x a 5x
-        if (GameSpeedManager.Instance != null)
-        {
             GameSpeedManager.Instance.ApplyTagSpeedMultiplier("PlayerTeam", 5.0f);
             Debug.Log("[Tutorial] 🚀 Boost x5 aplicado a tropas del jugador!");
         }
 
-        // Resetear flags de acciones
+        // Configurar restricciones para defensa
         step7_hasDefended = false;
         step7_hasAttacked = false;
-        allowedActionsRemaining = 2; // 2 acciones: defensa + ataque
+        allowedActionsRemaining = 2;
+        allowOnlySingleCards = true;
+        allowOnlyOperations = false;
+        restrictToLeftZone = true;
+        allowedSpecificCardValue = 2;
 
-        // ===== FASE 1: DEFENSA (SOLO IZQUIERDA) =====
-        
+        // Segunda pausa: Explicar defensa con carta 2
+        BlockPlayer();
         PauseGame();
-        ShowDialog("PRIMER, DEFENSA'T!", showImage: false);
+        
+        ShowDialog("PRIMER, DEFENSA'T AMB EL 2!", showImage: true, contextSprite: card2Sprite);
         yield return new WaitForSeconds(3f);
         yield return StartCoroutine(HidePopupWithAnimation());
         
-        // ✅ CONFIGURAR RESTRICCIONES PARA DEFENSA
-        allowOnlySingleCards = true;
-        allowOnlyOperations = false;
-        restrictToLeftZone = true; // ✅ SOLO IZQUIERDA
-        Debug.Log("[Tutorial] 🛡️ Paso 7 - Fase Defensa: Solo cartas individuales, solo zona izquierda");
+        Debug.Log("[Tutorial] 🛡️ Paso 7 - Fase Defensa: Solo carta 2 permitida, solo zona izquierda");
+
+        if (playerCardManager.cardSlots.Count > 1)
+        {
+            Transform card2Slot = playerCardManager.cardSlots[1];
+
+            HighlightCard(card2Slot);
+
+            if (card2Slot.childCount > 0)
+            {
+                GameObject card2 = card2Slot.GetChild(0).gameObject;
+                StartHighlightEffect(card2);
+            }
+        }
+
+        UpdateTutorialVisualFeedback();
         
         UnblockPlayer();
         ResumeGameWithoutResetSpeed();
 
         waitingForPlayerAction = true;
 
-        // Esperar a que el jugador defienda
+        // ESPERAR hasta que defienda con carta 2
         yield return new WaitUntil(() => step7_hasDefended);
         Debug.Log("[Tutorial] ✅ Defensa completada en paso 7");
 
-        // ===== FASE 2: ATAQUE (CUALQUIER ZONA) =====
-        
-        BlockPlayer(); // ✅ Bloquear antes de pausar
+        // PAUSAR inmediatamente después de defender
+        BlockPlayer();
         PauseGame();
-        
-        // ✅ CONFIGURAR RESTRICCIONES PARA ATAQUE
+
+        allowedSpecificCardValue = -1;
+
+        if (playerCardManager.cardSlots.Count > 1)
+        {
+            Transform card2Slot = playerCardManager.cardSlots[1];
+            if (card2Slot.childCount > 0)
+            {
+                GameObject card2 = card2Slot.GetChild(0).gameObject;
+                StopHighlightEffect(card2);
+            }
+        }
+
+        ClearHighlight();
+
+        // Cambiar a modo ataque
         allowOnlySingleCards = false;
         allowOnlyOperations = true;
-        restrictToLeftZone = false; // ✅ CUALQUIER ZONA
+        restrictToLeftZone = false;
+        
         Debug.Log("[Tutorial] ⚔️ Paso 7 - Fase Ataque: Solo operaciones, cualquier zona");
         
         ShowDialog("ARA, APROFITA PER ATACAR!", showImage: false);
@@ -955,17 +1144,18 @@ public class TutorialManager : MonoBehaviour
 
         waitingForPlayerAction = true;
 
-        // Esperar a que el jugador ataque
+        // ESPERAR hasta que ataque con operación
         yield return new WaitUntil(() => step7_hasAttacked);
         Debug.Log("[Tutorial] ✅ Ataque completado en paso 7");
 
-        // ===== LIMPIEZA FINAL =====
-        
+        // Limpiar restricciones
         BlockPlayer();
         allowedActionsRemaining = -1;
         allowOnlySingleCards = false;
         allowOnlyOperations = false;
         restrictToLeftZone = false;
+        allowedSpecificCardValue = -1;
+        
         Debug.Log("[Tutorial] 🔓 Paso 7 completado - Todas las restricciones desactivadas");
 
         if (aiTower != null)
@@ -1089,7 +1279,6 @@ public class TutorialManager : MonoBehaviour
             gameTimer.PauseTimer();
         }
 
-        // ✅ NUEVO: Pausar PowerUps
         if (PowerUpManager.Instance != null)
         {
             PowerUpManager.Instance.PausePowerUps();
@@ -1130,7 +1319,6 @@ public class TutorialManager : MonoBehaviour
             gameTimer.ResumeTimer();
         }
 
-        // ✅ NUEVO: Reanudar PowerUps
         if (PowerUpManager.Instance != null)
         {
             PowerUpManager.Instance.ResumePowerUps();
@@ -1168,7 +1356,6 @@ public class TutorialManager : MonoBehaviour
             gameTimer.ResumeTimer();
         }
 
-        // ✅ NUEVO: Reanudar PowerUps
         if (PowerUpManager.Instance != null)
         {
             PowerUpManager.Instance.ResumePowerUps();
@@ -1202,6 +1389,8 @@ public class TutorialManager : MonoBehaviour
         isPlayerBlocked = true;
         if (playerCardManager != null) playerCardManager.enabled = false;
         if (playableAreaUI != null) playableAreaUI.enabled = false;
+        
+        UpdateTutorialVisualFeedback();
     }
 
     private void UnblockPlayer()
@@ -1209,6 +1398,8 @@ public class TutorialManager : MonoBehaviour
         isPlayerBlocked = false;
         if (playerCardManager != null) playerCardManager.enabled = true;
         if (playableAreaUI != null) playableAreaUI.enabled = true;
+        
+        RestoreTutorialVisualFeedback();
     }
 
     private void UnblockPlayerForPowerUps()
@@ -1216,6 +1407,8 @@ public class TutorialManager : MonoBehaviour
         isPlayerBlocked = false;
         if (playerCardManager != null) playerCardManager.enabled = false;
         if (playableAreaUI != null) playableAreaUI.enabled = false;
+        
+        UpdateTutorialVisualFeedback();
     }
 
     private void HighlightCard(Transform cardSlot)
@@ -1284,6 +1477,13 @@ public class TutorialManager : MonoBehaviour
         return true;
     }
 
+    public bool CanPlaySpecificCard(int cardValue)
+    {
+        if (!CanPlaySingleCard()) return false;
+        
+        return IsSpecificCardAllowed(cardValue);
+    }
+
     public bool CanPlayOperation()
     {
         if (allowOnlySingleCards) return false;
@@ -1305,59 +1505,139 @@ public class TutorialManager : MonoBehaviour
         return false;
     }
 
-    // ✅ MODIFICADO: Trackear defensa en paso 7
     public void OnPlayerPlaysCard(int cardValue)
     {
+        Debug.Log($"[Tutorial] 🎴 OnPlayerPlaysCard llamado: valor={cardValue}, paso={currentStep}");
+        
+        // Verificar si puede jugar esta carta específica
+        if (!CanPlaySpecificCard(cardValue))
+        {
+            Debug.LogWarning($"[Tutorial] ⛔ Carta {cardValue} NO permitida en este paso (solo se permite: {allowedSpecificCardValue})");
+            
+            if (ScreenFlashEffect.Instance != null)
+            {
+                ScreenFlashEffect.Instance.Flash();
+            }
+            
+            return;
+        }
+
+        Debug.Log($"[Tutorial] ✅ Carta {cardValue} permitida - Procesando acción");
+
+        // Paso 2: Solo carta 5 para defender
+        if (currentStep == 2 && cardValue == 5 && waitingForPlayerAction)
+        {
+            Debug.Log("[Tutorial] 🛡️ Paso 2: Carta 5 jugada - Completando defensa");
+            waitingForPlayerAction = false;
+            
+            // Decrementar acciones permitidas
+            if (allowedActionsRemaining > 0)
+            {
+                allowedActionsRemaining--;
+                if (allowedActionsRemaining == 0)
+                {
+                    BlockPlayer();
+                }
+            }
+            return;
+        }
+
+        // Paso 7: Solo carta 2 para defender
+        if (currentStep == 7 && !step7_hasDefended && cardValue == 2 && waitingForPlayerAction)
+        {
+            Debug.Log("[Tutorial] 🛡️ Paso 7: Carta 2 jugada - Registrando defensa");
+            step7_hasDefended = true;
+            waitingForPlayerAction = false;
+            
+            // Decrementar acciones permitidas
+            if (allowedActionsRemaining > 0)
+            {
+                allowedActionsRemaining--;
+                if (allowedActionsRemaining == 0)
+                {
+                    BlockPlayer();
+                }
+            }
+            return;
+        }
+
+        // Cualquier otro caso: decrementar acciones si aplica
         if (allowedActionsRemaining > 0)
         {
             allowedActionsRemaining--;
-
-            // ✅ NUEVO: Si estamos en paso 7 y es una carta individual, marcar como defensa
-            if (currentStep == 7 && !step7_hasDefended)
-            {
-                step7_hasDefended = true;
-                waitingForPlayerAction = false;
-                Debug.Log("[Tutorial] 🛡️ Paso 7: Defensa registrada");
-                return;
-            }
 
             if (allowedActionsRemaining == 0)
             {
                 BlockPlayer();
             }
-        }
-
-        if (currentStep == 2 && cardValue == 5 && waitingForPlayerAction)
-        {
-            waitingForPlayerAction = false;
         }
     }
 
-    // ✅ MODIFICADO: Trackear ataque en paso 7
     public void OnPlayerPlaysOperation()
     {
+        Debug.Log($"[Tutorial] ⚔️ OnPlayerPlaysOperation llamado - paso={currentStep}");
+        
+        // Verificar si puede jugar operaciones
+        if (!CanPlayOperation())
+        {
+            Debug.LogWarning($"[Tutorial] ⛔ Operaciones NO permitidas en este paso");
+            
+            if (ScreenFlashEffect.Instance != null)
+            {
+                ScreenFlashEffect.Instance.Flash();
+            }
+            
+            return;
+        }
+
+        Debug.Log($"[Tutorial] ✅ Operación permitida - Procesando acción");
+
+        // Paso 7: Ataque después de defender
+        if (currentStep == 7 && step7_hasDefended && !step7_hasAttacked && waitingForPlayerAction)
+        {
+            Debug.Log("[Tutorial] ⚔️ Paso 7: Operación jugada - Registrando ataque");
+            step7_hasAttacked = true;
+            waitingForPlayerAction = false;
+            
+            // Decrementar acciones permitidas
+            if (allowedActionsRemaining > 0)
+            {
+                allowedActionsRemaining--;
+                if (allowedActionsRemaining == 0)
+                {
+                    BlockPlayer();
+                }
+            }
+            return;
+        }
+
+        // Paso 4: Enseñar ataque
+        if (currentStep == 4 && waitingForPlayerAction)
+        {
+            Debug.Log("[Tutorial] ⚔️ Paso 4: Operación jugada - Completando enseñanza de ataque");
+            waitingForPlayerAction = false;
+            
+            // Decrementar acciones permitidas
+            if (allowedActionsRemaining > 0)
+            {
+                allowedActionsRemaining--;
+                if (allowedActionsRemaining == 0)
+                {
+                    BlockPlayer();
+                }
+            }
+            return;
+        }
+
+        // Cualquier otro caso: decrementar acciones si aplica
         if (allowedActionsRemaining > 0)
         {
             allowedActionsRemaining--;
-
-            // ✅ NUEVO: Si estamos en paso 7 y es una operación, marcar como ataque
-            if (currentStep == 7 && step7_hasDefended && !step7_hasAttacked)
-            {
-                step7_hasAttacked = true;
-                waitingForPlayerAction = false;
-                Debug.Log("[Tutorial] ⚔️ Paso 7: Ataque registrado");
-                return;
-            }
 
             if (allowedActionsRemaining == 0)
             {
                 BlockPlayer();
             }
-        }
-
-        if ((currentStep == 4 || currentStep == 7) && waitingForPlayerAction)
-        {
-            waitingForPlayerAction = false;
         }
     }
 
