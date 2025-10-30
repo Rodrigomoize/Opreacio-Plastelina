@@ -493,7 +493,7 @@ public class TutorialManager : MonoBehaviour
 
         PauseGame();
 
-        ShowDialog("¡EN COMPTE, T'ATACAN!", showImage: false);
+        ShowDialog("VIGILA, T'ATAQUEN!", showImage: false);
 
         yield return new WaitForSeconds(2f);
     }
@@ -576,7 +576,7 @@ public class TutorialManager : MonoBehaviour
 
         yield return new WaitForSeconds(1f);
 
-        ShowDialog("CADA CARTA TE UN COST D'ENERGIA", showImage: true, contextSprite: intelectCost);
+        ShowDialog("CADA CARTA TÉ UN COST D'ENERGIA", showImage: true, contextSprite: intelectCost);
 
         PauseGame();
 
@@ -669,7 +669,7 @@ public class TutorialManager : MonoBehaviour
 
         PauseGame();
 
-        ShowDialog("¡MOLT BÉ, HAS GUANYAT 1 D'ENERGIA!", showImage: true, contextSprite: intelectBarIcon);
+        ShowDialog("MOLT BÉ, HAS GUANYAT + 1 D'ENERGIA!", showImage: true, contextSprite: intelectBarIcon);
 
         if (intelectBarFillImage != null)
         {
@@ -712,7 +712,7 @@ public class TutorialManager : MonoBehaviour
         allowedActionsRemaining = 1; // ✅ NUEVO: Solo 1 operación permitida
         Debug.Log("[Tutorial] 🚫 Restricción: Solo 1 operación de ataque permitida");
 
-        ShowDialog("FES UNA OPERACIO PER ATACAR", showImage: false);
+        ShowDialog("FES UNA OPERACIÓ PER ATACAR", showImage: false);
         UnblockPlayer();
 
         foreach (Transform slot in playerCardManager.cardSlots)
@@ -853,7 +853,7 @@ public class TutorialManager : MonoBehaviour
         // ✅ CUARTO: AHORA SÍ pausar y mostrar el mensaje
         PauseGame();
 
-        ShowDialog("OH NO, CURA'T!!!", showImage: true, contextSprite: healthPowerUpSprite);
+        ShowDialog("OH NO, CURA'T!", showImage: true, contextSprite: healthPowerUpSprite);
 
         // ✅ QUINTO: Desbloquear el powerup Health
         allowedPowerUps = new string[] { "Health" };
@@ -945,7 +945,7 @@ public class TutorialManager : MonoBehaviour
         Debug.Log("[Tutorial] ⏸️ Juego pausado después de spawner tropa enemiga (paso SlowTime)");
 
         // ✅ TERCERO: AHORA SÍ mostrar el mensaje
-        ShowDialog("¡FES QUE VAGIN MÉS LENTS!", showImage: true, contextSprite: slowTimePowerUpSprite);
+        ShowDialog("FES QUE VAGIN MÉS LENTS!", showImage: true, contextSprite: slowTimePowerUpSprite);
 
         allowedPowerUps = new string[] { "SlowTime" };
 
@@ -1032,7 +1032,7 @@ public class TutorialManager : MonoBehaviour
 
             PauseGame();
 
-            ShowDialog("¡APROFITA PER ATACAR!", showImage: false);
+            ShowDialog("APROFITA PER ATACAR!", showImage: false);
 
             yield return new WaitForSeconds(3.5f);
 
@@ -1077,14 +1077,14 @@ public class TutorialManager : MonoBehaviour
 
         PauseGame();
 
-        ShowDialog("LA TORRE HA ESTAT DESTRUÏDA!", showImage: false);
+        ShowDialog("HAS DESTRUÏT LA TORRE...", showImage: false);
 
         yield return new WaitForSeconds(4f);
 
-        UpdatePopupContent("HAS COMPLETAT EL TUTORIAL!", showImage: false);
+        UpdatePopupContent("I COMPLETAT EL TUTORIAL!", showImage: false);
         yield return new WaitForSeconds(4f);
 
-        UpdatePopupContent("JA ESTÀS PREPARAT PER\nRECUPERAR LA LLAVOR NUMÈRICA!", showImage: false);
+        UpdatePopupContent("JA ESTÀS PREPARAT!", showImage: false);
         yield return new WaitForSeconds(4f);
 
         // ✅ NUEVO: Ocultar el popup ANTES de cambiar de escena
