@@ -23,7 +23,7 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler, IPointerEnter
     {
         if (playerManager == null) Debug.LogWarning("PlayableAreaUI: playerManager no asignado.");
         if (worldCamera == null) Debug.Log("[PlayableAreaUI] worldCamera no asignada (usa Camera.main si corresponde).");
-        if (mapRawImage == null) Debug.Log("[PlayableAreaUI] mapRawImage no asignado: se usar� ScreenPointToRay si es posible.");
+        if (mapRawImage == null) Debug.Log("[PlayableAreaUI] mapRawImage no asignado: se usará ScreenPointToRay si es posible.");
         if (worldCamera == null) worldCamera = Camera.main;
         if (zoneFeedback == null) Debug.LogWarning("[PlayableAreaUI] zoneFeedback no asignado - no habrá feedback visual de zonas.");
     }
@@ -121,6 +121,7 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler, IPointerEnter
         Ray usedRay = default;
         Vector2 normalized = new Vector2(0.5f, 0.5f); // fallback
 
+        // ✅ NUEVO: Calcular normalizedX ANTES de procesar el clic
         if (mapRawImage != null && worldCamera != null)
         {
             RectTransform rt = mapRawImage.rectTransform;
@@ -147,6 +148,24 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler, IPointerEnter
                 float ny = (localPoint.y + rt.rect.height * rt.pivot.y) / rt.rect.height;
                 normalized = new Vector2(Mathf.Clamp01(nx), Mathf.Clamp01(ny));
 
+                // ✅ VERIFICAR RESTRICCIÓN DEL TUTORIAL ANTES DE CONTINUAR
+                if (TutorialManager.Instance != null && TutorialManager.Instance.IsRestrictedToLeftZone())
+                {
+                    // Si el clic está en la zona DERECHA (>=0.5), bloquear
+                    if (normalized.x >= 0.5f)
+                    {
+                        Debug.LogWarning("[Tutorial] ⛔ Solo puedes desplegar en la zona IZQUIERDA durante este paso");
+                        
+                        // ✅ Opcional: Mostrar feedback visual de error (shake de la barra, etc.)
+                        if (playerManager != null && playerManager.GetComponent<IntelectBar>() != null)
+                        {
+                            playerManager.GetComponent<IntelectBar>().ShakeBar(0.3f, 5f);
+                        }
+                        
+                        return; // ⛔ BLOQUEAR DESPLIEGUE
+                    }
+                }
+
                 Ray ray = worldCamera.ViewportPointToRay(new Vector3(normalized.x, normalized.y, 0f));
                 usedRay = ray;
                 Debug.DrawRay(ray.origin, ray.direction * 20f, Color.cyan, 2f);
@@ -156,13 +175,10 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler, IPointerEnter
                     spawnPos = hit.point;
                     hitFound = true;
                 }
-                else
-                {
-                }
             }
             else
             {
-                Debug.LogWarning("[PlayableAreaUI] ScreenPointToLocalPointInRectangle fall� para el RawImage. (camera para rect = " + (camForRect ? camForRect.name : "null") + ")");
+                Debug.LogWarning("[PlayableAreaUI] ScreenPointToLocalPointInRectangle falló para el RawImage. (camera para rect = " + (camForRect ? camForRect.name : "null") + ")");
             }
         }
 
@@ -180,13 +196,10 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler, IPointerEnter
                     spawnPos = hit2.point;
                     hitFound = true;
                 }
-                else
-                {
-                }
             }
             else
             {
-                Debug.LogWarning("[PlayableAreaUI] No hay c�mara disponible para ScreenPointToRay.");
+                Debug.LogWarning("[PlayableAreaUI] No hay cámara disponible para ScreenPointToRay.");
             }
         }
 
@@ -204,7 +217,7 @@ public class PlayableAreaUI : MonoBehaviour, IPointerClickHandler, IPointerEnter
             }
             else
             {
-                Debug.LogError("[PlayableAreaUI] No hubo hit y la intersecci�n con el plano fall�; spawnPos queda en Vector3.zero");
+                Debug.LogError("[PlayableAreaUI] No hubo hit y la intersección con el plano falló; spawnPos queda en Vector3.zero");
             }
         }
 
