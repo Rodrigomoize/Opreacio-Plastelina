@@ -2366,7 +2366,7 @@ MonoBehaviour:
   instructionSprites:
   - {fileID: 21300000, guid: a1a1521154d3b5241a8052b57883bdb6, type: 3}
   - {fileID: 21300000, guid: cb759ade68e034f42b1cf73f0c2a24d1, type: 3}
-  - {fileID: 21300000, guid: b64bb5b24d0ad6b4382b76190b8cab04, type: 3}
+  - {fileID: 21300000, guid: 784906eb6031d6f45b492caecc2bfea8, type: 3}
   - {fileID: 21300000, guid: 2482b767e4159214985d1b728d967a8f, type: 3}
   - {fileID: 21300000, guid: 16d0e00d1f57cc04685d9a39ac801759, type: 3}
   instructionsImage: {fileID: 264406630}

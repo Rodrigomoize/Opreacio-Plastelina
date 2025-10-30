@@ -1770,6 +1770,7 @@ MonoBehaviour:
     cooldownTimer: 0
     isActive: 0
     durationTimer: 0
+    isBlockedByTutorial: 0
   - powerUpName: Health
     duration: 0
     cooldownTime: 35
@@ -1783,9 +1784,11 @@ MonoBehaviour:
     cooldownTimer: 0
     isActive: 0
     durationTimer: 0
+    isBlockedByTutorial: 0
   availableColor: {r: 1, g: 1, b: 1, a: 1}
   cooldownColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   activeColor: {r: 0, g: 1, b: 0, a: 1}
+  blockedByTutorialColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   healingFlashColor: {r: 0, g: 1, b: 0, a: 0.4}
   slowTimeFlashColor: {r: 0, g: 0.5, b: 1, a: 0.3}
   flashDuration: 0.5
@@ -2151,7 +2154,7 @@ MonoBehaviour:
   instructionSprites:
   - {fileID: 21300000, guid: a1a1521154d3b5241a8052b57883bdb6, type: 3}
   - {fileID: 21300000, guid: cb759ade68e034f42b1cf73f0c2a24d1, type: 3}
-  - {fileID: 21300000, guid: b64bb5b24d0ad6b4382b76190b8cab04, type: 3}
+  - {fileID: 21300000, guid: 784906eb6031d6f45b492caecc2bfea8, type: 3}
   - {fileID: 21300000, guid: 2482b767e4159214985d1b728d967a8f, type: 3}
   - {fileID: 21300000, guid: 16d0e00d1f57cc04685d9a39ac801759, type: 3}
   instructionsImage: {fileID: 632163991}
