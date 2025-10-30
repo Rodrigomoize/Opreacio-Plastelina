@@ -130,6 +130,9 @@ public class PowerUpManager : MonoBehaviour
 
     private void UpdateCooldowns()
     {
+        // Si los PowerUps están pausados, no actualizar timers
+        if (isPaused) return;
+
         foreach (var p in powerUps)
         {
             if (p.isOnCooldown)
@@ -502,5 +505,26 @@ public class PowerUpManager : MonoBehaviour
         {
             ScreenFlashEffect.Instance.ClearPersistentFilter();
         }
+    }
+
+    // ✅ NUEVO: Variable para trackear si los PowerUps están pausados
+    private bool isPaused = false;
+
+    /// <summary>
+    /// Pausa todos los timers de PowerUps activos
+    /// </summary>
+    public void PausePowerUps()
+    {
+        isPaused = true;
+        Debug.Log("[PowerUpManager] ⏸️ PowerUps pausados");
+    }
+
+    /// <summary>
+    /// Reanuda todos los timers de PowerUps activos
+    /// </summary>
+    public void ResumePowerUps()
+    {
+        isPaused = false;
+        Debug.Log("[PowerUpManager] ▶️ PowerUps reanudados");
     }
 }
