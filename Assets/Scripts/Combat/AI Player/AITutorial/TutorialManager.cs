@@ -127,6 +127,14 @@ public class TutorialManager : MonoBehaviour
     private RectTransform optionalImageAttackRect;
     private RectTransform optionalImageDefenseRect;
 
+    // Escalas iniciales leídas desde el inspector en Awake. Usadas como base para animar
+    private Vector3 initialCharacterLocalScale = Vector3.one;
+    private Vector3 initialSpeechBubbleLocalScale = Vector3.one;
+    private Vector3 initialDialogLocalScale = Vector3.one;
+    private Vector3 initialOptionalImageLocalScale = Vector3.one;
+    private Vector3 initialOptionalImageAttackLocalScale = Vector3.one;
+    private Vector3 initialOptionalImageDefenseLocalScale = Vector3.one;
+
     private bool step7_hasDefended = false;
     private bool step7_hasAttacked = false;
 
@@ -141,6 +149,14 @@ public class TutorialManager : MonoBehaviour
         if (optionalImage != null) optionalImageRect = optionalImage.GetComponent<RectTransform>();
         if (optionalImageAttack != null) optionalImageAttackRect = optionalImageAttack.GetComponent<RectTransform>();
         if (optionalImageDefense != null) optionalImageDefenseRect = optionalImageDefense.GetComponent<RectTransform>();
+
+    // Guardar las escalas iniciales desde el inspector para que las animaciones sean relativas a ellas
+    if (characterImageRect != null) initialCharacterLocalScale = characterImageRect.localScale;
+    if (speechBubbleRect != null) initialSpeechBubbleLocalScale = speechBubbleRect.localScale;
+    if (dialogTextRect != null) initialDialogLocalScale = dialogTextRect.localScale;
+    if (optionalImageRect != null) initialOptionalImageLocalScale = optionalImageRect.localScale;
+    if (optionalImageAttackRect != null) initialOptionalImageAttackLocalScale = optionalImageAttackRect.localScale;
+    if (optionalImageDefenseRect != null) initialOptionalImageDefenseLocalScale = optionalImageDefenseRect.localScale;
 
         if (gameTimer == null)
         {
@@ -367,51 +383,32 @@ public class TutorialManager : MonoBehaviour
     private void AnimatePopupScale()
     {
         float speed = Time.unscaledDeltaTime * popupAnimationSpeed;
-
-        if (characterImageRect != null && characterImageRect.localScale != targetCharacterScale)
+        // Solo animamos la burbuja y el texto; no tocamos las escalas locales de los sprites (se respetan las del Inspector)
+        Vector3 speechTarget = Vector3.Scale(initialSpeechBubbleLocalScale, targetPopupScale);
+        if (speechBubbleRect != null && speechBubbleRect.localScale != speechTarget)
         {
-            characterImageRect.localScale = Vector3.Lerp(characterImageRect.localScale, targetCharacterScale, speed);
+            speechBubbleRect.localScale = Vector3.Lerp(speechBubbleRect.localScale, speechTarget, speed);
         }
 
-        if (speechBubbleRect != null && speechBubbleRect.localScale != targetPopupScale)
+        Vector3 dialogTarget = Vector3.Scale(initialDialogLocalScale, targetPopupScale);
+        if (dialogTextRect != null && dialogTextRect.localScale != dialogTarget)
         {
-            speechBubbleRect.localScale = Vector3.Lerp(speechBubbleRect.localScale, targetPopupScale, speed);
-        }
-
-        if (dialogTextRect != null && dialogTextRect.localScale != targetPopupScale)
-        {
-            dialogTextRect.localScale = Vector3.Lerp(dialogTextRect.localScale, targetPopupScale, speed);
-        }
-
-        if (optionalImageRect != null && optionalImage.gameObject.activeSelf && optionalImageRect.localScale != targetPopupScale)
-        {
-            optionalImageRect.localScale = Vector3.Lerp(optionalImageRect.localScale, targetPopupScale, speed);
-        }
-
-        if (optionalImageAttackRect != null && optionalImageAttack.gameObject.activeSelf && optionalImageAttackRect.localScale != targetPopupScale)
-        {
-            optionalImageAttackRect.localScale = Vector3.Lerp(optionalImageAttackRect.localScale, targetPopupScale, speed);
-        }
-
-        if (optionalImageDefenseRect != null && optionalImageDefense.gameObject.activeSelf && optionalImageDefenseRect.localScale != targetPopupScale)
-        {
-            optionalImageDefenseRect.localScale = Vector3.Lerp(optionalImageDefenseRect.localScale, targetPopupScale, speed);
+            dialogTextRect.localScale = Vector3.Lerp(dialogTextRect.localScale, dialogTarget, speed);
         }
     }
 
     private void SetPopupScale(float scale)
     {
-        Vector3 scaleVector = Vector3.one * scale;
-        Vector3 characterScale = Vector3.one * scale * characterImageScale;
+        // Usar las escalas iniciales como base para que los tamaños finales respeten lo establecido en el inspector
+        Vector3 relativeScale = Vector3.one * scale;
+        Vector3 characterScale = Vector3.Scale(initialCharacterLocalScale, Vector3.one * scale * characterImageScale);
 
-        if (characterImageRect != null) characterImageRect.localScale = characterScale;
-        if (speechBubbleRect != null) speechBubbleRect.localScale = scaleVector;
-        if (dialogTextRect != null) dialogTextRect.localScale = scaleVector;
-        if (optionalImageRect != null) optionalImageRect.localScale = scaleVector;
-        if (optionalImageAttackRect != null) optionalImageAttackRect.localScale = scaleVector;
-        if (optionalImageDefenseRect != null) optionalImageDefenseRect.localScale = scaleVector;
+    // No modificamos las escalas de los sprites (character y optional images) para respetar el Inspector.
+    if (speechBubbleRect != null) speechBubbleRect.localScale = Vector3.Scale(initialSpeechBubbleLocalScale, relativeScale);
+    if (dialogTextRect != null) dialogTextRect.localScale = Vector3.Scale(initialDialogLocalScale, relativeScale);
 
-        targetPopupScale = scaleVector;
+        // Guardar la escala relativa (uniforme) como objetivo; AnimatePopupScale multiplicará por las escalas iniciales
+        targetPopupScale = relativeScale;
         targetCharacterScale = characterScale;
     }
 
@@ -448,9 +445,6 @@ public class TutorialManager : MonoBehaviour
         {
             optionalImage.gameObject.SetActive(true);
             optionalImage.sprite = contextSprite;
-
-            if (optionalImageRect != null)
-                optionalImageRect.localScale = targetPopupScale;
         }
         else if (optionalImage != null)
         {
@@ -503,9 +497,7 @@ public class TutorialManager : MonoBehaviour
         {
             optionalImageAttack.gameObject.SetActive(true);
             optionalImageAttack.sprite = attackIcon;
-
-            if (optionalImageAttackRect != null)
-                optionalImageAttackRect.localScale = targetPopupScale;
+            // No modificamos optionalImageAttackRect.localScale para respetar escala del Inspector
         }
 
         yield return StartCoroutine(ShowContinueButtonAfterDelay(4f));
@@ -536,9 +528,7 @@ public class TutorialManager : MonoBehaviour
         {
             optionalImageDefense.gameObject.SetActive(true);
             optionalImageDefense.sprite = defenseIcon;
-
-            if (optionalImageDefenseRect != null)
-                optionalImageDefenseRect.localScale = targetPopupScale;
+            // No modificamos optionalImageDefenseRect.localScale para respetar escala del Inspector
         }
 
         yield return StartCoroutine(ShowContinueButtonAfterDelay(4f));
