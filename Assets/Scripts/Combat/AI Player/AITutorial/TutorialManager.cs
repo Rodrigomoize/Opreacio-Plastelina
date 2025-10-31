@@ -384,6 +384,11 @@ public class TutorialManager : MonoBehaviour
     {
         float speed = Time.unscaledDeltaTime * popupAnimationSpeed;
         // Solo animamos la burbuja y el texto; no tocamos las escalas locales de los sprites (se respetan las del Inspector)
+        // Además, animamos la imagen del personaje (cadet) relativo a su escala inicial
+        if (characterImageRect != null && characterImageRect.localScale != targetCharacterScale)
+        {
+            characterImageRect.localScale = Vector3.Lerp(characterImageRect.localScale, targetCharacterScale, speed);
+        }
         Vector3 speechTarget = Vector3.Scale(initialSpeechBubbleLocalScale, targetPopupScale);
         if (speechBubbleRect != null && speechBubbleRect.localScale != speechTarget)
         {
@@ -401,13 +406,14 @@ public class TutorialManager : MonoBehaviour
     {
         // Usar las escalas iniciales como base para que los tamaños finales respeten lo establecido en el inspector
         Vector3 relativeScale = Vector3.one * scale;
-        Vector3 characterScale = Vector3.Scale(initialCharacterLocalScale, Vector3.one * scale * characterImageScale);
+        Vector3 characterScale = Vector3.Scale(initialCharacterLocalScale, Vector3.one * scale);
 
-    // No modificamos las escalas de los sprites (character y optional images) para respetar el Inspector.
-    if (speechBubbleRect != null) speechBubbleRect.localScale = Vector3.Scale(initialSpeechBubbleLocalScale, relativeScale);
-    if (dialogTextRect != null) dialogTextRect.localScale = Vector3.Scale(initialDialogLocalScale, relativeScale);
+        // Establecer estado inmediato (por ejemplo al iniciar) para burbuja, texto y personaje sin tocar otras imágenes
+        if (characterImageRect != null) characterImageRect.localScale = characterScale;
+        if (speechBubbleRect != null) speechBubbleRect.localScale = Vector3.Scale(initialSpeechBubbleLocalScale, relativeScale);
+        if (dialogTextRect != null) dialogTextRect.localScale = Vector3.Scale(initialDialogLocalScale, relativeScale);
 
-        // Guardar la escala relativa (uniforme) como objetivo; AnimatePopupScale multiplicará por las escalas iniciales
+        // Guardar la escala objetivo absoluta para el personaje y la escala relativa para la burbuja/texto
         targetPopupScale = relativeScale;
         targetCharacterScale = characterScale;
     }
@@ -418,7 +424,8 @@ public class TutorialManager : MonoBehaviour
         {
             tutorialPanel.SetActive(true);
             targetPopupScale = Vector3.one * popupScaleTarget;
-            targetCharacterScale = Vector3.one * popupScaleTarget * characterImageScale;
+            // TargetCharacterScale debe ser la escala inicial del personaje multiplicada por el factor de popup
+            targetCharacterScale = Vector3.Scale(initialCharacterLocalScale, Vector3.one * popupScaleTarget);
             isPopupVisible = true;
         }
     }
@@ -1040,9 +1047,6 @@ public class TutorialManager : MonoBehaviour
         waitingForPlayerAction = true;
 
         yield return new WaitUntil(() => !waitingForPlayerAction);
-
-        // Después de usar SlowTime, reanudar el juego
-        ResumeGame();
 
         if (PowerUpManager.Instance != null)
         {
