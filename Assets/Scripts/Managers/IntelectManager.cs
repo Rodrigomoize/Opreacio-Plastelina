@@ -22,9 +22,11 @@ public class IntelectManager : MonoBehaviour
     private float currentIntelectFloat = 4f;
     private float targetIntelectFloat = 4f;
 
+    // ✅ NUEVO: Control de pausa
+    private bool isPaused = false;
+
     void Start()
     {
-        //currentIntelect = maxIntelect;
         currentIntelectFloat = currentIntelect;
         targetIntelectFloat = currentIntelect;
         UpdateUI();
@@ -38,6 +40,9 @@ public class IntelectManager : MonoBehaviour
 
     void Update()
     {
+        // ✅ No interpolar si está pausado
+        if (isPaused) return;
+
         // Interpolar suavemente hacia el valor objetivo
         if (currentIntelectFloat < targetIntelectFloat)
         {
@@ -56,6 +61,12 @@ public class IntelectManager : MonoBehaviour
         // Luego regenera hasta llegar al máximo
         while (currentIntelectFloat < maxIntelect)
         {
+            // ✅ Esperar mientras esté pausado
+            while (isPaused)
+            {
+                yield return null;
+            }
+
             // Incrementar el objetivo en +1 desde donde esté actualmente
             targetIntelectFloat = Mathf.Min(maxIntelect, targetIntelectFloat + regenAmount);
             
@@ -69,6 +80,23 @@ public class IntelectManager : MonoBehaviour
         regenCoroutine = null; 
     }
 
+    /// <summary>
+    /// ✅ NUEVO: Pausa la regeneración de intelecto
+    /// </summary>
+    public void PauseRegeneration()
+    {
+        isPaused = true;
+        Debug.Log("[IntelectManager] Regeneración pausada");
+    }
+
+    /// <summary>
+    /// ✅ NUEVO: Reanuda la regeneración de intelecto
+    /// </summary>
+    public void ResumeRegeneration()
+    {
+        isPaused = false;
+        Debug.Log("[IntelectManager] Regeneración reanudada");
+    }
 
     public bool CanConsume(int cost)
     {

@@ -127,7 +127,6 @@ public class TutorialManager : MonoBehaviour
     private RectTransform optionalImageAttackRect;
     private RectTransform optionalImageDefenseRect;
 
-    // Escalas iniciales leídas desde el inspector en Awake. Usadas como base para animar
     private Vector3 initialCharacterLocalScale = Vector3.one;
     private Vector3 initialSpeechBubbleLocalScale = Vector3.one;
     private Vector3 initialDialogLocalScale = Vector3.one;
@@ -150,13 +149,12 @@ public class TutorialManager : MonoBehaviour
         if (optionalImageAttack != null) optionalImageAttackRect = optionalImageAttack.GetComponent<RectTransform>();
         if (optionalImageDefense != null) optionalImageDefenseRect = optionalImageDefense.GetComponent<RectTransform>();
 
-    // Guardar las escalas iniciales desde el inspector para que las animaciones sean relativas a ellas
-    if (characterImageRect != null) initialCharacterLocalScale = characterImageRect.localScale;
-    if (speechBubbleRect != null) initialSpeechBubbleLocalScale = speechBubbleRect.localScale;
-    if (dialogTextRect != null) initialDialogLocalScale = dialogTextRect.localScale;
-    if (optionalImageRect != null) initialOptionalImageLocalScale = optionalImageRect.localScale;
-    if (optionalImageAttackRect != null) initialOptionalImageAttackLocalScale = optionalImageAttackRect.localScale;
-    if (optionalImageDefenseRect != null) initialOptionalImageDefenseLocalScale = optionalImageDefenseRect.localScale;
+        if (characterImageRect != null) initialCharacterLocalScale = characterImageRect.localScale;
+        if (speechBubbleRect != null) initialSpeechBubbleLocalScale = speechBubbleRect.localScale;
+        if (dialogTextRect != null) initialDialogLocalScale = dialogTextRect.localScale;
+        if (optionalImageRect != null) initialOptionalImageLocalScale = optionalImageRect.localScale;
+        if (optionalImageAttackRect != null) initialOptionalImageAttackLocalScale = optionalImageAttackRect.localScale;
+        if (optionalImageDefenseRect != null) initialOptionalImageDefenseLocalScale = optionalImageDefenseRect.localScale;
 
         if (gameTimer == null)
         {
@@ -166,10 +164,7 @@ public class TutorialManager : MonoBehaviour
 
     void Start()
     {
-        if (aiController != null)
-        {
-            aiController.enabled = false;
-        }
+        aiController.enabled = false;
 
         if (optionalImage != null) optionalImage.gameObject.SetActive(false);
         if (optionalImageAttack != null) optionalImageAttack.gameObject.SetActive(false);
@@ -235,7 +230,7 @@ public class TutorialManager : MonoBehaviour
         }
 
         AnimatePopupScale();
-        
+
         if (!isPlayerBlocked)
         {
             UpdateTutorialVisualFeedback();
@@ -250,6 +245,1045 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    // ========================================
+    // HELPERS DE BLOQUEO DE CARTAS
+    // ========================================
+
+    /// <summary>
+    /// Bloquea todas las cartas en modo INTERACTIVO (click para desbloquear)
+    /// Útil cuando quieres que el jugador vea grises pero pueda interactuar
+    /// </summary>
+    private void BlockAllCardsInteractive()
+    {
+        if (playerCardManager == null) return;
+
+        foreach (Transform slot in playerCardManager.cardSlots)
+        {
+            if (slot.childCount == 0) continue;
+
+            CardDisplay display = slot.GetComponentInChildren<CardDisplay>();
+            if (display == null) continue;
+
+            TutorialHighlight highlight = display.GetComponent<TutorialHighlight>();
+            if (highlight == null)
+            {
+                highlight = display.gameObject.AddComponent<TutorialHighlight>();
+            }
+
+            highlight.HideCard_ClickToReveal();
+        }
+
+        Debug.Log("[Tutorial] 🔒 Cartas bloqueadas (Click para revelar)");
+    }
+
+    /// <summary>
+    /// Bloquea todas las cartas en modo BLOQUEADO (solo tutorial puede desbloquear)
+    /// Útil para explicaciones donde el jugador NO debe interactuar
+    /// </summary>
+    private void BlockAllCardsLocked()
+    {
+        if (playerCardManager == null) return;
+
+        foreach (Transform slot in playerCardManager.cardSlots)
+        {
+            if (slot.childCount == 0) continue;
+
+            CardDisplay display = slot.GetComponentInChildren<CardDisplay>();
+            if (display == null) continue;
+
+            TutorialHighlight highlight = display.GetComponent<TutorialHighlight>();
+            if (highlight == null)
+            {
+                highlight = display.gameObject.AddComponent<TutorialHighlight>();
+            }
+
+            highlight.ForceBlockedState(true);
+        }
+
+        Debug.Log("[Tutorial] 🔒 Cartas bloqueadas (Locked mode)");
+    }
+
+    /// <summary>
+    /// Desbloquea todas las cartas (revela y restaura)
+    /// </summary>
+    private void UnblockAllCards()
+    {
+        if (playerCardManager == null) return;
+
+        foreach (Transform slot in playerCardManager.cardSlots)
+        {
+            if (slot.childCount == 0) continue;
+
+            CardDisplay display = slot.GetComponentInChildren<CardDisplay>();
+            if (display == null) continue;
+
+            TutorialHighlight highlight = display.GetComponent<TutorialHighlight>();
+            if (highlight != null)
+            {
+                highlight.RevealCard(force: true);
+                highlight.ForceBlockedState(false);
+            }
+        }
+
+        Debug.Log("[Tutorial] 🔓 Todas las cartas desbloqueadas");
+    }
+
+    private void BlockOperatorsInteractive()
+    {
+        if (playerCardManager == null) return;
+
+        // Bloquear botón Suma
+        if (playerCardManager.SumaButton != null)
+        {
+            TutorialHighlight sumHighlight = playerCardManager.SumaButton.GetComponent<TutorialHighlight>();
+            if (sumHighlight == null)
+            {
+                sumHighlight = playerCardManager.SumaButton.gameObject.AddComponent<TutorialHighlight>();
+            }
+            sumHighlight.HideCard_ClickToReveal();
+        }
+
+        // Bloquear botón Resta
+        if (playerCardManager.RestaButton != null)
+        {
+            TutorialHighlight restHighlight = playerCardManager.RestaButton.GetComponent<TutorialHighlight>();
+            if (restHighlight == null)
+            {
+                restHighlight = playerCardManager.RestaButton.gameObject.AddComponent<TutorialHighlight>();
+            }
+            restHighlight.HideCard_ClickToReveal();
+        }
+
+        Debug.Log("[Tutorial] 🔒 Operadores bloqueados (Click para revelar)");
+    }
+
+    /// <summary>
+    /// Bloquea los botones de operadores en modo BLOQUEADO (solo tutorial puede desbloquear)
+    /// </summary>
+    private void BlockOperatorsLocked()
+    {
+        if (playerCardManager == null) return;
+
+        // Bloquear botón Suma
+        if (playerCardManager.SumaButton != null)
+        {
+            TutorialHighlight sumHighlight = playerCardManager.SumaButton.GetComponent<TutorialHighlight>();
+            if (sumHighlight == null)
+            {
+                sumHighlight = playerCardManager.SumaButton.gameObject.AddComponent<TutorialHighlight>();
+            }
+            sumHighlight.ForceBlockedState(true);
+
+            // Deshabilitar interacción
+            playerCardManager.SumaButton.interactable = false;
+        }
+
+        // Bloquear botón Resta
+        if (playerCardManager.RestaButton != null)
+        {
+            TutorialHighlight restHighlight = playerCardManager.RestaButton.GetComponent<TutorialHighlight>();
+            if (restHighlight == null)
+            {
+                restHighlight = playerCardManager.RestaButton.gameObject.AddComponent<TutorialHighlight>();
+            }
+            restHighlight.ForceBlockedState(true);
+
+            // Deshabilitar interacción
+            playerCardManager.RestaButton.interactable = false;
+        }
+
+        Debug.Log("[Tutorial] 🔒 Operadores bloqueados (Locked mode)");
+    }
+
+    /// <summary>
+    /// Desbloquea los botones de operadores (revela y restaura)
+    /// </summary>
+    private void UnblockOperators()
+    {
+        if (playerCardManager == null) return;
+
+        // Desbloquear botón Suma
+        if (playerCardManager.SumaButton != null)
+        {
+            TutorialHighlight sumHighlight = playerCardManager.SumaButton.GetComponent<TutorialHighlight>();
+            if (sumHighlight != null)
+            {
+                sumHighlight.RevealCard(force: true);
+                sumHighlight.ForceBlockedState(false);
+            }
+
+            playerCardManager.SumaButton.interactable = true;
+
+            // Restaurar color
+            Image sumImage = playerCardManager.SumaButton.GetComponent<Image>();
+            if (sumImage != null)
+            {
+                sumImage.color = playerCardManager.validOperatorColor;
+            }
+        }
+
+        // Desbloquear botón Resta
+        if (playerCardManager.RestaButton != null)
+        {
+            TutorialHighlight restHighlight = playerCardManager.RestaButton.GetComponent<TutorialHighlight>();
+            if (restHighlight != null)
+            {
+                restHighlight.RevealCard(force: true);
+                restHighlight.ForceBlockedState(false);
+            }
+
+            playerCardManager.RestaButton.interactable = true;
+
+            // Restaurar color
+            Image restImage = playerCardManager.RestaButton.GetComponent<Image>();
+            if (restImage != null)
+            {
+                restImage.color = playerCardManager.validOperatorColor;
+            }
+        }
+    }
+
+    // ========================================
+    // HELPERS COMBINADOS (CARTAS + OPERADORES)
+    // ========================================
+
+    /// <summary>
+    /// Bloquea TODO (cartas + operadores) en modo INTERACTIVO
+    /// </summary>
+    private void BlockAllInteractive()
+    {
+        BlockAllCardsInteractive();
+        BlockOperatorsInteractive();
+        Debug.Log("[Tutorial] 🔒 Todo bloqueado (modo interactivo)");
+    }
+
+    /// <summary>
+    /// Bloquea TODO (cartas + operadores) en modo BLOQUEADO
+    /// </summary>
+    private void BlockAllLocked()
+    {
+        BlockAllCardsLocked();
+        BlockOperatorsLocked();
+        Debug.Log("[Tutorial] 🔒 Todo bloqueado (modo locked)");
+    }
+
+    /// <summary>
+    /// Desbloquea TODO (cartas + operadores)
+    /// </summary>
+    private void UnblockAll()
+    {
+        UnblockAllCards();
+        UnblockOperators();
+        Debug.Log("[Tutorial] 🔓 Todo desbloqueado");
+    }
+
+    // ========================================
+    // SISTEMA DE CONTINUE BUTTON
+    // ========================================
+
+    private IEnumerator ShowContinueButtonAfterDelay(float minDelay = 2f)
+    {
+        yield return new WaitForSecondsRealtime(minDelay);
+
+        if (continueButton != null)
+        {
+            continueButton.gameObject.SetActive(true);
+        }
+
+        waitingForContinueButton = true;
+
+        yield return new WaitUntil(() => !waitingForContinueButton);
+
+        if (continueButton != null)
+        {
+            continueButton.gameObject.SetActive(false);
+        }
+    }
+
+    private void OnContinueButtonClicked()
+    {
+        if (waitingForContinueButton)
+        {
+            waitingForContinueButton = false;
+            Debug.Log("[Tutorial] ✅ Continue button presionado");
+        }
+    }
+
+    // ========================================
+    // FLUJO PRINCIPAL DEL TUTORIAL
+    // ========================================
+
+    private IEnumerator RunTutorial()
+    {
+        yield return StartCoroutine(Tutorial_Welcome());
+        yield return StartCoroutine(Tutorial_AIAttacks());
+        yield return StartCoroutine(Tutorial_PlayerDefends());
+        yield return StartCoroutine(Tutorial_WaitForDestruction());
+        yield return StartCoroutine(Tutorial_TeachAttack());
+        yield return StartCoroutine(Tutorial_PlayerAttacks());
+        yield return StartCoroutine(Tutorial_HealthPowerUp());
+        yield return StartCoroutine(Tutorial_SlowTimePowerUp());
+        yield return StartCoroutine(Tutorial_TowerDestroyed());
+    }
+
+    // ========================================
+    // PASO 0: BIENVENIDA
+    // ========================================
+
+    private IEnumerator Tutorial_Welcome()
+    {
+        currentStep = 0;
+
+        PauseGame();
+        BlockPlayer();
+        BlockAllInteractive();
+
+        ShowDialog("BENVINGUT AL TUTORIAL!", showImage: false);
+        yield return StartCoroutine(ShowContinueButtonAfterDelay(2f));
+        yield return StartCoroutine(HidePopupWithAnimation());
+
+        UnblockAllCards();
+    }
+
+    // ========================================
+    // PASO 1: LA IA ATACA
+    // ========================================
+
+    private IEnumerator Tutorial_AIAttacks()
+    {
+        currentStep = 1;
+
+        // Generar enemigo
+        var card2 = cardManager.GetCardByIndex(1);
+        var card3 = cardManager.GetCardByIndex(2);
+        Vector3 spawnPos = aiSpawnPoint.position;
+        CardManager.GenerateResult result;
+        cardManager.GenerateCombinedCharacter(card2, card3, spawnPos, 5, '+', "AITeam", out result, aiIntelect);
+
+        yield return new WaitForSeconds(2.4f);
+
+        PauseGame();
+        BlockPlayer();
+        BlockAllInteractive();
+
+        ShowDialog("VIGILA, T'ATAQUEN!", showImage: false);
+        yield return StartCoroutine(ShowContinueButtonAfterDelay(2f));
+        yield return StartCoroutine(HidePopupWithAnimation());
+
+        PauseGame();
+        // Mostrar explicación de defensa
+        yield return StartCoroutine(ShowDefenseExplanation());
+
+        UnblockAllCards();
+    }
+
+    // ========================================
+    // PASO 2: EL JUGADOR DEFIENDE
+    // ========================================
+
+    private IEnumerator Tutorial_PlayerDefends()
+    {
+        currentStep = 2;
+
+        allowOnlySingleCards = true;
+        allowOnlyOperations = false;
+        allowedActionsRemaining = 1;
+        allowedSpecificCardValue = 5;
+        restrictToLeftZone = true;
+
+        PauseGame();
+        BlockPlayer();
+        BlockAllCardsLocked();
+
+        ShowDialog("DEFENSA-HO AMB EL RESULTAT!", showImage: true, contextSprite: card5Sprite);
+
+        // Resaltar carta 5
+        if (playerCardManager.cardSlots.Count > 4)
+        {
+            Transform card5Slot = playerCardManager.cardSlots[4];
+            HighlightCard(card5Slot);
+
+            if (card5Slot.childCount > 0)
+            {
+                GameObject card5 = card5Slot.GetChild(0).gameObject;
+                StartHighlightEffect(card5);
+            }
+        }
+
+        ForceUpdateTutorialVisualFeedback();
+
+        yield return StartCoroutine(ShowContinueButtonAfterDelay(3f));
+        yield return StartCoroutine(HidePopupWithAnimation());
+
+        // Desbloquear para jugar
+        UnblockAllCards();
+        UnblockPlayer();
+
+        waitingForPlayerAction = true;
+        yield return new WaitUntil(() => !waitingForPlayerAction);
+
+        // Limpiar highlights
+        if (playerCardManager.cardSlots.Count > 4)
+        {
+            Transform card5Slot = playerCardManager.cardSlots[4];
+            if (card5Slot.childCount > 0)
+            {
+                GameObject card5 = card5Slot.GetChild(0).gameObject;
+                StopHighlightEffect(card5);
+            }
+        }
+
+        yield return new WaitForSeconds(1);
+        // Popup de explicación de coste de intelecto
+        PauseGame();
+
+        ClearHighlight();
+        HideOptionalImage();
+
+        // Limpiar restricciones
+        restrictToLeftZone = false;
+        allowOnlySingleCards = false;
+        allowedActionsRemaining = -1;
+        allowedSpecificCardValue = -1;
+
+
+        BlockPlayer();
+        BlockAllCardsLocked();
+
+        ShowDialog("CADA CARTA TÉ UN COST D'ENERGIA", showImage: true, contextSprite: intelectCost);
+
+        if (intelectBarFillImage != null)
+        {
+            StartHighlightEffect(intelectBarFillImage.gameObject);
+        }
+
+        if (playerIntelect != null && playerIntelect.intelectSlider != null)
+        {
+            HighlightElement(playerIntelect.intelectSlider.GetComponent<RectTransform>());
+            StartHighlightEffect(playerIntelect.intelectSlider.gameObject);
+        }
+
+        ForceUpdateTutorialVisualFeedback();
+
+        yield return StartCoroutine(ShowContinueButtonAfterDelay(3f));
+
+        if (intelectBarFillImage != null)
+        {
+            StopHighlightEffect(intelectBarFillImage.gameObject);
+        }
+
+        if (playerIntelect != null && playerIntelect.intelectSlider != null)
+        {
+            StopHighlightEffect(playerIntelect.intelectSlider.gameObject);
+        }
+
+        ClearHighlight();
+        HideOptionalImage();
+
+        yield return StartCoroutine(HidePopupWithAnimation());
+
+        UnblockAllCards();
+        ResumeGame();
+    }
+
+    // ========================================
+    // PASO 3: ESPERAR DESTRUCCIÓN Y GANAR INTELECTO
+    // ========================================
+
+    private IEnumerator Tutorial_WaitForDestruction()
+    {
+        currentStep = 3;
+
+        yield return new WaitForSeconds(0.5f);
+
+        if (playerIntelect != null)
+        {
+            playerIntelectBeforeCounterattack = playerIntelect.currentIntelect;
+        }
+
+        aiTroopCount = CountTroopsByTag("AITeam");
+        playerTroopCount = CountTroopsByTag("PlayerTeam");
+
+        if (aiTroopCount == 0 && playerTroopCount == 0)
+        {
+            yield return new WaitForSeconds(2f);
+        }
+        else
+        {
+            waitingForTroopsDestroyed = true;
+
+            float timeout = 15f;
+            float elapsed = 0f;
+
+            while (waitingForTroopsDestroyed && elapsed < timeout)
+            {
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            waitingForCounterattack = true;
+
+            elapsed = 0f;
+            timeout = 5f;
+
+            while (waitingForCounterattack && elapsed < timeout)
+            {
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            yield return new WaitForSeconds(2f);
+        }
+
+        PauseGame();
+        BlockPlayer();
+        BlockAllCardsLocked();
+
+        ShowDialog("MOLT BÉ, HAS GUANYAT + 1 D'ENERGIA!", showImage: true, contextSprite: intelectBarIcon);
+
+        if (intelectBarFillImage != null)
+        {
+            StartHighlightEffect(intelectBarFillImage.gameObject);
+        }
+
+        if (playerIntelect != null && playerIntelect.intelectSlider != null)
+        {
+            HighlightElement(playerIntelect.intelectSlider.GetComponent<RectTransform>());
+            StartHighlightEffect(playerIntelect.intelectSlider.gameObject);
+        }
+
+        ForceUpdateTutorialVisualFeedback();
+
+        yield return StartCoroutine(ShowContinueButtonAfterDelay(3f));
+
+        if (intelectBarFillImage != null)
+        {
+            StopHighlightEffect(intelectBarFillImage.gameObject);
+        }
+
+        if (playerIntelect != null && playerIntelect.intelectSlider != null)
+        {
+            StopHighlightEffect(playerIntelect.intelectSlider.gameObject);
+        }
+
+        ClearHighlight();
+        HideOptionalImage();
+
+        yield return StartCoroutine(HidePopupWithAnimation());
+
+        UnblockAllCards();
+        ResumeGame();
+    }
+
+    // ========================================
+    // PASO 4: ENSEÑAR A ATACAR
+    // ========================================
+
+    private IEnumerator Tutorial_TeachAttack()
+    {
+        currentStep = 4;
+
+        yield return StartCoroutine(ShowAttackExplanation());
+
+        allowOnlySingleCards = false;
+        allowOnlyOperations = true;
+        allowedActionsRemaining = 1;
+
+        PauseGame();
+        BlockPlayer();
+        BlockAllCardsLocked();
+
+        ShowDialog("FES UNA OPERACIÓ PER ATACAR", showImage: false);
+
+        foreach (Transform slot in playerCardManager.cardSlots)
+        {
+            if (slot.childCount > 0)
+            {
+                GameObject card = slot.GetChild(0).gameObject;
+                StartHighlightEffect(card);
+            }
+        }
+
+        if (playerCardManager.SumaButton != null)
+        {
+            StartHighlightEffect(playerCardManager.SumaButton.gameObject);
+        }
+        if (playerCardManager.RestaButton != null)
+        {
+            StartHighlightEffect(playerCardManager.RestaButton.gameObject);
+        }
+
+        yield return StartCoroutine(ShowContinueButtonAfterDelay(3f));
+        yield return StartCoroutine(HidePopupWithAnimation());
+
+        UnblockAll();
+        UnblockAllCards();
+        UnblockPlayer();
+        ResumeGame();
+
+        waitingForPlayerAction = true;
+        yield return new WaitUntil(() => !waitingForPlayerAction);
+
+        allowOnlyOperations = false;
+        allowedActionsRemaining = -1;
+
+        foreach (Transform slot in playerCardManager.cardSlots)
+        {
+            if (slot.childCount > 0)
+            {
+                GameObject card = slot.GetChild(0).gameObject;
+                StopHighlightEffect(card);
+            }
+        }
+
+        if (playerCardManager.SumaButton != null)
+        {
+            StopHighlightEffect(playerCardManager.SumaButton.gameObject);
+        }
+        if (playerCardManager.RestaButton != null)
+        {
+            StopHighlightEffect(playerCardManager.RestaButton.gameObject);
+        }
+
+        ClearHighlight();
+    }
+
+    // ========================================
+    // PASO 5: EL JUGADOR ATACA
+    // ========================================
+
+    private IEnumerator Tutorial_PlayerAttacks()
+    {
+        currentStep = 5;
+
+        if (aiTower != null)
+        {
+            aiTowerHealthBeforeAttack = aiTower.currentHealth;
+        }
+
+        waitingForEnemyTowerDamage = true;
+
+        yield return new WaitUntil(() => !waitingForEnemyTowerDamage);
+
+        yield return new WaitForSeconds(1f);
+    }
+
+    // ========================================
+    // PASO 6: POWERUP DE SALUD
+    // ========================================
+
+    private IEnumerator Tutorial_HealthPowerUp()
+    {
+        currentStep = 6;
+
+        PauseGame();
+        BlockPlayer();
+        BlockAllInteractive();
+
+        if (playerTower != null)
+        {
+            playerTowerHealthBeforeAttack = playerTower.currentHealth;
+        }
+
+        // ✅ FIX: Generar enemigo 2+1 = 3 ANTES de reanudar
+        var card2 = cardManager.GetCardByIndex(1);  // Carta 2
+        var card1 = cardManager.GetCardByIndex(0);  // Carta 1
+        Vector3 spawnPos = aiSpawnPoint.position;
+        CardManager.GenerateResult result;
+
+        Debug.Log("[Tutorial] 🔧 Generando enemigo 2+1 para paso 6...");
+
+        // Generar con intelecto de IA suficiente
+        if (aiIntelect != null && aiIntelect.currentIntelect < 3)
+        {
+            aiIntelect.AddIntelect(3 - aiIntelect.currentIntelect);
+        }
+
+        bool success = cardManager.GenerateCombinedCharacter(card2, card1, spawnPos, 3, '+', "AITeam", out result, aiIntelect);
+
+        if (success)
+        {
+            Debug.Log("[Tutorial] ✅ Enemigo 2+1 generado correctamente");
+        }
+        else
+        {
+            Debug.LogError("[Tutorial] ❌ ERROR: No se pudo generar enemigo 2+1");
+        }
+
+        // Reanudar DESPUÉS de generar
+        ResumeGame();
+
+        waitingForTowerDamage = true;
+
+        float timeout = 15f;
+        float elapsed = 0f;
+
+        while (waitingForTowerDamage && elapsed < timeout)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        PauseGame();
+        BlockPlayer();
+        BlockAllInteractive();
+
+        ShowDialog("OH NO, CURA'T!", showImage: true, contextSprite: healthPowerUpSprite);
+
+        yield return StartCoroutine(ShowContinueButtonAfterDelay(2f));
+        yield return StartCoroutine(HidePopupWithAnimation());
+
+
+        allowedPowerUps = new string[] { "Health" };
+
+        if (PowerUpManager.Instance != null)
+        {
+            PowerUpManager.Instance.SetPowerUpBlocked("Health", false);
+        }
+
+        var healPowerUp = powerUpManager.GetPowerUpButton("Health");
+        if (healPowerUp != null)
+        {
+            HighlightElement(healPowerUp.GetComponent<RectTransform>());
+            StartHighlightEffect(healPowerUp.gameObject);
+        }
+        UnblockPlayerForPowerUps();
+
+        waitingForPlayerAction = true;
+        yield return new WaitUntil(() => !waitingForPlayerAction);
+
+        if (PowerUpManager.Instance != null)
+        {
+            PowerUpManager.Instance.SetPowerUpBlocked("Health", true);
+        }
+
+        allowedPowerUps = new string[0];
+
+        if (healPowerUp != null)
+        {
+            StopHighlightEffect(healPowerUp.gameObject);
+        }
+        ClearHighlight();
+        HideOptionalImage();
+
+        PauseGame();
+        BlockPlayer();
+        BlockAllCardsLocked();
+
+        ShowDialog("BEN FET!", showImage: false);
+        yield return StartCoroutine(ShowContinueButtonAfterDelay(2f));
+        yield return StartCoroutine(HidePopupWithAnimation());
+
+        UnblockAllCards();
+        ResumeGame();
+    }
+
+    // ========================================
+    // PASO 7: POWERUP SLOWTIME + DEFENSA + ATAQUE
+    // ========================================
+
+    private IEnumerator Tutorial_SlowTimePowerUp()
+    {
+        currentStep = 7;
+
+        // Generar enemigo 1+1
+        var card1A = cardManager.GetCardByIndex(0);
+        var card1B = cardManager.GetCardByIndex(0);
+        Vector3 spawnPos = aiSpawnPoint.position;
+        CardManager.GenerateResult result;
+
+        cardManager.GenerateCombinedCharacter(card1A, card1B, spawnPos, 2, '+', "AITeam", out result, aiIntelect);
+
+        yield return new WaitForSeconds(2.2f);
+
+        PauseGame();
+        BlockPlayer();
+        BlockAllCardsLocked();
+
+        ShowDialog("FES QUE VAGIN MÉS LENTS!", showImage: true, contextSprite: slowTimePowerUpSprite);
+
+        yield return StartCoroutine(ShowContinueButtonAfterDelay(2f));
+        yield return StartCoroutine(HidePopupWithAnimation());
+
+        allowedPowerUps = new string[] { "SlowTime" };
+
+        if (PowerUpManager.Instance != null)
+        {
+            PowerUpManager.Instance.SetPowerUpBlocked("SlowTime", false);
+        }
+
+        var slowPowerUp = powerUpManager.GetPowerUpButton("SlowTime");
+        if (slowPowerUp != null)
+        {
+            HighlightElement(slowPowerUp.GetComponent<RectTransform>());
+            StartHighlightEffect(slowPowerUp.gameObject);
+        }
+
+        UnblockPlayerForPowerUps();
+        waitingForPlayerAction = true;
+
+        yield return new WaitUntil(() => !waitingForPlayerAction);
+
+        ResumeGame();
+
+        if (PowerUpManager.Instance != null)
+        {
+            PowerUpManager.Instance.SetPowerUpBlocked("SlowTime", true);
+        }
+
+        allowedPowerUps = new string[0];
+
+        if (slowPowerUp != null)
+        {
+            StopHighlightEffect(slowPowerUp.gameObject);
+        }
+        ClearHighlight();
+        HideOptionalImage();
+
+        yield return new WaitForSeconds(1f);
+
+        PauseGame();
+        BlockPlayer();
+
+        if (GameSpeedManager.Instance != null)
+        {
+            GameSpeedManager.Instance.RemoveActiveTagMultiplier("AITeam");
+            GameSpeedManager.Instance.ApplyTagSpeedMultiplier("PlayerTeam", 5.0f);
+        }
+
+        BlockAllCardsLocked();
+
+        step7_hasDefended = false;
+        step7_hasAttacked = false;
+        allowedActionsRemaining = 2;
+        allowOnlySingleCards = true;
+        allowOnlyOperations = false;
+        restrictToLeftZone = true;
+        allowedSpecificCardValue = 2;
+
+        ShowDialog("PRIMER, DEFENSA'T AMB EL 2!", showImage: true, contextSprite: card2Sprite);
+
+        if (playerCardManager.cardSlots.Count > 1)
+        {
+            Transform card2Slot = playerCardManager.cardSlots[1];
+            HighlightCard(card2Slot);
+
+            if (card2Slot.childCount > 0)
+            {
+                GameObject card2 = card2Slot.GetChild(0).gameObject;
+                StartHighlightEffect(card2);
+            }
+        }
+
+        ForceUpdateTutorialVisualFeedback();
+
+        yield return StartCoroutine(ShowContinueButtonAfterDelay(3f));
+        yield return StartCoroutine(HidePopupWithAnimation());
+
+        UnblockAllCards();
+        UnblockPlayer();
+        ResumeGameWithoutResetSpeed();
+
+        waitingForPlayerAction = true;
+        yield return new WaitUntil(() => step7_hasDefended);
+
+        yield return new WaitForSeconds(1.1f);
+        ResumeGameWithoutResetSpeed();
+        PauseGame();
+        BlockPlayer();
+
+        allowedSpecificCardValue = -1;
+
+        if (playerCardManager.cardSlots.Count > 1)
+        {
+            Transform card2Slot = playerCardManager.cardSlots[1];
+            if (card2Slot.childCount > 0)
+            {
+                GameObject card2 = card2Slot.GetChild(0).gameObject;
+                StopHighlightEffect(card2);
+            }
+        }
+
+        ClearHighlight();
+
+        allowOnlySingleCards = false;
+        allowOnlyOperations = true;
+        restrictToLeftZone = false;
+
+        BlockAllCardsLocked();
+
+        ShowDialog("ARA, APROFITA PER ATACAR!", showImage: false);
+
+        foreach (Transform slot in playerCardManager.cardSlots)
+        {
+            if (slot.childCount > 0)
+            {
+                GameObject card = slot.GetChild(0).gameObject;
+                StartHighlightEffect(card);
+            }
+        }
+
+        if (playerCardManager.SumaButton != null)
+        {
+            StartHighlightEffect(playerCardManager.SumaButton.gameObject);
+        }
+        if (playerCardManager.RestaButton != null)
+        {
+            StartHighlightEffect(playerCardManager.RestaButton.gameObject);
+        }
+
+        yield return StartCoroutine(ShowContinueButtonAfterDelay(3f));
+        yield return StartCoroutine(HidePopupWithAnimation());
+
+        UnblockAll();
+        UnblockPlayer();
+        ResumeGameWithoutResetSpeed();
+
+        waitingForPlayerAction = true;
+        yield return new WaitUntil(() => step7_hasAttacked);
+
+        foreach (Transform slot in playerCardManager.cardSlots)
+        {
+            if (slot.childCount > 0)
+            {
+                GameObject card = slot.GetChild(0).gameObject;
+                StopHighlightEffect(card);
+            }
+        }
+
+        if (playerCardManager.SumaButton != null)
+        {
+            StopHighlightEffect(playerCardManager.SumaButton.gameObject);
+        }
+        if (playerCardManager.RestaButton != null)
+        {
+            StopHighlightEffect(playerCardManager.RestaButton.gameObject);
+        }
+
+        BlockPlayer();
+        allowedActionsRemaining = -1;
+        allowOnlySingleCards = false;
+        allowOnlyOperations = false;
+        restrictToLeftZone = false;
+        allowedSpecificCardValue = -1;
+
+        if (aiTower != null)
+        {
+            aiTowerHealthBeforeAttack = aiTower.currentHealth;
+        }
+
+        waitingForEnemyTowerDamage = true;
+        yield return new WaitUntil(() => !waitingForEnemyTowerDamage);
+        yield return new WaitForSeconds(1f);
+    }
+
+    // ========================================
+    // PASO 8: TORRE DESTRUIDA - FIN
+    // ========================================
+
+    private IEnumerator Tutorial_TowerDestroyed()
+    {
+        currentStep = 8;
+
+        PauseGame();
+        BlockPlayer();
+        BlockAllCardsLocked();
+
+        ShowDialog("HAS DESTRUÏT LA TORRE...", showImage: false);
+        yield return StartCoroutine(ShowContinueButtonAfterDelay(2f));
+
+        UpdatePopupContent("I COMPLETAT EL TUTORIAL!", showImage: false);
+        yield return StartCoroutine(ShowContinueButtonAfterDelay(2f));
+
+        UpdatePopupContent("JA ESTÀS PREPARAT!", showImage: false);
+        yield return StartCoroutine(ShowContinueButtonAfterDelay(2f));
+
+        yield return StartCoroutine(HidePopupWithAnimation());
+
+        yield return new WaitForSeconds(1f);
+
+        if (PowerUpManager.Instance != null)
+        {
+            PowerUpManager.Instance.UnblockAllPowerUps();
+        }
+
+        UnityEngine.SceneManagement.SceneManager.LoadScene("WinScene");
+    }
+
+    // ========================================
+    // EXPLICACIONES DE ATAQUE Y DEFENSA
+    // ========================================
+
+    private IEnumerator ShowAttackExplanation()
+    {
+        if (hasShownAttackExplanation) yield break;
+
+        hasShownAttackExplanation = true;
+
+        yield return new WaitForSeconds(1f);
+
+        PauseGame();
+        BlockPlayer();
+        BlockAllCardsLocked();
+
+        ShowDialog("AIXÍ FUNCIONA L'ATAC!", showImage: false, showSpeechBubble: false);
+
+        HideOptionalImage();
+
+        if (optionalImageAttack != null && attackIcon != null)
+        {
+            optionalImageAttack.gameObject.SetActive(true);
+            optionalImageAttack.sprite = attackIcon;
+        }
+
+        ForceUpdateTutorialVisualFeedback();
+
+        yield return StartCoroutine(ShowContinueButtonAfterDelay(2f));
+
+        HideOptionalImageAttack();
+
+        yield return StartCoroutine(HidePopupWithAnimation());
+
+        UnblockAllCards();
+    }
+
+    private IEnumerator ShowDefenseExplanation()
+    {
+        if (hasShownDefenseExplanation) yield break;
+
+        hasShownDefenseExplanation = true;
+
+        yield return new WaitForSeconds(1f);
+
+        PauseGame();
+        BlockPlayer();
+        BlockAllCardsLocked();
+
+        ShowDialog("AIXÍ ÉS COM ES DEFENSA!", showImage: false, showSpeechBubble: false);
+
+        HideOptionalImage();
+
+        if (optionalImageDefense != null && defenseIcon != null)
+        {
+            optionalImageDefense.gameObject.SetActive(true);
+            optionalImageDefense.sprite = defenseIcon;
+        }
+
+        ForceUpdateTutorialVisualFeedback();
+
+        yield return StartCoroutine(ShowContinueButtonAfterDelay(2f));
+
+        HideOptionalImageDefense();
+
+        yield return StartCoroutine(HidePopupWithAnimation());
+
+        UnblockAllCards();
+    }
+
+    // ========================================
+    // MÉTODOS DE FEEDBACK VISUAL
+    // ========================================
+
     private void UpdateTutorialVisualFeedback()
     {
         if (playerCardManager == null) return;
@@ -262,32 +1296,97 @@ public class TutorialManager : MonoBehaviour
             if (display == null || display.cardData == null) continue;
 
             TutorialHighlight highlight = display.GetComponent<TutorialHighlight>();
-            bool hasActiveHighlight = (highlight != null && highlight.enabled);
+            if (highlight == null)
+            {
+                highlight = display.gameObject.AddComponent<TutorialHighlight>();
+            }
 
+            bool hasActiveHighlight = highlight.enabled && highlight != null;
             if (hasActiveHighlight) continue;
 
-            Image cardImage = display.GetComponent<Image>();
-            if (cardImage == null) continue;
-
             int cardValue = display.cardData.cardValue;
-
             bool isCardAllowed = IsSpecificCardAllowed(cardValue);
 
-            if (!isCardAllowed)
+            if (!isCardAllowed || !CanPlaySingleCard() || allowedActionsRemaining == 0)
             {
-                ApplyTutorialBlockedTint(cardImage);
+                highlight.SetBlocked(true);
             }
-            else if (!CanPlaySingleCard())
+            else
             {
-                ApplyTutorialBlockedTint(cardImage);
-            }
-            else if (allowedActionsRemaining == 0)
-            {
-                ApplyTutorialBlockedTint(cardImage);
+                highlight.SetBlocked(false);
             }
         }
 
         UpdateOperatorButtonFeedback();
+    }
+
+    private void ForceUpdateTutorialVisualFeedback()
+    {
+        if (playerCardManager == null) return;
+
+        foreach (Transform slot in playerCardManager.cardSlots)
+        {
+            if (slot.childCount == 0) continue;
+
+            CardDisplay display = slot.GetComponentInChildren<CardDisplay>();
+            if (display == null || display.cardData == null) continue;
+
+            TutorialHighlight highlight = display.GetComponent<TutorialHighlight>();
+            if (highlight == null)
+            {
+                highlight = display.gameObject.AddComponent<TutorialHighlight>();
+            }
+
+            int cardValue = display.cardData.cardValue;
+            bool isCardAllowed = IsSpecificCardAllowed(cardValue);
+
+            if (!isCardAllowed || !CanPlaySingleCard() || allowedActionsRemaining == 0)
+            {
+                highlight.SetBlocked(true);
+            }
+            else
+            {
+                highlight.SetBlocked(false);
+            }
+        }
+
+        bool operationsAllowed = CanPlayOperation();
+
+        if (playerCardManager.SumaButton != null)
+        {
+            Image sumaImage = playerCardManager.SumaButton.GetComponent<Image>();
+            if (sumaImage != null)
+            {
+                if (!operationsAllowed || allowedActionsRemaining == 0)
+                {
+                    sumaImage.color = tutorialBlockedColor;
+                    playerCardManager.SumaButton.interactable = false;
+                }
+                else
+                {
+                    sumaImage.color = playerCardManager.validOperatorColor;
+                    playerCardManager.SumaButton.interactable = true;
+                }
+            }
+        }
+
+        if (playerCardManager.RestaButton != null)
+        {
+            Image restaImage = playerCardManager.RestaButton.GetComponent<Image>();
+            if (restaImage != null)
+            {
+                if (!operationsAllowed || allowedActionsRemaining == 0)
+                {
+                    restaImage.color = tutorialBlockedColor;
+                    playerCardManager.RestaButton.interactable = false;
+                }
+                else
+                {
+                    restaImage.color = playerCardManager.validOperatorColor;
+                    playerCardManager.RestaButton.interactable = true;
+                }
+            }
+        }
     }
 
     private bool IsSpecificCardAllowed(int cardValue)
@@ -330,14 +1429,6 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
-    private void ApplyTutorialBlockedTint(Image image)
-    {
-        if (image == null) return;
-
-        Color currentColor = image.color;
-        image.color = Color.Lerp(currentColor, tutorialBlockedColor, 0.7f);
-    }
-
     private void RestoreTutorialVisualFeedback()
     {
         if (playerCardManager == null) return;
@@ -350,14 +1441,9 @@ public class TutorialManager : MonoBehaviour
             if (display == null) continue;
 
             TutorialHighlight highlight = display.GetComponent<TutorialHighlight>();
-            bool hasActiveHighlight = (highlight != null && highlight.enabled);
-
-            if (hasActiveHighlight) continue;
-
-            Image cardImage = display.GetComponent<Image>();
-            if (cardImage != null)
+            if (highlight != null)
             {
-                cardImage.color = playerCardManager.validCardColor;
+                highlight.SetBlocked(false);
             }
         }
 
@@ -368,6 +1454,7 @@ public class TutorialManager : MonoBehaviour
             {
                 sumaImage.color = playerCardManager.validOperatorColor;
             }
+            playerCardManager.SumaButton.interactable = true;
         }
 
         if (playerCardManager.RestaButton != null)
@@ -377,14 +1464,18 @@ public class TutorialManager : MonoBehaviour
             {
                 restaImage.color = playerCardManager.validOperatorColor;
             }
+            playerCardManager.RestaButton.interactable = true;
         }
     }
+
+    // ========================================
+    // MÉTODOS DE UI Y ANIMACIÓN
+    // ========================================
 
     private void AnimatePopupScale()
     {
         float speed = Time.unscaledDeltaTime * popupAnimationSpeed;
-        // Solo animamos la burbuja y el texto; no tocamos las escalas locales de los sprites (se respetan las del Inspector)
-        // Además, animamos la imagen del personaje (cadet) relativo a su escala inicial
+
         if (characterImageRect != null && characterImageRect.localScale != targetCharacterScale)
         {
             characterImageRect.localScale = Vector3.Lerp(characterImageRect.localScale, targetCharacterScale, speed);
@@ -404,16 +1495,13 @@ public class TutorialManager : MonoBehaviour
 
     private void SetPopupScale(float scale)
     {
-        // Usar las escalas iniciales como base para que los tamaños finales respeten lo establecido en el inspector
         Vector3 relativeScale = Vector3.one * scale;
         Vector3 characterScale = Vector3.Scale(initialCharacterLocalScale, Vector3.one * scale);
 
-        // Establecer estado inmediato (por ejemplo al iniciar) para burbuja, texto y personaje sin tocar otras imágenes
         if (characterImageRect != null) characterImageRect.localScale = characterScale;
         if (speechBubbleRect != null) speechBubbleRect.localScale = Vector3.Scale(initialSpeechBubbleLocalScale, relativeScale);
         if (dialogTextRect != null) dialogTextRect.localScale = Vector3.Scale(initialDialogLocalScale, relativeScale);
 
-        // Guardar la escala objetivo absoluta para el personaje y la escala relativa para la burbuja/texto
         targetPopupScale = relativeScale;
         targetCharacterScale = characterScale;
     }
@@ -424,7 +1512,6 @@ public class TutorialManager : MonoBehaviour
         {
             tutorialPanel.SetActive(true);
             targetPopupScale = Vector3.one * popupScaleTarget;
-            // TargetCharacterScale debe ser la escala inicial del personaje multiplicada por el factor de popup
             targetCharacterScale = Vector3.Scale(initialCharacterLocalScale, Vector3.one * popupScaleTarget);
             isPopupVisible = true;
         }
@@ -457,775 +1544,6 @@ public class TutorialManager : MonoBehaviour
         {
             optionalImage.gameObject.SetActive(false);
         }
-    }
-
-    private IEnumerator ShowContinueButtonAfterDelay(float minDelay = 4f)
-    {
-        yield return new WaitForSeconds(minDelay);
-
-        if (continueButton != null)
-        {
-            continueButton.gameObject.SetActive(true);
-        }
-
-        waitingForContinueButton = true;
-
-        yield return new WaitUntil(() => !waitingForContinueButton);
-
-        if (continueButton != null)
-        {
-            continueButton.gameObject.SetActive(false);
-        }
-    }
-
-    private void OnContinueButtonClicked()
-    {
-        if (waitingForContinueButton)
-        {
-            waitingForContinueButton = false;
-        }
-    }
-
-    private IEnumerator ShowAttackExplanation()
-    {
-        if (hasShownAttackExplanation) yield break;
-
-        hasShownAttackExplanation = true;
-
-        yield return new WaitForSeconds(2f);
-
-        PauseGame();
-
-        ShowDialog("AIXÍ FUNCIONA L'ATAC!", showImage: false, showSpeechBubble: false);
-
-        HideOptionalImage();
-
-        if (optionalImageAttack != null && attackIcon != null)
-        {
-            optionalImageAttack.gameObject.SetActive(true);
-            optionalImageAttack.sprite = attackIcon;
-            // No modificamos optionalImageAttackRect.localScale para respetar escala del Inspector
-        }
-
-        yield return StartCoroutine(ShowContinueButtonAfterDelay(4f));
-
-        HideOptionalImageAttack();
-
-        yield return StartCoroutine(HidePopupWithAnimation());
-
-        ResumeGame();
-    }
-
-    private IEnumerator ShowDefenseExplanation()
-    {
-        if (hasShownDefenseExplanation) yield break;
-
-        hasShownDefenseExplanation = true;
-
-        yield return new WaitForSeconds(2f);
-
-        PauseGame();
-
-        BlockPlayer();
-        ShowDialog("AIXÍ ÉS COM ES DEFENSA!", showImage: false, showSpeechBubble: false);
-
-        HideOptionalImage();
-
-        if (optionalImageDefense != null && defenseIcon != null)
-        {
-            optionalImageDefense.gameObject.SetActive(true);
-            optionalImageDefense.sprite = defenseIcon;
-            // No modificamos optionalImageDefenseRect.localScale para respetar escala del Inspector
-        }
-
-        yield return StartCoroutine(ShowContinueButtonAfterDelay(4f));
-
-        HideOptionalImageDefense();
-
-        yield return StartCoroutine(HidePopupWithAnimation());
-
-        ResumeGame();
-    }
-
-    private int CountTroopsByTag(string tag)
-    {
-        Character[] characters = FindObjectsOfType<Character>();
-        CharacterCombined[] combined = FindObjectsOfType<CharacterCombined>();
-
-        int count = 0;
-
-        foreach (var character in characters)
-        {
-            if (character.CompareTag(tag)) count++;
-        }
-
-        foreach (var comb in combined)
-        {
-            if (comb.CompareTag(tag)) count++;
-        }
-
-        return count;
-    }
-
-    private IEnumerator RunTutorial()
-    {
-        yield return StartCoroutine(Tutorial_Welcome());
-        yield return StartCoroutine(Tutorial_AIAttacks());
-        yield return StartCoroutine(Tutorial_PlayerDefends());
-        yield return StartCoroutine(Tutorial_WaitForDestruction());
-        yield return StartCoroutine(Tutorial_TeachAttack());
-        yield return StartCoroutine(Tutorial_PlayerAttacks());
-        yield return StartCoroutine(Tutorial_HealthPowerUp());
-        yield return StartCoroutine(Tutorial_SlowTimePowerUp());
-        yield return StartCoroutine(Tutorial_TowerDestroyed());
-    }
-
-    private IEnumerator Tutorial_Welcome()
-    {
-        currentStep = 0;
-
-        BlockPlayer();
-        PauseGame();
-
-        ShowDialog("BENVINGUT AL TUTORIAL!", showImage: false);
-
-        yield return new WaitForSeconds(4f);
-
-        yield return StartCoroutine(HidePopupWithAnimation());
-    }
-
-    private IEnumerator Tutorial_AIAttacks()
-    {
-        currentStep = 1;
-
-        var card2 = cardManager.GetCardByIndex(1);
-        var card3 = cardManager.GetCardByIndex(2);
-        Vector3 spawnPos = aiSpawnPoint.position;
-        CardManager.GenerateResult result;
-        cardManager.GenerateCombinedCharacter(card2, card3, spawnPos, 5, '+', "AITeam", out result, aiIntelect);
-
-        yield return new WaitForSeconds(0.5f);
-
-        yield return StartCoroutine(ShowDefenseExplanation());
-
-        PauseGame();
-
-        ShowDialog("VIGILA, T'ATAQUEN!", showImage: false);
-
-        yield return new WaitForSeconds(2f);
-    }
-
-    private IEnumerator Tutorial_PlayerDefends()
-    {
-        currentStep = 2;
-
-        // Configurar restricciones ANTES de mostrar UI
-        allowOnlySingleCards = true;
-        allowOnlyOperations = false;
-        allowedActionsRemaining = 1;
-        allowedSpecificCardValue = 5;
-        restrictToLeftZone = true;
-
-        Debug.Log("[Tutorial] 🛡️ Paso 2: Solo carta 5 permitida, zona izquierda");
-
-        yield return new WaitForSeconds(2.7f);
-
-        BlockPlayer();
-        PauseGame();
-
-        UpdatePopupContent("¡DEFENSA-HO AMB EL RESULTAT!", showImage: true, contextSprite: card5Sprite);
-
-        if (playerCardManager.cardSlots.Count > 4)
-        {
-            Transform card5Slot = playerCardManager.cardSlots[4];
-
-            HighlightCard(card5Slot);
-
-            if (card5Slot.childCount > 0)
-            {
-                GameObject card5 = card5Slot.GetChild(0).gameObject;
-                StartHighlightEffect(card5);
-            }
-        }
-
-        UpdateTutorialVisualFeedback();
-
-        // Esperar 5 segundos antes de ocultar el popup (pero seguir pausado)
-        yield return new WaitForSeconds(5f);
-
-        // Ocultar el popup pero MANTENER el juego pausado
-        yield return StartCoroutine(HidePopupWithAnimation());
-
-        // Desbloquear solo el jugador para que pueda interactuar
-        UnblockPlayer();
-        // IMPORTANTE: NO llamar a ResumeGame() aquí - mantener pausado
-
-        waitingForPlayerAction = true;
-
-        // ESPERAR hasta que el jugador juegue la carta 5
-        // Durante este tiempo el juego está pausado pero el jugador puede interactuar
-        yield return new WaitUntil(() => !waitingForPlayerAction);
-
-        Debug.Log("[Tutorial] ✅ Paso 2: Carta 5 jugada - Continuando");
-
-        // AHORA SÍ pausar completamente de nuevo
-        yield return new WaitForSeconds(0.1f);
-
-        BlockPlayer();
-        PauseGame();
-
-        // Limpiar restricciones
-        restrictToLeftZone = false;
-        allowOnlySingleCards = false;
-        allowedActionsRemaining = -1;
-        allowedSpecificCardValue = -1;
-
-        Debug.Log("[Tutorial] 🔓 Paso 2 completado - Restricciones desactivadas");
-
-        if (playerCardManager.cardSlots.Count > 4)
-        {
-            Transform card5Slot = playerCardManager.cardSlots[4];
-            if (card5Slot.childCount > 0)
-            {
-                GameObject card5 = card5Slot.GetChild(0).gameObject;
-                StopHighlightEffect(card5);
-            }
-        }
-
-        ClearHighlight();
-        HideOptionalImage();
-
-        yield return new WaitForSeconds(1f);
-
-        ShowDialog("CADA CARTA TÉ UN COST D'ENERGIA", showImage: true, contextSprite: intelectCost);
-        PauseGame();
-
-        if (intelectBarFillImage != null)
-        {
-            StartHighlightEffect(intelectBarFillImage.gameObject);
-        }
-
-        if (playerIntelect != null && playerIntelect.intelectSlider != null)
-        {
-            HighlightElement(playerIntelect.intelectSlider.GetComponent<RectTransform>());
-            StartHighlightEffect(playerIntelect.intelectSlider.gameObject);
-        }
-
-        // ✅ Mostrar cartas bloqueadas durante la explicación
-        UpdateTutorialVisualFeedback();
-
-        yield return StartCoroutine(ShowContinueButtonAfterDelay(4f));
-
-        if (intelectBarFillImage != null)
-        {
-            StopHighlightEffect(intelectBarFillImage.gameObject);
-        }
-
-        if (playerIntelect != null && playerIntelect.intelectSlider != null)
-        {
-            StopHighlightEffect(playerIntelect.intelectSlider.gameObject);
-        }
-
-        ClearHighlight();
-        HideOptionalImage();
-
-        yield return StartCoroutine(HidePopupWithAnimation());
-        ResumeGame();
-    }
-
-    private IEnumerator Tutorial_WaitForDestruction()
-    {
-        currentStep = 3;
-
-        yield return new WaitForSeconds(0.5f);
-
-        if (playerIntelect != null)
-        {
-            playerIntelectBeforeCounterattack = playerIntelect.currentIntelect;
-        }
-
-        aiTroopCount = CountTroopsByTag("AITeam");
-        playerTroopCount = CountTroopsByTag("PlayerTeam");
-
-        if (aiTroopCount == 0 && playerTroopCount == 0)
-        {
-            yield return new WaitForSeconds(2.5f);
-            PauseGame();
-            yield break;
-        }
-
-        waitingForTroopsDestroyed = true;
-
-        float timeout = 15f;
-        float elapsed = 0f;
-
-        while (waitingForTroopsDestroyed && elapsed < timeout)
-        {
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-
-        if (elapsed >= timeout)
-        {
-            waitingForTroopsDestroyed = false;
-        }
-
-        waitingForCounterattack = true;
-
-        elapsed = 0f;
-        timeout = 5f;
-
-        while (waitingForCounterattack && elapsed < timeout)
-        {
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-
-        yield return new WaitForSeconds(2f);
-
-        PauseGame();
-        BlockPlayer(); // ✅ Bloquear jugador para mostrar cartas bloqueadas
-
-        ShowDialog("MOLT BÉ, HAS GUANYAT + 1 D'ENERGIA!", showImage: true, contextSprite: intelectBarIcon);
-        
-        if (intelectBarFillImage != null)
-        {
-            StartHighlightEffect(intelectBarFillImage.gameObject);
-        }
-
-        if (playerIntelect != null && playerIntelect.intelectSlider != null)
-        {
-            HighlightElement(playerIntelect.intelectSlider.GetComponent<RectTransform>());
-            StartHighlightEffect(playerIntelect.intelectSlider.gameObject);
-        }
-
-        // ✅ Mostrar cartas bloqueadas durante la explicación
-        UpdateTutorialVisualFeedback();
-
-        yield return StartCoroutine(ShowContinueButtonAfterDelay(4f));
-
-        if (intelectBarFillImage != null)
-        {
-            StopHighlightEffect(intelectBarFillImage.gameObject);
-        }
-
-        if (playerIntelect != null && playerIntelect.intelectSlider != null)
-        {
-            StopHighlightEffect(playerIntelect.intelectSlider.gameObject);
-        }
-
-        ClearHighlight();
-        HideOptionalImage();
-
-        yield return StartCoroutine(HidePopupWithAnimation());
-    }
-
-    private IEnumerator Tutorial_TeachAttack()
-    {
-        currentStep = 4;
-
-        yield return StartCoroutine(ShowAttackExplanation());
-
-        allowOnlySingleCards = false;
-        allowOnlyOperations = true;
-        allowedActionsRemaining = 1;
-
-        ShowDialog("FES UNA OPERACIÓ PER ATACAR", showImage: false);
-        UnblockPlayer();
-
-        foreach (Transform slot in playerCardManager.cardSlots)
-        {
-            if (slot.childCount > 0)
-            {
-                GameObject card = slot.GetChild(0).gameObject;
-                StartHighlightEffect(card);
-            }
-        }
-
-        if (playerCardManager.SumaButton != null)
-        {
-            StartHighlightEffect(playerCardManager.SumaButton.gameObject);
-        }
-        if (playerCardManager.RestaButton != null)
-        {
-            StartHighlightEffect(playerCardManager.RestaButton.gameObject);
-        }
-
-        waitingForPlayerAction = true;
-
-        float elapsed = 0f;
-        float timeout = 4f;
-
-        while (elapsed < timeout && waitingForPlayerAction)
-        {
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-
-        if (waitingForPlayerAction)
-        {
-            yield return StartCoroutine(HidePopupWithAnimation());
-        }
-
-        yield return new WaitUntil(() => !waitingForPlayerAction);
-
-        allowOnlyOperations = false;
-        allowedActionsRemaining = -1;
-
-        foreach (Transform slot in playerCardManager.cardSlots)
-        {
-            if (slot.childCount > 0)
-            {
-                GameObject card = slot.GetChild(0).gameObject;
-                StopHighlightEffect(card);
-            }
-        }
-
-        if (playerCardManager.SumaButton != null)
-        {
-            StopHighlightEffect(playerCardManager.SumaButton.gameObject);
-        }
-        if (playerCardManager.RestaButton != null)
-        {
-            StopHighlightEffect(playerCardManager.RestaButton.gameObject);
-        }
-
-        if (isPopupVisible)
-        {
-            yield return StartCoroutine(HidePopupWithAnimation());
-        }
-
-        ClearHighlight();
-        ResumeGame();
-    }
-
-    private IEnumerator Tutorial_PlayerAttacks()
-    {
-        currentStep = 5;
-
-        if (aiTower != null)
-        {
-            aiTowerHealthBeforeAttack = aiTower.currentHealth;
-        }
-
-        waitingForEnemyTowerDamage = true;
-
-        yield return new WaitUntil(() => !waitingForEnemyTowerDamage);
-
-        yield return new WaitForSeconds(1f);
-    }
-
-    private IEnumerator Tutorial_HealthPowerUp()
-    {
-        currentStep = 6;
-
-        BlockPlayer();
-
-        if (playerTower != null)
-        {
-            playerTowerHealthBeforeAttack = playerTower.currentHealth;
-        }
-
-        var card2 = cardManager.GetCardByIndex(1);
-        var card1 = cardManager.GetCardByIndex(0);
-        Vector3 spawnPos = aiSpawnPoint.position;
-        CardManager.GenerateResult result;
-        cardManager.GenerateCombinedCharacter(card2, card1, spawnPos, 3, '+', "AITeam", out result, aiIntelect);
-
-        waitingForTowerDamage = true;
-
-        float timeout = 15f;
-        float elapsed = 0f;
-
-        while (waitingForTowerDamage && elapsed < timeout)
-        {
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-
-        PauseGame();
-        BlockPlayer(); // ✅ Asegurar que está bloqueado
-
-        ShowDialog("OH NO, CURA'T!", showImage: true, contextSprite: healthPowerUpSprite);
-
-        allowedPowerUps = new string[] { "Health" };
-
-        if (PowerUpManager.Instance != null)
-        {
-            PowerUpManager.Instance.SetPowerUpBlocked("Health", false);
-        }
-
-        var healPowerUp = powerUpManager.GetPowerUpButton("Health");
-        if (healPowerUp != null)
-        {
-            HighlightElement(healPowerUp.GetComponent<RectTransform>());
-            StartHighlightEffect(healPowerUp.gameObject);
-        }
-
-        // ✅ Mostrar cartas bloqueadas durante la explicación
-        UpdateTutorialVisualFeedback();
-
-        UnblockPlayerForPowerUps();
-
-        waitingForPlayerAction = true;
-
-        float elapsedAction = 0f;
-        float messageTimeout = 1f;
-
-        while (elapsedAction < messageTimeout && waitingForPlayerAction)
-        {
-            elapsedAction += Time.deltaTime;
-            yield return null;
-        }
-
-        yield return new WaitUntil(() => !waitingForPlayerAction);
-
-        if (PowerUpManager.Instance != null)
-        {
-            PowerUpManager.Instance.SetPowerUpBlocked("Health", true);
-        }
-
-        allowedPowerUps = new string[0];
-
-        if (healPowerUp != null)
-        {
-            StopHighlightEffect(healPowerUp.gameObject);
-        }
-        ClearHighlight();
-        HideOptionalImage();
-
-        UpdatePopupContent("BEN FET!", showImage: false);
-
-        yield return new WaitForSeconds(2.5f);
-
-        yield return StartCoroutine(HidePopupWithAnimation());
-        ResumeGame();
-    }
-
-    private IEnumerator Tutorial_SlowTimePowerUp()
-    {
-        currentStep = 7;
-
-        // Generar ataque enemigo
-        var card1A = cardManager.GetCardByIndex(0);
-        var card1B = cardManager.GetCardByIndex(0);
-        Vector3 spawnPos = aiSpawnPoint.position;
-        CardManager.GenerateResult result;
-
-        // ✅ Generar el personaje combinado
-        bool success = cardManager.GenerateCombinedCharacter(card1A, card1B, spawnPos, 2, '+', "AITeam", out result, aiIntelect);
-
-        yield return new WaitForSeconds(2.5f);
-        // ⏸️ PAUSAR INMEDIATAMENTE después de generar
-        BlockPlayer();
-        PauseGame();
-        Debug.Log("[Tutorial] ⏸️ Paso 7: Juego PAUSADO inmediatamente");
-
-        // Primera pausa: Usar SlowTime
-        ShowDialog("FES QUE VAGIN MÉS LENTS!", showImage: true, contextSprite: slowTimePowerUpSprite);
-
-        allowedPowerUps = new string[] { "SlowTime" };
-
-        if (PowerUpManager.Instance != null)
-        {
-            PowerUpManager.Instance.SetPowerUpBlocked("SlowTime", false);
-        }
-
-        var slowPowerUp = powerUpManager.GetPowerUpButton("SlowTime");
-        if (slowPowerUp != null)
-        {
-            HighlightElement(slowPowerUp.GetComponent<RectTransform>());
-            StartHighlightEffect(slowPowerUp.gameObject);
-        }
-
-        // ✅ Mostrar cartas bloqueadas durante la explicación
-        UpdateTutorialVisualFeedback();
-
-        // ⏸️ MANTENER PAUSADO - solo desbloquear los powerups
-        UnblockPlayerForPowerUps();
-
-        waitingForPlayerAction = true;
-
-        yield return new WaitUntil(() => !waitingForPlayerAction);
-
-        if (PowerUpManager.Instance != null)
-        {
-            PowerUpManager.Instance.SetPowerUpBlocked("SlowTime", true);
-        }
-
-        allowedPowerUps = new string[0];
-
-        if (slowPowerUp != null)
-        {
-            StopHighlightEffect(slowPowerUp.gameObject);
-        }
-        ClearHighlight();
-        HideOptionalImage();
-
-        yield return StartCoroutine(HidePopupWithAnimation());
-
-        // ✅ VER 1 SEGUNDO CÓMO VA MÁS LENTO (gameplay activo)
-        Debug.Log("[Tutorial] ⏱️ Mostrando efecto SlowTime durante 1 segundo...");
-        yield return new WaitForSeconds(1f);
-
-        // ✅ VOLVER A PAUSAR después de ver el efecto
-        BlockPlayer();
-        PauseGame();
-        Debug.Log("[Tutorial] ⏸️ Juego pausado después de ver SlowTime");
-
-        // Aplicar boost al jugador
-        if (GameSpeedManager.Instance != null)
-        {
-            GameSpeedManager.Instance.RemoveActiveTagMultiplier("AITeam");
-            GameSpeedManager.Instance.ApplyTagSpeedMultiplier("PlayerTeam", 5.0f);
-            Debug.Log("[Tutorial] 🚀 Boost x5 aplicado a tropas del jugador!");
-        }
-
-        // Configurar restricciones para defensa
-        step7_hasDefended = false;
-        step7_hasAttacked = false;
-        allowedActionsRemaining = 2;
-        allowOnlySingleCards = true;
-        allowOnlyOperations = false;
-        restrictToLeftZone = true;
-        allowedSpecificCardValue = 2;
-
-        // Segunda pausa: Explicar defensa con carta 2
-        ShowDialog("PRIMER, DEFENSA'T AMB EL 2!", showImage: true, contextSprite: card2Sprite);
-
-        // ✅ ESPERAR MIENTRAS ESTÁ PAUSADO antes de ocultar el popup
-        yield return new WaitForSeconds(3f);
-        yield return StartCoroutine(HidePopupWithAnimation());
-
-        Debug.Log("[Tutorial] 🛡️ Paso 7 - Fase Defensa: Solo carta 2 permitida, solo zona izquierda");
-
-        if (playerCardManager.cardSlots.Count > 1)
-        {
-            Transform card2Slot = playerCardManager.cardSlots[1];
-
-            HighlightCard(card2Slot);
-
-            if (card2Slot.childCount > 0)
-            {
-                GameObject card2 = card2Slot.GetChild(0).gameObject;
-                StartHighlightEffect(card2);
-            }
-        }
-
-        UpdateTutorialVisualFeedback();
-
-        // ✅ AHORA desbloquear y reanudar SIN resetear velocidad
-        UnblockPlayer();
-        ResumeGameWithoutResetSpeed();
-
-        waitingForPlayerAction = true;
-
-        // ESPERAR hasta que defienda con carta 2
-        yield return new WaitUntil(() => step7_hasDefended);
-        Debug.Log("[Tutorial] ✅ Defensa completada en paso 7");
-
-        // PAUSAR inmediatamente después de defender
-        BlockPlayer();
-        PauseGame();
-
-        allowedSpecificCardValue = -1;
-
-        if (playerCardManager.cardSlots.Count > 1)
-        {
-            Transform card2Slot = playerCardManager.cardSlots[1];
-            if (card2Slot.childCount > 0)
-            {
-                GameObject card2 = card2Slot.GetChild(0).gameObject;
-                StopHighlightEffect(card2);
-            }
-        }
-
-        ClearHighlight();
-
-        // Cambiar a modo ataque
-        allowOnlySingleCards = false;
-        allowOnlyOperations = true;
-        restrictToLeftZone = false;
-
-        Debug.Log("[Tutorial] ⚔️ Paso 7 - Fase Ataque: Solo operaciones, cualquier zona");
-
-        ShowDialog("ARA, APROFITA PER ATACAR!", showImage: false);
-        yield return new WaitForSeconds(3f);
-        yield return StartCoroutine(HidePopupWithAnimation());
-
-        UnblockPlayer();
-        ResumeGameWithoutResetSpeed();
-
-        waitingForPlayerAction = true;
-
-        // ESPERAR hasta que ataque con operación
-        yield return new WaitUntil(() => step7_hasAttacked);
-        Debug.Log("[Tutorial] ✅ Ataque completado en paso 7");
-
-        // Limpiar restricciones
-        BlockPlayer();
-        allowedActionsRemaining = -1;
-        allowOnlySingleCards = false;
-        allowOnlyOperations = false;
-        restrictToLeftZone = false;
-        allowedSpecificCardValue = -1;
-
-        Debug.Log("[Tutorial] 🔓 Paso 7 completado - Todas las restricciones desactivadas");
-
-        if (aiTower != null)
-        {
-            aiTowerHealthBeforeAttack = aiTower.currentHealth;
-        }
-
-        waitingForEnemyTowerDamage = true;
-
-        yield return new WaitUntil(() => !waitingForEnemyTowerDamage);
-
-        yield return new WaitForSeconds(1f);
-    }
-
-    private IEnumerator Tutorial_TowerDestroyed()
-    {
-        currentStep = 8;
-
-        PauseGame();
-
-        ShowDialog("HAS DESTRUÏT LA TORRE...", showImage: false);
-
-        yield return new WaitForSeconds(4f);
-
-        UpdatePopupContent("I COMPLETAT EL TUTORIAL!", showImage: false);
-        yield return new WaitForSeconds(4f);
-
-        UpdatePopupContent("JA ESTÀS PREPARAT!", showImage: false);
-        yield return new WaitForSeconds(4f);
-
-        yield return StartCoroutine(HidePopupWithAnimation());
-
-        yield return new WaitForSeconds(1f);
-
-        if (PowerUpManager.Instance != null)
-        {
-            PowerUpManager.Instance.UnblockAllPowerUps();
-        }
-
-        UnityEngine.SceneManagement.SceneManager.LoadScene("WinScene");
-    }
-
-    private Transform FindCardSlotByValue(int cardValue)
-    {
-        foreach (Transform slot in playerCardManager.cardSlots)
-        {
-            if (slot.childCount > 0)
-            {
-                CardDisplay display = slot.GetComponentInChildren<CardDisplay>();
-                if (display != null && display.cardData != null && display.cardData.cardValue == cardValue)
-                {
-                    return slot;
-                }
-            }
-        }
-        return null;
     }
 
     private void ShowDialog(string message, bool showImage, Sprite contextSprite = null, bool showSpeechBubble = true)
@@ -1274,10 +1592,9 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
-    private void HideTutorialPanel()
-    {
-        StartCoroutine(HidePopupWithAnimation());
-    }
+    // ========================================
+    // MÉTODOS DE CONTROL DEL JUEGO
+    // ========================================
 
     private void PauseGame()
     {
@@ -1296,6 +1613,15 @@ public class TutorialManager : MonoBehaviour
         if (PowerUpManager.Instance != null)
         {
             PowerUpManager.Instance.PausePowerUps();
+        }
+
+        if (playerIntelect != null)
+        {
+            playerIntelect.PauseRegeneration();
+        }
+        if (aiIntelect != null)
+        {
+            aiIntelect.PauseRegeneration();
         }
 
         Character[] characters = FindObjectsOfType<Character>();
@@ -1338,6 +1664,15 @@ public class TutorialManager : MonoBehaviour
             PowerUpManager.Instance.ResumePowerUps();
         }
 
+        if (playerIntelect != null)
+        {
+            playerIntelect.ResumeRegeneration();
+        }
+        if (aiIntelect != null)
+        {
+            aiIntelect.ResumeRegeneration();
+        }
+
         Character[] characters = FindObjectsOfType<Character>();
         foreach (var character in characters)
         {
@@ -1375,6 +1710,15 @@ public class TutorialManager : MonoBehaviour
             PowerUpManager.Instance.ResumePowerUps();
         }
 
+        if (playerIntelect != null)
+        {
+            playerIntelect.ResumeRegeneration();
+        }
+        if (aiIntelect != null)
+        {
+            aiIntelect.ResumeRegeneration();
+        }
+
         Character[] characters = FindObjectsOfType<Character>();
         foreach (var character in characters)
         {
@@ -1403,7 +1747,7 @@ public class TutorialManager : MonoBehaviour
         isPlayerBlocked = true;
         if (playerCardManager != null) playerCardManager.enabled = false;
         if (playableAreaUI != null) playableAreaUI.enabled = false;
-        
+
         UpdateTutorialVisualFeedback();
     }
 
@@ -1412,7 +1756,9 @@ public class TutorialManager : MonoBehaviour
         isPlayerBlocked = false;
         if (playerCardManager != null) playerCardManager.enabled = true;
         if (playableAreaUI != null) playableAreaUI.enabled = true;
-        
+
+        PauseAllHighlightsForPlayerInteraction(true);
+
         RestoreTutorialVisualFeedback();
     }
 
@@ -1421,9 +1767,13 @@ public class TutorialManager : MonoBehaviour
         isPlayerBlocked = false;
         if (playerCardManager != null) playerCardManager.enabled = false;
         if (playableAreaUI != null) playableAreaUI.enabled = false;
-        
+
         UpdateTutorialVisualFeedback();
     }
+
+    // ========================================
+    // MÉTODOS DE HIGHLIGHT
+    // ========================================
 
     private void HighlightCard(Transform cardSlot)
     {
@@ -1467,6 +1817,49 @@ public class TutorialManager : MonoBehaviour
         if (highlight != null) highlight.StopHighlight();
     }
 
+    private void PauseAllHighlightsForPlayerInteraction(bool pause)
+    {
+        if (playerCardManager == null) return;
+
+        foreach (Transform slot in playerCardManager.cardSlots)
+        {
+            if (slot.childCount == 0) continue;
+
+            CardDisplay display = slot.GetComponentInChildren<CardDisplay>();
+            if (display == null) continue;
+
+            TutorialHighlight highlight = display.GetComponent<TutorialHighlight>();
+            if (highlight != null)
+            {
+                highlight.PauseForPlayerCardManager(pause);
+            }
+        }
+    }
+
+    private int CountTroopsByTag(string tag)
+    {
+        Character[] characters = FindObjectsOfType<Character>();
+        CharacterCombined[] combined = FindObjectsOfType<CharacterCombined>();
+
+        int count = 0;
+
+        foreach (var character in characters)
+        {
+            if (character.CompareTag(tag)) count++;
+        }
+
+        foreach (var comb in combined)
+        {
+            if (comb.CompareTag(tag)) count++;
+        }
+
+        return count;
+    }
+
+    // ========================================
+    // MÉTODOS PÚBLICOS PARA VALIDACIÓN
+    // ========================================
+
     public bool IsTutorialPaused()
     {
         return isTutorialPaused;
@@ -1494,7 +1887,7 @@ public class TutorialManager : MonoBehaviour
     public bool CanPlaySpecificCard(int cardValue)
     {
         if (!CanPlaySingleCard()) return false;
-        
+
         return IsSpecificCardAllowed(cardValue);
     }
 
@@ -1521,30 +1914,20 @@ public class TutorialManager : MonoBehaviour
 
     public void OnPlayerPlaysCard(int cardValue)
     {
-        Debug.Log($"[Tutorial] 🎴 OnPlayerPlaysCard llamado: valor={cardValue}, paso={currentStep}");
-        
-        // Verificar si puede jugar esta carta específica
         if (!CanPlaySpecificCard(cardValue))
         {
-            Debug.LogWarning($"[Tutorial] ⛔ Carta {cardValue} NO permitida en este paso (solo se permite: {allowedSpecificCardValue})");
-            
             if (ScreenFlashEffect.Instance != null)
             {
                 ScreenFlashEffect.Instance.Flash();
             }
-            
+
             return;
         }
 
-        Debug.Log($"[Tutorial] ✅ Carta {cardValue} permitida - Procesando acción");
-
-        // Paso 2: Solo carta 5 para defender
         if (currentStep == 2 && cardValue == 5 && waitingForPlayerAction)
         {
-            Debug.Log("[Tutorial] 🛡️ Paso 2: Carta 5 jugada - Completando defensa");
             waitingForPlayerAction = false;
-            
-            // Decrementar acciones permitidas
+
             if (allowedActionsRemaining > 0)
             {
                 allowedActionsRemaining--;
@@ -1556,14 +1939,11 @@ public class TutorialManager : MonoBehaviour
             return;
         }
 
-        // Paso 7: Solo carta 2 para defender
         if (currentStep == 7 && !step7_hasDefended && cardValue == 2 && waitingForPlayerAction)
         {
-            Debug.Log("[Tutorial] 🛡️ Paso 7: Carta 2 jugada - Registrando defensa");
             step7_hasDefended = true;
             waitingForPlayerAction = false;
-            
-            // Decrementar acciones permitidas
+
             if (allowedActionsRemaining > 0)
             {
                 allowedActionsRemaining--;
@@ -1575,7 +1955,6 @@ public class TutorialManager : MonoBehaviour
             return;
         }
 
-        // Cualquier otro caso: decrementar acciones si aplica
         if (allowedActionsRemaining > 0)
         {
             allowedActionsRemaining--;
@@ -1589,31 +1968,21 @@ public class TutorialManager : MonoBehaviour
 
     public void OnPlayerPlaysOperation()
     {
-        Debug.Log($"[Tutorial] ⚔️ OnPlayerPlaysOperation llamado - paso={currentStep}");
-        
-        // Verificar si puede jugar operaciones
         if (!CanPlayOperation())
         {
-            Debug.LogWarning($"[Tutorial] ⛔ Operaciones NO permitidas en este paso");
-            
             if (ScreenFlashEffect.Instance != null)
             {
                 ScreenFlashEffect.Instance.Flash();
             }
-            
+
             return;
         }
 
-        Debug.Log($"[Tutorial] ✅ Operación permitida - Procesando acción");
-
-        // Paso 7: Ataque después de defender
         if (currentStep == 7 && step7_hasDefended && !step7_hasAttacked && waitingForPlayerAction)
         {
-            Debug.Log("[Tutorial] ⚔️ Paso 7: Operación jugada - Registrando ataque");
             step7_hasAttacked = true;
             waitingForPlayerAction = false;
-            
-            // Decrementar acciones permitidas
+
             if (allowedActionsRemaining > 0)
             {
                 allowedActionsRemaining--;
@@ -1625,13 +1994,10 @@ public class TutorialManager : MonoBehaviour
             return;
         }
 
-        // Paso 4: Enseñar ataque
         if (currentStep == 4 && waitingForPlayerAction)
         {
-            Debug.Log("[Tutorial] ⚔️ Paso 4: Operación jugada - Completando enseñanza de ataque");
             waitingForPlayerAction = false;
-            
-            // Decrementar acciones permitidas
+
             if (allowedActionsRemaining > 0)
             {
                 allowedActionsRemaining--;
@@ -1643,7 +2009,6 @@ public class TutorialManager : MonoBehaviour
             return;
         }
 
-        // Cualquier otro caso: decrementar acciones si aplica
         if (allowedActionsRemaining > 0)
         {
             allowedActionsRemaining--;

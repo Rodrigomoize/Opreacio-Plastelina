@@ -1,63 +1,88 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
 /// <summary>
-/// Efecto de resaltado para el tutorial inspirado en CardDisplay
-/// Usa escalado suave + parpadeo de color para llamar la atenciÛn
+/// Gestiona TODOS los efectos visuales del tutorial con prioridad sobre PlayerCardManager
+/// - Resaltado con pulso de escala y color (cuando la carta est√° seleccionable)
+/// - Tinte gris para cartas bloqueadas
+/// - Se pausa cuando PlayerCardManager toma control (selecci√≥n activa)
 /// </summary>
 [RequireComponent(typeof(RectTransform))]
 public class TutorialHighlight : MonoBehaviour
 {
-    [Header("ConfiguraciÛn de Escala")]
-    [Tooltip("Escala m·xima del pulso (1.2 = 120% del tamaÒo original)")]
+    [Header("Configuraci√≥n de Escala")]
     [Range(1.0f, 1.5f)]
     public float pulseScaleMax = 1.15f;
-    
-    [Tooltip("Escala mÌnima del pulso (0.95 = 95% del tamaÒo original)")]
+
     [Range(0.8f, 1.0f)]
     public float pulseScaleMin = 1.0f;
-    
-    [Tooltip("Velocidad del pulso de escala")]
+
     [Range(0.5f, 5f)]
     public float pulseSpeed = 2f;
-    
-    [Header("ConfiguraciÛn de Color")]
-    [Tooltip("Activar parpadeo de color")]
+
+    [Header("Configuraci√≥n de Color")]
     public bool enableColorPulse = true;
-    
-    [Tooltip("Color del resaltado")]
     public Color highlightColor = Color.yellow;
-    
-    [Tooltip("Intensidad del color (0 = sin efecto, 1 = color completo)")]
+
     [Range(0f, 1f)]
     public float colorIntensity = 0.5f;
-    
-    [Header("DetecciÛn Autom·tica")]
-    [Tooltip("Buscar Image en el objeto y sus hijos")]
-    public bool autoDetectImages = true;
-    
-    [Tooltip("Buscar Graphic (Text, Image, etc.) si no encuentra Image")]
-    public bool includeAllGraphics = true;
+
+    [Header("Tutorial Blocking")]
+    public Color blockedColor = new Color(0.3f, 0.3f, 0.3f, 0.5f);
+
+    [Range(0f, 1f)]
+    public float blockedTintStrength = 0.7f;
+
+    [Header("Ocultaci√≥n de Cartas")]
+    [Tooltip("Alpha cuando est√° oculta")]
+    [Range(0f, 0.3f)]
+    public float hiddenAlpha = 0.15f;
+
+    [Header("Configuraci√≥n de Componentes")]
+    public bool autoDetectImages = true; // Declarar la variable autoDetectImages
 
     // Estado
     private Vector3 originalScale;
     private Vector3 targetScale;
     private bool isHighlighting = false;
+    private bool isBlocked = false;
+    private bool isPausedByPlayerCardManager = false;
+    private bool isHidden = false;
+    private HideMode currentHideMode = HideMode.None;
     private Coroutine highlightCoroutine;
-    
+
     // Componentes visuales
     private Image[] images;
     private Graphic[] graphics;
     private Color[] originalColors;
+    private CanvasGroup canvasGroup;
     private RectTransform rectTransform;
+    private CardDisplay cardDisplay;
+    private bool includeAllGraphics = false; // Agregar esta l√≠nea para definir la variable
+
+    public enum HideMode
+    {
+        None,           // Visible normal
+        ClickToReveal,  // Oculta, click para mostrar (modo actual)
+        Locked          // Oculta hasta que el tutorial lo permita
+    }
 
     void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
         originalScale = rectTransform.localScale;
         targetScale = originalScale;
-        
+
+        cardDisplay = GetComponent<CardDisplay>();
+
+        // Crear CanvasGroup para control de alpha
+        canvasGroup = GetComponent<CanvasGroup>();
+        if (canvasGroup == null)
+        {
+            canvasGroup = gameObject.AddComponent<CanvasGroup>();
+        }
+
         if (autoDetectImages)
         {
             DetectComponents();
@@ -66,38 +91,31 @@ public class TutorialHighlight : MonoBehaviour
 
     void Update()
     {
-        // Animar escala suavemente (igual que CardDisplay)
-        if (rectTransform.localScale != targetScale)
+        if (!isPausedByPlayerCardManager && rectTransform.localScale != targetScale)
         {
             rectTransform.localScale = Vector3.Lerp(
-                rectTransform.localScale, 
-                targetScale, 
-                Time.unscaledDeltaTime * 10f // Usar unscaledDeltaTime para que funcione con Time.timeScale = 0
+                rectTransform.localScale,
+                targetScale,
+                Time.unscaledDeltaTime * 10f
             );
         }
     }
 
-    /// <summary>
-    /// Detecta componentes Image y Graphic autom·ticamente
-    /// </summary>
     private void DetectComponents()
     {
-        // Detectar Images
         images = GetComponentsInChildren<Image>(true);
-        
-        // Si no hay Images, buscar todos los Graphic (Text, RawImage, etc.)
-        if ((images == null || images.Length == 0) && includeAllGraphics)
+
+        if ((images == null || images.Length == 0) &&   includeAllGraphics)
         {
             graphics = GetComponentsInChildren<Graphic>(true);
         }
 
-        // Guardar colores originales
         int totalComponents = (images?.Length ?? 0) + (graphics?.Length ?? 0);
         if (totalComponents > 0)
         {
             originalColors = new Color[totalComponents];
             int index = 0;
-            
+
             if (images != null)
             {
                 foreach (var img in images)
@@ -105,7 +123,7 @@ public class TutorialHighlight : MonoBehaviour
                     originalColors[index++] = img.color;
                 }
             }
-            
+
             if (graphics != null)
             {
                 foreach (var graphic in graphics)
@@ -113,24 +131,130 @@ public class TutorialHighlight : MonoBehaviour
                     originalColors[index++] = graphic.color;
                 }
             }
-            
-            Debug.Log($"[TutorialHighlight] ? Detectados {totalComponents} componentes visuales en '{gameObject.name}'");
-        }
-        else
-        {
-            Debug.LogWarning($"[TutorialHighlight] ?? No se encontraron componentes visuales en '{gameObject.name}'");
         }
     }
 
     /// <summary>
-    /// Inicia el efecto de resaltado
+    /// Oculta la carta con modo "Click para revelar" (modo actual)
     /// </summary>
+    public void HideCard_ClickToReveal()
+    {
+        currentHideMode = HideMode.ClickToReveal;
+        isHidden = true;
+
+        if (canvasGroup != null)
+        {
+            canvasGroup.alpha = hiddenAlpha;
+        }
+
+        Debug.Log($"[TutorialHighlight] üëÅÔ∏è Carta OCULTA (Click para revelar): {gameObject.name}");
+    }
+
+    /// <summary>
+    /// Oculta la carta en modo bloqueado (el tutorial debe revelarla)
+    /// </summary>
+    public void HideCard_Locked()
+    {
+        currentHideMode = HideMode.Locked;
+        isHidden = true;
+
+        if (canvasGroup != null)
+        {
+            canvasGroup.alpha = hiddenAlpha;
+        }
+
+        // Deshabilitar interacci√≥n
+        if (canvasGroup != null)
+        {
+            canvasGroup.interactable = false;
+            canvasGroup.blocksRaycasts = false;
+        }
+
+        Debug.Log($"[TutorialHighlight] üîí Carta BLOQUEADA (Tutorial debe revelar): {gameObject.name}");
+    }
+
+    /// <summary>
+    /// Revela la carta (solo funciona si no est√° en modo Locked O si forzamos)
+    /// </summary>
+    public void RevealCard(bool force = false)
+    {
+        if (currentHideMode == HideMode.Locked && !force)
+        {
+            Debug.LogWarning($"[TutorialHighlight] ‚ö†Ô∏è Intento de revelar carta bloqueada sin force: {gameObject.name}");
+            return;
+        }
+
+        currentHideMode = HideMode.None;
+        isHidden = false;
+
+        if (canvasGroup != null)
+        {
+            canvasGroup.alpha = 1f;
+            canvasGroup.interactable = true;
+            canvasGroup.blocksRaycasts = true;
+        }
+
+        Debug.Log($"[TutorialHighlight] üëÅÔ∏è‚úÖ Carta REVELADA: {gameObject.name}");
+    }
+
+    /// <summary>
+    /// Maneja el click en carta oculta (solo si es modo ClickToReveal)
+    /// </summary>
+    public void OnCardClicked()
+    {
+        if (isHidden && currentHideMode == HideMode.ClickToReveal)
+        {
+            RevealCard();
+        }
+    }
+
+    /// <summary>
+    /// Pausa el efecto visual del tutorial para dar prioridad a PlayerCardManager
+    /// </summary>
+    public void PauseForPlayerCardManager(bool pause)
+    {
+        isPausedByPlayerCardManager = pause;
+
+        if (pause)
+        {
+            // Detener highlight si estaba activo
+            if (isHighlighting)
+            {
+                if (highlightCoroutine != null)
+                {
+                    StopCoroutine(highlightCoroutine);
+                    highlightCoroutine = null;
+                }
+                targetScale = originalScale;
+            }
+
+            // Restaurar colores para que PlayerCardManager tome control
+            if (isBlocked)
+            {
+                RestoreOriginalColors();
+            }
+        }
+        else
+        {
+            // Reactivar efectos si correspond√≠a
+            if (isHighlighting)
+            {
+                highlightCoroutine = StartCoroutine(HighlightCoroutine());
+            }
+            if (isBlocked)
+            {
+                ApplyBlockedTint();
+            }
+        }
+    }
+
     public void StartHighlight()
     {
-        if (isHighlighting)
+        if (isHighlighting || isPausedByPlayerCardManager || isHidden) return;
+
+        if (isBlocked)
         {
-            Debug.Log($"[TutorialHighlight] Ya est· resaltando: {gameObject.name}");
-            return;
+            SetBlocked(false);
         }
 
         isHighlighting = true;
@@ -141,12 +265,9 @@ public class TutorialHighlight : MonoBehaviour
         }
 
         highlightCoroutine = StartCoroutine(HighlightCoroutine());
-        Debug.Log($"[TutorialHighlight] ? Resaltado iniciado en '{gameObject.name}'");
+        Debug.Log($"[TutorialHighlight] üåü Resaltado iniciado en '{gameObject.name}'");
     }
 
-    /// <summary>
-    /// Detiene el efecto de resaltado
-    /// </summary>
     public void StopHighlight()
     {
         if (!isHighlighting) return;
@@ -159,31 +280,108 @@ public class TutorialHighlight : MonoBehaviour
             highlightCoroutine = null;
         }
 
-        // Restaurar estado original
         targetScale = originalScale;
-        RestoreOriginalColors();
-        
-        Debug.Log($"[TutorialHighlight] ?? Resaltado detenido en '{gameObject.name}'");
+
+        if (!isPausedByPlayerCardManager)
+        {
+            RestoreOriginalColors();
+        }
+
+        Debug.Log($"[TutorialHighlight] üîµ Resaltado detenido en '{gameObject.name}'");
+    }
+
+    public void SetBlocked(bool blocked)
+    {
+        if (isBlocked == blocked || isPausedByPlayerCardManager) return;
+
+        isBlocked = blocked;
+
+        if (blocked && isHighlighting)
+        {
+            StopHighlight();
+        }
+
+        if (blocked)
+        {
+            ApplyBlockedTint();
+            Debug.Log($"[TutorialHighlight] üö´ Carta bloqueada: '{gameObject.name}'");
+        }
+        else
+        {
+            RestoreOriginalColors();
+            Debug.Log($"[TutorialHighlight] ‚úÖ Carta desbloqueada: '{gameObject.name}'");
+        }
     }
 
     /// <summary>
-    /// Corrutina de efecto de pulso (escala + color)
+    /// NUEVO: Fuerza el estado bloqueado AHORA (ignorando PlayerCardManager temporalmente)
+    /// √ötil para bloquear todas las cartas durante explicaciones
     /// </summary>
+    public void ForceBlockedState(bool blocked)
+    {
+        bool wasPaused = isPausedByPlayerCardManager;
+        isPausedByPlayerCardManager = false; // Temporal para aplicar el cambio
+
+        isBlocked = blocked;
+
+        if (blocked)
+        {
+            if (isHighlighting)
+            {
+                StopHighlight();
+            }
+            ApplyBlockedTint();
+        }
+        else
+        {
+            RestoreOriginalColors();
+        }
+
+        isPausedByPlayerCardManager = wasPaused;
+        Debug.Log($"[TutorialHighlight] üí™ Estado forzado (bloqueado={blocked}) en '{gameObject.name}'");
+    }
+
+    private void ApplyBlockedTint()
+    {
+        if (isPausedByPlayerCardManager) return;
+
+        int index = 0;
+
+        if (images != null)
+        {
+            foreach (var img in images)
+            {
+                if (img != null && index < originalColors.Length)
+                {
+                    img.color = Color.Lerp(originalColors[index], blockedColor, blockedTintStrength);
+                    index++;
+                }
+            }
+        }
+
+        if (graphics != null)
+        {
+            foreach (var graphic in graphics)
+            {
+                if (graphic != null && index < originalColors.Length)
+                {
+                    graphic.color = Color.Lerp(originalColors[index], blockedColor, blockedTintStrength);
+                    index++;
+                }
+            }
+        }
+    }
+
     private IEnumerator HighlightCoroutine()
     {
-        while (isHighlighting)
+        while (isHighlighting && !isPausedByPlayerCardManager)
         {
-            // Calcular pulso (oscila entre 0 y 1)
             float pulse = Mathf.PingPong(Time.unscaledTime * pulseSpeed, 1f);
-            
-            // Aplicar curva suave
             pulse = Mathf.SmoothStep(0f, 1f, pulse);
 
-            // EFECTO 1: ESCALA (como CardDisplay hover)
             float currentScale = Mathf.Lerp(pulseScaleMin, pulseScaleMax, pulse);
             targetScale = originalScale * currentScale;
 
-            // EFECTO 2: COLOR (parpadeo)
             if (enableColorPulse)
             {
                 Color targetColor = Color.Lerp(Color.white, highlightColor, pulse * colorIntensity);
@@ -194,11 +392,10 @@ public class TutorialHighlight : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Aplica el color de pulso a todos los componentes
-    /// </summary>
     private void ApplyColorPulse(Color targetColor)
     {
+        if (isPausedByPlayerCardManager) return;
+
         int index = 0;
 
         if (images != null)
@@ -226,11 +423,10 @@ public class TutorialHighlight : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Restaura los colores originales
-    /// </summary>
     private void RestoreOriginalColors()
     {
+        if (isPausedByPlayerCardManager) return;
+
         int index = 0;
 
         if (images != null)
@@ -263,31 +459,6 @@ public class TutorialHighlight : MonoBehaviour
 
     void OnDestroy()
     {
-        StopHighlight();
-    }
-
-    /// <summary>
-    /// MÈtodo para debugging - fuerza redetecciÛn
-    /// </summary>
-    [ContextMenu("Redetectar Componentes")]
-    public void ForceRedetect()
-    {
-        DetectComponents();
-    }
-
-    /// <summary>
-    /// Test r·pido desde el Inspector
-    /// </summary>
-    [ContextMenu("Test Highlight 3s")]
-    public void TestHighlight()
-    {
-        StartHighlight();
-        StartCoroutine(StopAfterDelay(3f));
-    }
-
-    private IEnumerator StopAfterDelay(float delay)
-    {
-        yield return new WaitForSecondsRealtime(delay);
         StopHighlight();
     }
 }
