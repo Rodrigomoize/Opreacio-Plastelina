@@ -573,7 +573,7 @@ public class TutorialManager : MonoBehaviour
         CardManager.GenerateResult result;
         cardManager.GenerateCombinedCharacter(card2, card3, spawnPos, 5, '+', "AITeam", out result, aiIntelect);
 
-        yield return new WaitForSeconds(2.4f);
+        yield return new WaitForSeconds(4f);
 
         PauseGame();
         BlockPlayer();

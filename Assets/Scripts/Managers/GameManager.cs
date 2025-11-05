@@ -363,6 +363,46 @@ public class GameManager : MonoBehaviour
 
             UnsubscribeFromTimer();
         }
+        else if (scene.name == "TutorialScene")
+        {
+            // Tutorial siempre usa dificultad Media para equilibrio
+            currentSelectedDifficulty = IAController.AIDificultad.Media;
+            
+            if (DifficultyManager.Instance != null)
+            {
+                DifficultyManager.Instance.SetDifficulty(IAController.AIDificultad.Media);
+            }
+
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.StopAndResetMusic();
+            }
+
+            if (ScoreManager.Instance != null)
+            {
+                ScoreManager.Instance.ResetScore();
+            }
+
+            if (gameTimerManager != null)
+            {
+                float duracion = GetDurationForDifficulty();
+                gameTimerManager.ResetTimer();
+                gameTimerManager.StartCountdown(duracion);
+            }
+
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayGameplayMusic();
+            }
+
+            if (aiCardManager != null)
+            {
+                aiCardManager.SetDificultad(IAController.AIDificultad.Media);
+            }
+
+            ApplyDifficultySpeed();
+            SubscribeToTimer();
+        }
         else if (scene.name == "PlayScene")
         {
             // DETENER música de menú antes de iniciar gameplay
