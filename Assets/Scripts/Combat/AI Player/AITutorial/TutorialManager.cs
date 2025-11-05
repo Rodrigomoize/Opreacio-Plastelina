@@ -807,9 +807,6 @@ public class TutorialManager : MonoBehaviour
 
         ShowDialog("FES UNA OPERACIÓ PER ATACAR", showImage: false);
 
-        UnblockAll();
-        UnblockAllCards();
-
         foreach (Transform slot in playerCardManager.cardSlots)
         {
             if (slot.childCount > 0)
@@ -831,7 +828,8 @@ public class TutorialManager : MonoBehaviour
         yield return StartCoroutine(ShowContinueButtonAfterDelay(3f));
         yield return StartCoroutine(HidePopupWithAnimation());
 
-
+        UnblockAll();
+        UnblockAllCards();
         UnblockPlayer();
         ResumeGame();
 
@@ -990,7 +988,6 @@ public class TutorialManager : MonoBehaviour
         yield return StartCoroutine(ShowContinueButtonAfterDelay(2f));
         yield return StartCoroutine(HidePopupWithAnimation());
 
-        UnblockAll();
         ResumeGame();
     }
 
@@ -1002,6 +999,7 @@ public class TutorialManager : MonoBehaviour
     {
         currentStep = 7;
 
+        aiIntelect.AddIntelect(7);
         // Generar enemigo 1+1
         var card1A = cardManager.GetCardByIndex(0);
         var card1B = cardManager.GetCardByIndex(0);
@@ -1035,13 +1033,15 @@ public class TutorialManager : MonoBehaviour
             StartHighlightEffect(slowPowerUp.gameObject);
         }
 
+
         UnblockPlayerForPowerUps();
         UnblockAll();
         waitingForPlayerAction = true;
-
+        PauseGame();
         yield return new WaitUntil(() => !waitingForPlayerAction);
 
-        ResumeGame();
+        yield return new WaitForSeconds(1f);
+
 
         if (PowerUpManager.Instance != null)
         {
@@ -1122,7 +1122,7 @@ public class TutorialManager : MonoBehaviour
             }
         }
 
-        ClearHighlight();
+         ClearHighlight();
 
         allowOnlySingleCards = false;
         allowOnlyOperations = true;

@@ -928,8 +928,10 @@ MonoBehaviour:
   enableColorPulse: 1
   highlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   colorIntensity: 0.5
+  blockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
+  blockedTintStrength: 0.7
+  hiddenAlpha: 0.15
   autoDetectImages: 1
-  includeAllGraphics: 1
 --- !u!1 &174509995
 GameObject:
   m_ObjectHideFlags: 0
@@ -1419,8 +1421,10 @@ MonoBehaviour:
   enableColorPulse: 1
   highlightColor: {r: 1, g: 0.9597835, b: 0.495283, a: 1}
   colorIntensity: 0.5
+  blockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
+  blockedTintStrength: 0.7
+  hiddenAlpha: 0.15
   autoDetectImages: 1
-  includeAllGraphics: 1
 --- !u!1 &264406628
 GameObject:
   m_ObjectHideFlags: 0
@@ -4178,7 +4182,7 @@ Transform:
   m_GameObject: {fileID: 1055435151}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.02, y: 0, z: 4.7}
+  m_LocalPosition: {x: -2.093, y: 0, z: 5.308}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4769,8 +4773,10 @@ MonoBehaviour:
   enableColorPulse: 1
   highlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   colorIntensity: 0.5
+  blockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
+  blockedTintStrength: 0.7
+  hiddenAlpha: 0.15
   autoDetectImages: 1
-  includeAllGraphics: 1
 --- !u!1 &1254470900
 GameObject:
   m_ObjectHideFlags: 0
@@ -5487,8 +5493,10 @@ MonoBehaviour:
   enableColorPulse: 1
   highlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   colorIntensity: 0.5
+  blockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
+  blockedTintStrength: 0.7
+  hiddenAlpha: 0.15
   autoDetectImages: 1
-  includeAllGraphics: 1
 --- !u!1 &1318414164
 GameObject:
   m_ObjectHideFlags: 0
@@ -5945,8 +5953,10 @@ MonoBehaviour:
   enableColorPulse: 1
   highlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   colorIntensity: 0.5
+  blockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
+  blockedTintStrength: 0.7
+  hiddenAlpha: 0.15
   autoDetectImages: 1
-  includeAllGraphics: 1
 --- !u!1 &1439576984
 GameObject:
   m_ObjectHideFlags: 0
@@ -6098,8 +6108,10 @@ MonoBehaviour:
   enableColorPulse: 1
   highlightColor: {r: 1, g: 0.95452154, b: 0.4292453, a: 1}
   colorIntensity: 0.5
+  blockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
+  blockedTintStrength: 0.7
+  hiddenAlpha: 0.15
   autoDetectImages: 1
-  includeAllGraphics: 1
 --- !u!1 &1443187162
 GameObject:
   m_ObjectHideFlags: 0
