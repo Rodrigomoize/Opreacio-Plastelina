@@ -297,15 +297,21 @@ public class TutorialManager : MonoBehaviour
                 highlight = display.gameObject.AddComponent<TutorialHighlight>();
             }
 
-            highlight.ForceBlockedState(true);
+            // Forzar reset del estado antes de bloquearlo
+            highlight.RevealCard(force: true); // Primero reseteamos cualquier estado previo
+            highlight.ForceBlockedState(true); // Luego forzamos el estado bloqueado
+
+            // También reseteamos el color de la carta si tiene Image
+            Image cardImage = display.GetComponent<Image>();
+            if (cardImage != null)
+            {
+                cardImage.color = tutorialBlockedColor;
+            }
         }
 
         Debug.Log("[Tutorial] 🔒 Cartas bloqueadas (Locked mode)");
     }
 
-    /// <summary>
-    /// Desbloquea todas las cartas (revela y restaura)
-    /// </summary>
     private void UnblockAllCards()
     {
         if (playerCardManager == null) return;
@@ -323,10 +329,18 @@ public class TutorialManager : MonoBehaviour
                 highlight.RevealCard(force: true);
                 highlight.ForceBlockedState(false);
             }
+
+            // Restaurar color original
+            Image cardImage = display.GetComponent<Image>();
+            if (cardImage != null)
+            {
+                cardImage.color = Color.white; // O el color original que debería tener
+            }
         }
 
         Debug.Log("[Tutorial] 🔓 Todas las cartas desbloqueadas");
     }
+
 
     private void BlockOperatorsInteractive()
     {
@@ -542,7 +556,6 @@ public class TutorialManager : MonoBehaviour
         yield return StartCoroutine(ShowContinueButtonAfterDelay(2f));
         yield return StartCoroutine(HidePopupWithAnimation());
 
-        UnblockAllCards();
     }
 
     // ========================================
@@ -574,7 +587,7 @@ public class TutorialManager : MonoBehaviour
         // Mostrar explicación de defensa
         yield return StartCoroutine(ShowDefenseExplanation());
 
-        UnblockAllCards();
+        UnblockAll();
     }
 
     // ========================================
@@ -616,7 +629,7 @@ public class TutorialManager : MonoBehaviour
         yield return StartCoroutine(HidePopupWithAnimation());
 
         // Desbloquear para jugar
-        UnblockAllCards();
+        UnblockAll();
         UnblockPlayer();
 
         waitingForPlayerAction = true;
@@ -632,6 +645,7 @@ public class TutorialManager : MonoBehaviour
                 StopHighlightEffect(card5);
             }
         }
+        BlockAllLocked();
 
         yield return new WaitForSeconds(1);
         // Popup de explicación de coste de intelecto
@@ -648,7 +662,7 @@ public class TutorialManager : MonoBehaviour
 
 
         BlockPlayer();
-        BlockAllCardsLocked();
+        BlockAllLocked();
 
         ShowDialog("CADA CARTA TÉ UN COST D'ENERGIA", showImage: true, contextSprite: intelectCost);
 
@@ -681,8 +695,6 @@ public class TutorialManager : MonoBehaviour
         HideOptionalImage();
 
         yield return StartCoroutine(HidePopupWithAnimation());
-
-        UnblockAllCards();
         ResumeGame();
     }
 
@@ -694,8 +706,8 @@ public class TutorialManager : MonoBehaviour
     {
         currentStep = 3;
 
-        yield return new WaitForSeconds(0.5f);
-
+        yield return new WaitForSeconds(1f);
+        BlockAllLocked();
         if (playerIntelect != null)
         {
             playerIntelectBeforeCounterattack = playerIntelect.currentIntelect;
@@ -737,7 +749,7 @@ public class TutorialManager : MonoBehaviour
 
         PauseGame();
         BlockPlayer();
-        BlockAllCardsLocked();
+        BlockAllLocked();
 
         ShowDialog("MOLT BÉ, HAS GUANYAT + 1 D'ENERGIA!", showImage: true, contextSprite: intelectBarIcon);
 
@@ -771,7 +783,7 @@ public class TutorialManager : MonoBehaviour
 
         yield return StartCoroutine(HidePopupWithAnimation());
 
-        UnblockAllCards();
+        UnblockAll();
         ResumeGame();
     }
 
@@ -791,9 +803,12 @@ public class TutorialManager : MonoBehaviour
 
         PauseGame();
         BlockPlayer();
-        BlockAllCardsLocked();
+        BlockAllLocked();
 
         ShowDialog("FES UNA OPERACIÓ PER ATACAR", showImage: false);
+
+        UnblockAll();
+        UnblockAllCards();
 
         foreach (Transform slot in playerCardManager.cardSlots)
         {
@@ -816,8 +831,7 @@ public class TutorialManager : MonoBehaviour
         yield return StartCoroutine(ShowContinueButtonAfterDelay(3f));
         yield return StartCoroutine(HidePopupWithAnimation());
 
-        UnblockAll();
-        UnblockAllCards();
+
         UnblockPlayer();
         ResumeGame();
 
@@ -856,6 +870,8 @@ public class TutorialManager : MonoBehaviour
     {
         currentStep = 5;
 
+        BlockAllLocked();
+
         if (aiTower != null)
         {
             aiTowerHealthBeforeAttack = aiTower.currentHealth;
@@ -878,7 +894,7 @@ public class TutorialManager : MonoBehaviour
 
         PauseGame();
         BlockPlayer();
-        BlockAllInteractive();
+        BlockAllLocked();
 
         if (playerTower != null)
         {
@@ -926,7 +942,7 @@ public class TutorialManager : MonoBehaviour
 
         PauseGame();
         BlockPlayer();
-        BlockAllInteractive();
+        BlockAllLocked();
 
         ShowDialog("OH NO, CURA'T!", showImage: true, contextSprite: healthPowerUpSprite);
 
@@ -968,13 +984,13 @@ public class TutorialManager : MonoBehaviour
 
         PauseGame();
         BlockPlayer();
-        BlockAllCardsLocked();
+        BlockAllLocked();
 
         ShowDialog("BEN FET!", showImage: false);
         yield return StartCoroutine(ShowContinueButtonAfterDelay(2f));
         yield return StartCoroutine(HidePopupWithAnimation());
 
-        UnblockAllCards();
+        UnblockAll();
         ResumeGame();
     }
 
@@ -998,7 +1014,7 @@ public class TutorialManager : MonoBehaviour
 
         PauseGame();
         BlockPlayer();
-        BlockAllCardsLocked();
+        BlockAllLocked();
 
         ShowDialog("FES QUE VAGIN MÉS LENTS!", showImage: true, contextSprite: slowTimePowerUpSprite);
 
@@ -1020,6 +1036,7 @@ public class TutorialManager : MonoBehaviour
         }
 
         UnblockPlayerForPowerUps();
+        UnblockAll();
         waitingForPlayerAction = true;
 
         yield return new WaitUntil(() => !waitingForPlayerAction);
@@ -1080,6 +1097,7 @@ public class TutorialManager : MonoBehaviour
         yield return StartCoroutine(ShowContinueButtonAfterDelay(3f));
         yield return StartCoroutine(HidePopupWithAnimation());
 
+        UnblockAll();
         UnblockAllCards();
         UnblockPlayer();
         ResumeGameWithoutResetSpeed();
@@ -1187,7 +1205,7 @@ public class TutorialManager : MonoBehaviour
 
         PauseGame();
         BlockPlayer();
-        BlockAllCardsLocked();
+        BlockAllLocked();
 
         ShowDialog("HAS DESTRUÏT LA TORRE...", showImage: false);
         yield return StartCoroutine(ShowContinueButtonAfterDelay(2f));

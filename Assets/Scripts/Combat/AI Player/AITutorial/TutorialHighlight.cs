@@ -319,26 +319,30 @@ public class TutorialHighlight : MonoBehaviour
     /// </summary>
     public void ForceBlockedState(bool blocked)
     {
-        bool wasPaused = isPausedByPlayerCardManager;
-        isPausedByPlayerCardManager = false; // Temporal para aplicar el cambio
+        // Resetear cualquier estado previo
+        isHidden = blocked;
+        currentHideMode = blocked ? HideMode.Locked : HideMode.None;
 
-        isBlocked = blocked;
-
-        if (blocked)
+        // Aplicar el nuevo estado
+        Image image = GetComponent<Image>();
+        if (image != null && originalColors != null && originalColors.Length > 0)
         {
-            if (isHighlighting)
-            {
-                StopHighlight();
-            }
-            ApplyBlockedTint();
-        }
-        else
-        {
-            RestoreOriginalColors();
+            image.color = blocked ? blockedColor : originalColors[0];
         }
 
-        isPausedByPlayerCardManager = wasPaused;
-        Debug.Log($"[TutorialHighlight] 💪 Estado forzado (bloqueado={blocked}) en '{gameObject.name}'");
+        // Desactivar interacción si está bloqueado
+        CardDisplay display = GetComponent<CardDisplay>();
+        if (display != null)
+        {
+            display.enabled = !blocked;
+        }
+
+        // Actualizar CanvasGroup si existe
+        if (canvasGroup != null)
+        {
+            canvasGroup.interactable = !blocked;
+            canvasGroup.blocksRaycasts = !blocked;
+        }
     }
 
     private void ApplyBlockedTint()
